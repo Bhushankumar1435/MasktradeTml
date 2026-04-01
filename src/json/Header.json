@@ -1,0 +1,145 @@
+[
+  {
+    "title": "Home",
+    "path": "/",
+    "icon": "FaHome"
+  },
+  {
+    "title": "User Management",
+    "icon": "FaUsers",
+    "children": [
+      {
+        "title": "All Users",
+        "path": "/users",
+        "icon": "FaUsers"
+      },
+      {
+        "title": "API Users",
+        "path": "/bindUsers",
+        "icon": "FaLink"
+      },
+      {
+        "title": "Paid Users",
+        "path": "/paidUsers",
+        "icon": "FaUserCheck"
+      }
+    ]
+  },
+  {
+    "title": "Trade Manage",
+    "icon": "FaChartBar",
+    "children": [
+      {
+        "title": "Place Trade",
+        "path": "/placetrade",
+        "icon": "FaArrowUp"
+      },
+      {
+        "title": "Trade History",
+        "path": "/tradehistory",
+        "icon": "FaList"
+      },
+      {
+        "title": "Open Trades",
+        "path": "/opentrades",
+        "icon": "FaChartLine"
+      },
+      {
+        "title": "Closed Trades",
+        "path": "/closetrades",
+        "icon": "FaCheckCircle"
+      }
+    ]
+  },
+  {
+    "title": "Wallet Manage",
+    "icon": "FaWallet",
+    "children": [
+      {
+        "title": "Add Balance",
+        "path": "/addwallet",
+        "icon": "FaPlusCircle"
+      },
+      {
+        "title": "User Txn List",
+        "path": "/userwallettxnlist",
+        "icon": "FaList"
+      },
+      {
+        "title": "Admin Txn List",
+        "path": "/adminwallettxnlist",
+        "icon": "FaUserShield"
+      },
+      {
+        "title": "Deduct Balance",
+        "path": "/walletdeduct",
+        "icon": "FaMinusCircle"
+      }
+    ]
+  },
+  {
+    "title": "Income Manage",
+    "icon": "FaChartLine",
+    "children": [
+      {
+        "title": "Income Txn List",
+        "path": "/incometxnlist",
+        "icon": "FaList"
+      },
+      {
+        "title": "Add Income",
+        "path": "/addincome",
+        "icon": "FaPlusCircle"
+      }
+    ]
+  },
+  {
+    "title": "Withdraw Manage",
+    "icon": "FaMoneyBillWave",
+    "children": [
+      {
+        "title": "Withdraw History",
+        "path": "/withdrawhistory",
+        "icon": "FaTicketAlt"
+      }
+    ]
+  },
+  {
+    "title": "Ticket Manage",
+    "icon": "FaTicketAlt",
+    "children": [
+      {
+        "title": "Ticket History",
+        "path": "/ticketHistory",
+        "icon": "FaTicketAlt"
+      }
+    ]
+  },
+  {
+    "title": "Packages",
+    "icon": "FaBox",
+    "children": [
+      {
+        "title": "Package List",
+        "path": "/packagelist",
+        "icon": "FaList"
+      }
+    ]
+  },
+  {
+    "title": "Banner",
+    "icon": "FaImage",
+    "children": [
+      {
+        "title": "Add Banner",
+        "path": "/addbanner",
+        "icon": "FaPlusCircle"
+      },
+      {
+        "title": "Banner List",
+        "path": "/bannerList",
+        "icon": "FaList"
+      }
+    ]
+  }
+]
