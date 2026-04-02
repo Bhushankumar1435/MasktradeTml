@@ -68,9 +68,18 @@ const UserDashboard = () => {
     <div className="relative  min-h-screen bg-[#0f172a] text-white p-4 md:p-6 rounded-md">
 
       {/* HEADER */}
-      <h2 className="text-xl md:text-2xl font-semibold mb-5">
-        User Dashboard ({userId})
-      </h2>
+      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <h1 className="text-lg md:text-xl font-semibold text-white">
+          User Dashboard ({userId})
+        </h1>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+        >
+          ← Back
+        </button>
+      </div>
 
       {/* LOADING */}
       {loading && (
@@ -238,7 +247,7 @@ const UserDashboard = () => {
                       <td className="px-3 py-2 border border-gray-700">
                         <button
                           onClick={() => navigate(`/level-referrals/${userId}/${item.level}`)}
-                          className="px-3 py-1 bg-blue-600 rounded text-sm hover:bg-blue-700"
+                          className="px-3 py-1 bg-[#cca539] rounded text-sm hover:bg-[#d6a210]"
                         >
                           View
                         </button>
@@ -283,7 +292,7 @@ const Card = ({ title, value }) => {
       </div>
 
       {/* Bottom Line Animation */}
-      <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-blue-500 group-hover:w-full transition-all duration-300"></div>
+      <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-[#d6a210] group-hover:w-full transition-all duration-300"></div>
 
     </div>
   );

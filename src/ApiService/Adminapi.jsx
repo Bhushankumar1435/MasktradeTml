@@ -6,6 +6,10 @@ import api from "./axios";
 export const adminLogin = (data) =>
   api.post("/admin/signin", data);
 
+export const resendOtpApi = (email) => {
+  return api.post("/admin/resendOtp", { email });
+};
+
 // USERS
 export const getUsersApi = (
   page = 1,
@@ -203,5 +207,16 @@ export const closeTradeApi = (tradeId) => {
 export const getAllBinanceOrdersapi = (page = 1, limit = 10,userId) => {
   return api.get(
     `/admin/getAllBinanceOrders?page=${page}&limit=${limit}&userId=${userId}`
+  );
+};
+
+
+
+
+// ApiService/Adminapi.js
+
+export const getMyProfitHistoryApi = (page = 1,limit = 10,search = "",type = "") => {
+  return api.get(
+    `/admin/getMyProfitHistory?page=${page}&limit=${limit}&search=${search}&type=${type}`
   );
 };

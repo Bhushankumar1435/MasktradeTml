@@ -73,11 +73,12 @@ const BannerList = () => {
 
     return (
         <div className=" bg-[#0f172a] text-white p-3 md:p-6 rounded-md">
-
-            <h2 className="text-lg md:text-2xl font-semibold mb-4">
-                Banner List ({banners.length})
-            </h2>
-
+            <div className="flex items-center gap-4 mb-6">
+                <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+                <h2 className="text-lg md:text-2xl font-semibold ">
+                    Banner List ({banners.length})
+                </h2>
+            </div>
             {/* 📱 MOBILE */}
             <div className="md:hidden flex flex-col gap-3">
                 {loading ? (
@@ -158,7 +159,7 @@ const BannerList = () => {
                                         <div className="flex items-center justify-center gap-2">
                                             <button
                                                 onClick={() => setEditData(item)}
-                                                className="px-3 py-1 bg-blue-600 rounded text-sm "
+                                                className="px-3 py-1 bg-[#d6a210] rounded text-sm "
                                             >
                                                 Edit
                                             </button>

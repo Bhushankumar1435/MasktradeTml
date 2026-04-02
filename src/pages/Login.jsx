@@ -4,7 +4,8 @@ import { toast } from "react-toastify";
 import api from "../ApiService/axios";
 import { OTPInput } from "../components/ui/SixDigitotp";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import loginImg from "../Images/main.png"; // 👈 your image
+import loginImg from "../Images/main.png";
+import { resendOtpApi } from "../ApiService/Adminapi";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -37,8 +38,8 @@ const Login = () => {
 
       toast.success(res.data.message);
 
-     if (res.data.success) {
-        localStorage.setItem("admin_token", res.data.data); // 🔥 ADD THIS
+      if (res.data.success) {
+        localStorage.setItem("admin_token", res.data.data);
         navigate("/");
       }
     } catch (err) {
@@ -49,6 +50,15 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     otpScreen ? handleVerifyOtp() : handleLogin();
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      const res = await resendOtpApi(email);
+      toast.success(res.data.message || "OTP resent successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
+    }
   };
 
   return (
@@ -73,7 +83,7 @@ const Login = () => {
             {!otpScreen ? (
               <>
                 <h1 className="text-2xl md:text-4xl font-bold mb-8">
-                  Welcome Back 
+                  Welcome Back
                 </h1>
 
                 <div className="flex flex-col gap-6">
@@ -102,9 +112,9 @@ const Login = () => {
                       <button
                         type="button"
                         onClick={() => setView(!view)}
-                         className="cursor-pointer text-xl text-gray-600 hover:text-black transition"
+                        className="cursor-pointer text-xl text-gray-600 hover:text-black transition"
                       >
-                         {view ? <FaEyeSlash /> : <FaEye />}
+                        {view ? <FaEyeSlash /> : <FaEye />}
                       </button>
                     </div>
                   </div>
@@ -132,6 +142,14 @@ const Login = () => {
                   className="mt-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:opacity-90 transition"
                 >
                   Verify OTP
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="mt-3 text-sm text-blue-400 hover:underline"
+                >
+                  Resend OTP
                 </button>
               </>
             )}

@@ -43,7 +43,7 @@ const WalletDeduct = () => {
 
       <div className="w-full max-w-md bg-[#1e293b] rounded-xl shadow-lg p-6">
 
-        <h2 className="text-xl font-semibold text-white mb-5 text-center">
+        <h2 className="text-xl font-semibold text-red-500 mb-5 text-center">
           Deduct Wallet Balance
         </h2>
 
@@ -71,7 +71,7 @@ const WalletDeduct = () => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700 transition p-2 rounded text-white font-semibold disabled:opacity-50"
+            className="bg-gradient-to-r from-red-700 to-red-500 hover:scale-[1.02] transition  p-2 rounded text-white font-semibold "
           >
             {loading ? "Processing..." : "Deduct Amount"}
           </button>

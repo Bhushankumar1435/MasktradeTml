@@ -54,7 +54,7 @@ const Addincome = () => {
           </div>
         )}
 
-        <h2 className="text-xl font-semibold mb-5 text-white text-center">
+        <h2 className="text-xl font-semibold mb-5 text-[#d6a210] text-center">
           Add Income
         </h2>
 
@@ -82,7 +82,8 @@ const Addincome = () => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 transition p-2 rounded text-white font-semibold disabled:opacity-50 active:scale-95"
+            className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition  p-2 rounded text-white font-semibold "
+
           >
             {loading ? "Adding..." : "Add Income"}
           </button>

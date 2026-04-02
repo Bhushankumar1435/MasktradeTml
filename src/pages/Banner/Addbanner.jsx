@@ -52,7 +52,7 @@ const Addbanner = () => {
 
             <div className="w-full max-w-4xl mx-auto bg-[#1e293b] rounded-xl shadow-lg p-2 md:p-4">
 
-                <h2 className="text-lg md:text-2xl font-semibold mb-4 md:mb-6">
+                <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210] mb-4 md:mb-6">
                     Add Banner
                 </h2>
 
@@ -92,7 +92,8 @@ const Addbanner = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="bg-blue-600 py-2.5 rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                            className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition  p-2 rounded text-white font-semibold "
+
                         >
                             {loading ? "Adding..." : "Add Banner"}
                         </button>

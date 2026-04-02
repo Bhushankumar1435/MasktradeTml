@@ -53,7 +53,7 @@ const AdminWalletAdd = () => {
                     </div>
                 )}
 
-                <h2 className="text-xl font-semibold mb-5 text-white text-center">
+                <h2 className="text-xl font-semibold mb-5 text-[#d6a210] text-center">
                     Add Wallet Balance
                 </h2>
 
@@ -78,7 +78,7 @@ const AdminWalletAdd = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700 transition p-2 rounded text-white font-semibold disabled:opacity-50"
+                        className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition  p-2 rounded text-white font-semibold "
                     >
                         {loading ? "Adding..." : "Add Balance"}
                     </button>

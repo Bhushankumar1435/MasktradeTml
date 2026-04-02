@@ -30,6 +30,7 @@ import TradeHistory from "./pages/Binance/tradehistory";
 import Opentrades from "./pages/Binance/Opentrades";
 import CloseTrades from "./pages/Binance/Closetrades";
 import BinanceOrders from "./pages/BinanceOrders";
+import PnlHistory from "./pages/Pnlhistroy";
 
 function App() {
   return (
@@ -73,6 +74,8 @@ function App() {
             <Route path="/opentrades" element={<Opentrades />} />
             <Route path="/closeTrades" element={<CloseTrades />} />
             <Route path="/binance-orders/:userId" element={<BinanceOrders />} />
+            <Route path="/pnlhistory" element={<PnlHistory />} />
+
           </Route>
         </Route>
 

@@ -36,20 +36,30 @@ const Income = () => {
 
     const getPageNumbers = () => {
         const pages = [];
-        const maxVisible = 3;
 
-        let start = Math.max(1, page - 1);
-        let end = Math.min(totalPages, start + maxVisible - 1);
-
-        if (end - start < maxVisible - 1) {
-            start = Math.max(1, end - maxVisible + 1);
+        if (totalPages <= 5) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            pages.push(1, 2, 3);
+            if (page > 4) {
+                pages.push("...");
+            }
+            if (page > 3 && page < totalPages - 2) {
+                pages.push(page);
+            }
+            if (page < totalPages - 3) {
+                pages.push("...");
+            }
+            pages.push(totalPages - 1, totalPages);
         }
+        return [...new Set(pages)];
+    };
 
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-
-        return pages;
+    const handlePageChange = (p) => {
+        if (p < 1 || p > totalPages) return;
+        setPage(p);
     };
 
     return (
@@ -57,11 +67,12 @@ const Income = () => {
 
             {/* Header */}
             <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-
-                <h1 className="text-lg md:text-xl font-semibold text-white">
-                    Income History ({total})
-                </h1>
-
+                <div className="flex items-center gap-4 mb-6">
+                    <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+                    <h1 className="text-lg md:text-xl font-semibold text-white">
+                        Income History ({total})
+                    </h1>
+                </div>
                 <input
                     type="text"
                     placeholder="Search by User ID..."
@@ -115,13 +126,12 @@ const Income = () => {
 
                                         <td className="px-3 py-3 border border-gray-700">
                                             <span
-                                                className={`px-2 py-1 rounded font-semibold ${
-                                                    item.amount > 0
-                                                        ? "bg-green-500/20 text-green-400"
-                                                        : "bg-red-500/20 text-red-400"
-                                                }`}
+                                                className={`px-2 py-1 rounded font-semibold ${item.amount > 0
+                                                    ? "bg-green-500/20 text-green-400"
+                                                    : "bg-red-500/20 text-red-400"
+                                                    }`}
                                             >
-                                                 {item.amount}
+                                                {item.amount}
                                             </span>
                                         </td>
 
@@ -140,7 +150,7 @@ const Income = () => {
 
                                         <td className="px-3 py-3 border border-gray-700">
                                             {item.createdAt
-                                                ? new Date(item.createdAt).toLocaleDateString()
+                                                ? new Date(item.createdAt).toLocaleString()
                                                 : "N/A"}
                                         </td>
 
@@ -161,64 +171,56 @@ const Income = () => {
                 </div>
 
                 {/* Pagination */}
-                {!loading && totalPages > 1 && (
-                    <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3">
+                <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
 
-                        <span className="text-gray-400">
-                            Page {page} of {totalPages}
-                        </span>
+                    {/* LEFT */}
+                    <span className="text-gray-400">
+                        Page {page} of {totalPages}
+                    </span>
 
-                        <div className="flex gap-2 flex-wrap items-center">
+                    {/* RIGHT (GROUP ALL BUTTONS) */}
+                    <div className="flex items-center gap-2 flex-wrap">
 
-                            <button
-                                disabled={page === 1}
-                                onClick={() => setPage(1)}
-                                className="px-3 py-1.5 bg-[#1e293b] rounded disabled:opacity-40"
-                            >
-                                First
-                            </button>
+                        {/* Previous */}
+                        <button
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page === 1}
+                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
+                        >
+                            ‹
+                        </button>
 
-                            <button
-                                disabled={page === 1}
-                                onClick={() => setPage(p => p - 1)}
-                                className="px-3 py-1.5 bg-[#1e293b] rounded disabled:opacity-40"
-                            >
-                                Prev
-                            </button>
-
-                            {getPageNumbers().map((num) => (
+                        {/* Page Numbers */}
+                        {getPageNumbers().map((num, index) =>
+                            num === "..." ? (
+                                <span key={index} className=" text-gray-400 text-sm">
+                                    ...
+                                </span>
+                            ) : (
                                 <button
-                                    key={num}
-                                    onClick={() => setPage(num)}
-                                    className={`px-3 py-1.5 rounded ${
-                                        page === num
-                                            ? "bg-blue-500 text-white"
-                                            : "bg-[#1e293b]"
-                                    }`}
+                                    key={index}
+                                    onClick={() => handlePageChange(num)}
+                                    className={` flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
+                                        ? " text-[#d6a210]"
+                                        : "text-gray-300 hover:text-[#d3b769]"
+                                        }`}
                                 >
                                     {num}
                                 </button>
-                            ))}
+                            )
+                        )}
 
-                            <button
-                                disabled={page === totalPages}
-                                onClick={() => setPage(p => p + 1)}
-                                className="px-3 py-1.5 bg-[#1e293b] rounded disabled:opacity-40"
-                            >
-                                Next
-                            </button>
+                        {/* Next */}
+                        <button
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={page === totalPages}
+                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
+                        >
+                            ›
+                        </button>
 
-                            <button
-                                disabled={page === totalPages}
-                                onClick={() => setPage(totalPages)}
-                                className="px-3 py-1.5 bg-[#1e293b] rounded disabled:opacity-40"
-                            >
-                                Last
-                            </button>
-
-                        </div>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

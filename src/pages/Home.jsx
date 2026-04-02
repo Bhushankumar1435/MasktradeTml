@@ -57,10 +57,12 @@ const Home = () => {
 
   return (
     <div className=" bg-[#0f172a] text-white p-2 md:p-4 rounded-md">
-
-      <h1 className="text-xl md:text-2xl font-semibold mb-6">
-        Dashboard
-      </h1>
+      <div className="flex items-center gap-4 mb-6">
+       <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+        <h1 className="text-xl md:text-2xl font-semibold ">
+          Dashboard
+        </h1>
+      </div>
 
       <div className="relative">
 
@@ -76,32 +78,32 @@ const Home = () => {
 
           {/* USERS */}
           <div className="relative bg-[#1e293b] p-5 rounded-xl shadow group overflow-hidden hover:scale-[1.03] transition">
-            <FaUsers className="text-blue-500 text-2xl mb-2" />
+            <FaUsers className="text-[#d6a210] text-2xl mb-2" />
             <div className="flex items-center justify-between">
               <p className="text-gray-400 font-medium">Total Users</p>
               <h2 className="text-xl md:text-2xl font-bold">{stats.users}</h2>
             </div>
-            <span className="absolute left-0 bottom-0 h-[3px] bg-blue-500 w-0 group-hover:w-full transition-all"></span>
+            <span className="absolute left-0 bottom-0 h-[3px] bg-[#d6a210] w-0 group-hover:w-full transition-all"></span>
           </div>
 
           {/* TRANSACTIONS */}
           <div className="relative bg-[#1e293b] p-5 rounded-xl shadow group overflow-hidden hover:scale-[1.03] transition">
-            <FaWallet className="text-blue-500 text-2xl mb-2" />
+            <FaWallet className="text-[#d6a210] text-2xl mb-2" />
             <div className="flex items-center justify-between">
               <p className="text-gray-400">Total Transactions</p>
               <h2 className="text-xl md:text-2xl font-bold">{stats.transactions}</h2>
             </div>
-            <span className="absolute left-0 bottom-0 h-[3px] bg-blue-500 w-0 group-hover:w-full transition-all"></span>
+            <span className="absolute left-0 bottom-0 h-[3px] bg-[#d6a210] w-0 group-hover:w-full transition-all"></span>
           </div>
 
           {/* PACKAGES */}
           <div className="relative bg-[#1e293b] p-5 rounded-xl shadow group overflow-hidden hover:scale-[1.03] transition">
-            <FaBox className="text-blue-500 text-2xl mb-2" />
+            <FaBox className="text-[#d6a210] text-2xl mb-2" />
             <div className="flex items-center justify-between">
               <p className="text-gray-400">Total Packages</p>
               <h2 className="text-xl md:text-2xl font-bold">{stats.packages}</h2>
             </div>
-            <span className="absolute left-0 bottom-0 h-[3px] bg-blue-500 w-0 group-hover:w-full transition-all"></span>
+            <span className="absolute left-0 bottom-0 h-[3px] bg-[#d6a210] w-0 group-hover:w-full transition-all"></span>
           </div>
 
         </div>
