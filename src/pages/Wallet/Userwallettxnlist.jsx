@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getWalletListApi } from "../../ApiService/Adminapi";
+import Loader from "../../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -65,9 +66,9 @@ const Userwallettxnlist = () => {
 
       {/* HEADER */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 ">
           <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-          <h1 className="text-lg md:text-xl font-semibold text-white">
+          <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
             Wallet Transactions ({total})
           </h1>
         </div>
@@ -86,15 +87,8 @@ const Userwallettxnlist = () => {
       {/* MAIN */}
       <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        {/* Loader */}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-            <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-        )}
-
         {/* ✅ TABLE FOR ALL DEVICES */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
           <table className="min-w-[800px] w-full text-sm border-collapse table-auto">
 
@@ -163,6 +157,14 @@ const Userwallettxnlist = () => {
             </tbody>
 
           </table>
+
+          {/* Loader */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+              {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
+              <Loader />
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getPaidUsersApi } from "../../ApiService/Adminapi";
+import Loader from "../../components/ui/Loader";
 
 const PaidUsers = () => {
   const [data, setData] = useState([]);
@@ -64,25 +65,20 @@ const PaidUsers = () => {
 
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 ">
           <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-          <h1 className="text-lg md:text-xl font-semibold text-white">
+          <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
             Paid Users ({total})
           </h1>
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 relative">
+        <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        {/* Loader */}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60">
-            <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-        )}
+        
 
-        <div className="w-full overflow-x-auto">
+         <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
           <table className="min-w-[800px] w-full text-sm border-collapse">
 
             <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase border-b border-gray-700">
@@ -102,7 +98,7 @@ const PaidUsers = () => {
             <tbody>
               {data.length > 0 ? (
                 data.map((item, index) => (
-                  <tr key={item._id} className="text-center font-semibold hover:bg-[#1e293b]">
+                  <tr key={item._id} className="text-center whitespace-nowrap font-semibold hover:bg-[#1e293b]">
 
                     <td className="px-3 py-3 border border-gray-700 ">
                       {(page - 1) * limit + index + 1}
@@ -158,6 +154,12 @@ const PaidUsers = () => {
             </tbody>
 
           </table>
+          {/* ✅ NEW LOADER (same as transactions) */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+              <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
         </div>
 
         {/* Pagination */}

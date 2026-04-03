@@ -69,7 +69,7 @@ const UserDashboard = () => {
 
       {/* HEADER */}
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 className="text-lg md:text-xl font-semibold text-white">
+        <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
           User Dashboard ({userId})
         </h1>
 
@@ -84,7 +84,8 @@ const UserDashboard = () => {
       {/* LOADING */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-[#0f172a]/60 backdrop-blur-sm z-10">
-          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          {/* <div className="w-10 h-10 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+          <Loader />
         </div>
       )}
 
@@ -94,7 +95,7 @@ const UserDashboard = () => {
 
           {/* 👤 USER INFO */}
           <div className="bg-[#1e293b] p-4 rounded-xl border border-gray-700">
-            <h3 className="text-lg font-semibold mb-3">User Info</h3>
+            <h3 className="text-lg font-semibold text-[#d6a210] mb-3">User Info</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
 
@@ -190,14 +191,15 @@ const UserDashboard = () => {
       {filteredLevels.length > 0 && (
         <div className="bg-[#020817] border border-gray-700 rounded-xl mt-6 overflow-hidden">
 
-          <h3 className="text-lg font-semibold p-4 border-b border-gray-700">
+          <h3 className="text-lg font-semibold text-[#d6a210] p-4 border-b border-gray-700">
             Level View
           </h3>
 
           <div className="relative">
             {levelLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                {/* <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div> */}
+                <Loader/>
               </div>
             )}
 

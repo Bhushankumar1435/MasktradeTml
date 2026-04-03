@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getAllBinanceOrdersapi, getUserDashboardApi } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
+import Loader from "../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -118,7 +119,7 @@ const BinanceOrders = () => {
                 {/* 🔹 TOP ROW (Mobile: space-between, Desktop: normal) */}
                 <div className="flex justify-between items-center">
 
-                    <h1 className="text-base sm:text-lg md:text-xl font-semibold text-white">
+                    <h1 className="text-base sm:text-lg md:text-xl font-semibold text-[#d6a210]">
                         Binance Orders ({total})
                     </h1>
 
@@ -136,14 +137,14 @@ const BinanceOrders = () => {
 
                     <span className="text-xs sm:text-sm text-gray-400">
                         User ID:{" "}
-                        <span className="text-blue-400 font-semibold break-all">
+                        <span className="text-[#d6a210] font-semibold break-all">
                             {userId}
                         </span>
                     </span>
 
                     <span className="text-xs sm:text-sm text-gray-300">
                         User:{" "}
-                        <span className="text-blue-400 font-semibold">
+                        <span className="text-[#d6a210] font-semibold">
                             {checkingUser ? "Loading..." : userName}
                         </span>
                     </span>
@@ -153,15 +154,10 @@ const BinanceOrders = () => {
             </div>
 
             {/* TABLE */}
-            <div className="bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                        <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-                    </div>
-                )}
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
-                <div className="w-full overflow-x-auto">
                     <table className="min-w-[900px] w-full text-sm border-collapse">
 
                         <thead className="bg-[#1e293b] text-gray-400 uppercase whitespace-nowrap border-b  border-gray-700">
@@ -260,6 +256,13 @@ const BinanceOrders = () => {
                         </tbody>
 
                     </table>
+
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+                            {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
+                            <Loader />
+                        </div>
+                    )}
                 </div>
 
 

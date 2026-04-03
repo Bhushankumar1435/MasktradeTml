@@ -47,9 +47,16 @@ const PlaceTrade = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+
+        let newValue = value;
+
+        if (name === "userId" || name === "pair") {
+            newValue = value.toUpperCase();
+        }
+
         setFormData({
             ...formData,
-            [name]: type === "checkbox" ? checked : value,
+            [name]: type === "checkbox" ? checked : newValue,
         });
     };
 
@@ -60,7 +67,7 @@ const PlaceTrade = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-       
+
         setLoading(true);
 
 
@@ -82,7 +89,7 @@ const PlaceTrade = () => {
 
             await placeTradeApi(payload);
 
-           alert("Trade has been placed successfully ✅");
+            alert("Trade has been placed successfully ✅");
 
             setFormData({
                 userId: "",
@@ -125,7 +132,7 @@ const PlaceTrade = () => {
                                 name="userId"
                                 value={formData.userId}
                                 onChange={handleChange}
-                                className="w-full p-3 pr-36 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
+                                className="w-full p-3 pr-36 uppercase rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
                             />
 
                             <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -155,7 +162,7 @@ const PlaceTrade = () => {
                             name="pair"
                             value={formData.pair}
                             onChange={handleChange}
-                            className="p-3 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
+                            className="p-3 rounded-lg uppercase bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
                         />
                     </div>
 
@@ -243,7 +250,7 @@ const PlaceTrade = () => {
                             name="autoClose"
                             checked={formData.autoClose}
                             onChange={handleChange}
-                            className="w-5 h-5 accent-blue-500 cursor-pointer"
+                            className="w-5 h-5 accent-[#d6a210] cursor-pointer"
                         />
                     </div>
 
@@ -292,7 +299,7 @@ const PlaceTrade = () => {
                             required
                             checked={formData.confirm}
                             onChange={handleChange}
-                            className="w-5 h-5 accent-green-500 cursor-pointer scale-110"
+                            className="w-5 h-5 accent-[#d6a210] cursor-pointer scale-110"
                         />
                     </div>
 

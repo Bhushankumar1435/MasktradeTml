@@ -7,6 +7,7 @@ import {
 } from "../ApiService/Adminapi";
 import { FaUsers, FaWallet, FaBox } from "react-icons/fa";
 import { toast } from "react-toastify";
+import Loader from "../components/ui/Loader";
 
 const Home = () => {
   const [stats, setStats] = useState({
@@ -58,8 +59,8 @@ const Home = () => {
   return (
     <div className=" bg-[#0f172a] text-white p-2 md:p-4 rounded-md">
       <div className="flex items-center gap-4 mb-6">
-       <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-        <h1 className="text-xl md:text-2xl font-semibold ">
+        <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+        <h1 className="text-xl md:text-2xl font-semibold text-[#d6a210]">
           Dashboard
         </h1>
       </div>
@@ -69,7 +70,9 @@ const Home = () => {
         {/* LOADER */}
         {loading && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-md z-10">
-            <div className="w-10 h-10 border-4 border-gray-400 border-t-blue-500 rounded-full animate-spin"></div>
+            {/* <div className="w-10 h-10 border-4 border-gray-400 border-t-blue-500 rounded-full animate-spin"></div> */}
+            <Loader />
+
           </div>
         )}
 

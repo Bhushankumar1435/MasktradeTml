@@ -204,6 +204,23 @@ export const closeTradeApi = (tradeId) => {
   return api.post(`/admin/closetrade?tradeId=${tradeId}`)
 };
 
+// ✅ CREATE BATCH
+export const createBatchApi = (data) => {
+  return api.post("/admin/createBatch", data);
+};
+
+export const batchPlaceTradeApi = (data) => {
+  return api.post("/admin/batchPlaceTrade", data);
+};
+
+export const getAllBatchesApi = (page = 1, limit = 10, search = "") => {
+  return api.get(
+    `/admin/getAllBatches?page=${page}&limit=${limit}${
+      search ? `&search=${search}` : ""
+    }`
+  );
+};
+
 export const getAllBinanceOrdersapi = (page = 1, limit = 10,userId) => {
   return api.get(
     `/admin/getAllBinanceOrders?page=${page}&limit=${limit}&userId=${userId}`

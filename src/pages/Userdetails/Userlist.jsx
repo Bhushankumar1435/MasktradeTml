@@ -3,7 +3,7 @@ import { getUsersApi } from "../../ApiService/Adminapi";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
+import Loader from "../../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -31,14 +31,11 @@ const User = () => {
       setLoading(true);
       const res = await getUsersApi(page, PAGE_SIZE, search, formatDate(fromDate), formatDate(toDate));
 
-
       if (res.data?.success) {
         const data = res.data.data;
 
         setUserData(data?.users || []);
         setTotal(data?.pagination?.totalUsers || 0);
-
-        // ✅ ADD THIS
         setStats(data?.stats || {});
       }
     } catch (error) {
@@ -50,7 +47,7 @@ const User = () => {
 
   const formatDate = (date) => {
     if (!date) return "";
-    return new Date(date).toISOString().split("T")[0]; // ✅ 2026-03-25
+    return new Date(date).toISOString().split("T")[0];
   };
 
   useEffect(() => {
@@ -89,9 +86,7 @@ const User = () => {
     try {
       setLoading(true);
 
-      // ✅ API call with large limit (ALL DATA)
       const res = await getUsersApi(1, 100000, search, formatDate(fromDate), formatDate(toDate));
-
 
       if (!res.data?.success) return;
 
@@ -99,7 +94,6 @@ const User = () => {
 
       if (!users.length) return;
 
-      // ✅ Format data
       const formattedData = users.map((user, index) => ({
         "Sr No": index + 1,
         Name: user.name || "N/A",
@@ -119,21 +113,20 @@ const User = () => {
           : "N/A",
       }));
 
-      // ✅ Excel generate
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
       worksheet["!cols"] = [
-        { wch: 6 },   // Sr No
-        { wch: 20 },  // Name
-        { wch: 15 },  // User ID
-        { wch: 15 },  // Sponsor
-        { wch: 30 },  // Email
-        { wch: 12 },  // Package
-        { wch: 12 },  // Amount
-        { wch: 12 },  // Balance
-        { wch: 15 },  // Expiry
-        { wch: 10 },  // Paid
-        { wch: 10 },  // Level
-        { wch: 15 },  // Joined
+        { wch: 6 },
+        { wch: 20 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 30 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 15 },
       ];
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
@@ -161,17 +154,16 @@ const User = () => {
     <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
 
       {/* Header */}
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div className="flex items-center gap-4">
           <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
 
-          <h1 className="text-lg md:text-xl font-semibold text-white">
+          <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
             Users List ({total})
           </h1>
         </div>
-        <div className="flex flex-wrap gap-2 md:gap-3 items-center">
+        <div className="flex flex-wrap gap-2 lg:gap-3 items-center">
 
-          {/* Search */}
           <input
             type="text"
             placeholder="Search user..."
@@ -192,7 +184,6 @@ const User = () => {
                 setFromDate(e.target.value);
                 setPage(1);
               }}
-              placeholder="dd/mm/yyyy"
               className="w-1/2 sm:w-auto bg-[#1e293b] border border-gray-700 px-1 md:px-2 py-2 rounded text-sm text-white"
             />
 
@@ -203,12 +194,11 @@ const User = () => {
                 setToDate(e.target.value);
                 setPage(1);
               }}
-              placeholder="dd/mm/yyyy"
-              className="w-1/2 sm:w-auto bg-[#1e293b] border placeholder-white border-gray-700 px-1 md:px-2 py-2 rounded text-sm text-white"
+              className="w-1/2 sm:w-auto bg-[#1e293b] border border-gray-700 px-1 md:px-2 py-2 rounded text-sm text-white"
             />
 
           </div>
-          {/* Reset */}
+
           <button
             onClick={() => {
               setFromDate("");
@@ -221,7 +211,6 @@ const User = () => {
             Reset
           </button>
 
-          {/* Export */}
           <button
             onClick={exportAllUsersToExcel}
             className="w-full sm:w-auto bg-green-600 px-3 py-2 rounded text-sm"
@@ -232,23 +221,13 @@ const User = () => {
         </div>
       </div>
 
-
-
       {/* Main Container */}
       <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        {/* Loader */}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-            <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-        )}
-
-        {/* ✅ TABLE FOR ALL DEVICES */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
+        {/* TABLE */}
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
           <table className="min-w-[1100px] w-full text-sm border-collapse table-auto">
-
             <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
               <tr>
                 <th className="px-3 py-2 whitespace-nowrap">#</th>
@@ -272,19 +251,19 @@ const User = () => {
                 userData.map((user, index) => (
                   <tr key={user._id || index} className="hover:bg-[#1e293b] font-semibold transition text-center">
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {(page - 1) * PAGE_SIZE + index + 1}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.name || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.userId || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.sponsorId || "N/A"}
                     </td>
 
@@ -292,38 +271,35 @@ const User = () => {
                       {user.email || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.totalPackage || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.pacageAmmount || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.balance || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.expiryDate
                         ? new Date(user.expiryDate).toLocaleDateString()
                         : "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${user.paidStatus ? "bg-green-600" : "bg-red-600"
-                          }`}
-                      >
+                    <td className="px-3 py-3 border border-gray-700">
+                      <span className={`px-2 py-1 rounded text-xs ${user.paidStatus ? "bg-green-600" : "bg-red-600"}`}>
                         {user.paidStatus ? "Paid" : "Unpaid"}
                       </span>
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.level || "N/A"}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       <button
                         onClick={() => navigate(`/user-dashboard/${user.userId}`)}
                         className="px-3 py-1 bg-[#d6a210] rounded text-sm hover:bg-[#ad8619]"
@@ -332,7 +308,7 @@ const User = () => {
                       </button>
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                    <td className="px-3 py-3 border border-gray-700">
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleString()
                         : "N/A"}
@@ -350,22 +326,26 @@ const User = () => {
                 )
               )}
             </tbody>
-
           </table>
+
+          {/* ✅ NEW LOADER (same as transactions) */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+              {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+              <Loader/>
+            </div>
+          )}
+
         </div>
 
-        {/* Pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-          {/* LEFT */}
-          <span className="text-gray-400">
+        {/* Pagination (UNCHANGED) */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
+          <span className="text-gray-400 flex full justify-end">
             Page {page} of {totalPages}
           </span>
 
-          {/* RIGHT (GROUP ALL BUTTONS) */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center justify-end gap-2 w-full md:w-auto overflow-x-auto">
 
-            {/* Previous */}
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
@@ -374,7 +354,6 @@ const User = () => {
               ‹
             </button>
 
-            {/* Page Numbers */}
             {getPageNumbers().map((num, index) =>
               num === "..." ? (
                 <span key={index} className=" text-gray-400 text-sm">
@@ -384,7 +363,7 @@ const User = () => {
                 <button
                   key={index}
                   onClick={() => handlePageChange(num)}
-                  className={` flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
+                  className={` ${page === num
                     ? " text-[#d6a210]"
                     : "text-gray-300 hover:text-[#d3b769]"
                     }`}
@@ -394,7 +373,6 @@ const User = () => {
               )
             )}
 
-            {/* Next */}
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
@@ -407,12 +385,13 @@ const User = () => {
         </div>
 
       </div>
-      {/* Stats Cards */}
+
+      {/* Stats Cards (UNCHANGED) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-4">
 
         <div className="bg-[#1e293b] p-4 rounded-lg border border-gray-700">
           <p className="text-gray-400 text-sm">Total Users</p>
-          <h2 className="text-xl font-bold text-white">{stats.totalUsers}</h2>
+          <h2 className="text-xl font-bold text-[#d6a210]">{stats.totalUsers}</h2>
         </div>
 
         <div className="bg-[#1e293b] p-4 rounded-lg border border-gray-700">

@@ -64,7 +64,7 @@ const Header = ({ closeSidebar }) => {
 
   const handleLogout = async () => {
     try {
-      await adminLogoutApi(); 
+      await adminLogoutApi();
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -80,7 +80,7 @@ const Header = ({ closeSidebar }) => {
         onClick={() => closeSidebar?.()}
         className="p-5 border-b border-gray-700 cursor-pointer md:cursor-default"
       >
-        <h1 className="text-xl md:text-2xl font-semibold">
+        <h1 className="text-xl md:text-2xl text-[#d6a210] font-semibold">
           Admin Panel
         </h1>
       </div>
@@ -116,7 +116,10 @@ const Header = ({ closeSidebar }) => {
                 >
                   <span className="flex items-center gap-3">
                     {item.icon && iconMap[item.icon] && (
-                      <span className="text-lg">
+                      <span
+                        className={`text-lg ${isParentActive ? "text-white" : "text-[#d6a210]"
+                          }`}
+                      >
                         {React.createElement(iconMap[item.icon])}
                       </span>
                     )}
@@ -124,7 +127,7 @@ const Header = ({ closeSidebar }) => {
                   </span>
 
                   {item.children && (
-                    <span className="text-sm">
+                    <span className="text-sm ">
                       {openMenu === index ? <FaChevronUp /> : <FaChevronDown />}
                     </span>
                   )}
@@ -156,7 +159,12 @@ const Header = ({ closeSidebar }) => {
                       }
                     >
                       {subItem.icon && iconMap[subItem.icon] && (
-                        <span className="text-sm">
+                        <span
+                          className={`text-sm ${location.pathname === subItem.path
+                              ? "text-white"
+                              : "text-[#d6a210]"
+                            }`}
+                        >
                           {React.createElement(iconMap[subItem.icon])}
                         </span>
                       )}

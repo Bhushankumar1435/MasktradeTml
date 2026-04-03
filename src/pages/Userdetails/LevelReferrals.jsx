@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getReferralByLevelApi } from "../../ApiService/Adminapi";
+import Loader from "../../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -92,15 +93,9 @@ const LevelReferrals = () => {
             {/* MAIN CONTAINER */}
             <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-                {/* Loader */}
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                        <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-                    </div>
-                )}
-
                 {/* ✅ TABLE FOR ALL DEVICES */}
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+
 
                     <table className="min-w-[900px] w-full text-sm border-collapse table-auto">
 
@@ -172,6 +167,13 @@ const LevelReferrals = () => {
                         </tbody>
 
                     </table>
+                    {/* Loader */}
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+                            {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
+                            <Loader />
+                        </div>
+                    )}
                 </div>
 
                 {/* Pagination */}

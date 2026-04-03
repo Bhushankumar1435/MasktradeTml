@@ -81,7 +81,7 @@ const PackageList = () => {
       {/* HEADER */}
       <div className="flex items-center gap-4 mb-6">
         <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-        <h2 className="text-lg md:text-2xl font-semibold ">
+        <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210] ">
           Packages ({packages.length})
         </h2>
       </div>

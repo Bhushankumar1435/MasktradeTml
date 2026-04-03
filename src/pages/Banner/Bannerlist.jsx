@@ -75,12 +75,12 @@ const BannerList = () => {
         <div className=" bg-[#0f172a] text-white p-3 md:p-6 rounded-md">
             <div className="flex items-center gap-4 mb-6">
                 <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                <h2 className="text-lg md:text-2xl font-semibold ">
+                <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210]">
                     Banner List ({banners.length})
                 </h2>
             </div>
             {/* 📱 MOBILE */}
-            <div className="md:hidden flex flex-col gap-3">
+            <div className="lg:hidden flex flex-col gap-3">
                 {loading ? (
                     <ListSkeleton count={5} />
                 ) : banners.length > 0 ? (
@@ -121,7 +121,7 @@ const BannerList = () => {
             </div>
 
             {/* 💻 DESKTOP */}
-            <div className="hidden md:block overflow-x-auto border border-gray-700 rounded-lg mt-4">
+            <div className="hidden lg:block overflow-x-auto border border-gray-700 rounded-lg mt-4">
 
                 <table className="w-full text-sm table-fixed">
 

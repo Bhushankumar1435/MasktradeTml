@@ -30,13 +30,28 @@
     "icon": "FaChartBar",
     "children": [
       {
-        "title": "Place Trade",
+        "title": "Create Batch",
+        "path": "/createbatch",
+        "icon": "FaArrowUp"
+      },
+      {
+        "title": "Place Single Trade",
         "path": "/placetrade",
+        "icon": "FaArrowUp"
+      },
+      {
+        "title": "Place Batch Trade",
+        "path": "/Placebatchtrade",
         "icon": "FaArrowUp"
       },
       {
         "title": "Trade History",
         "path": "/tradehistory",
+        "icon": "FaList"
+      },
+      {
+        "title": "batch History",
+        "path": "/batchhistory",
         "icon": "FaList"
       },
       {

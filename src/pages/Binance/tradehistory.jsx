@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getTradeHistoryApi, closeTradeApi } from "../../ApiService/Adminapi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loader from "../../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -87,7 +88,6 @@ const TradeHistory = () => {
       })
     );
 
-    // ✅ IMPORTANT: only update if changed (no flicker)
     setPrices(prev => {
       const changed = Object.keys(updated).some(
         key => prev[key] !== updated[key]
@@ -162,15 +162,12 @@ const TradeHistory = () => {
 
       <ToastContainer />
 
-      {/* ✅ SMOOTH TOP LOADER (NO OVERLAY) */}
-      {loading && (
-        <div className="w-full h-[2px] bg-blue-500 animate-pulse mb-2"></div>
-      )}
+    
 
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 ">
           <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-          <h1 className="text-lg md:text-xl font-semibold text-white">
+          <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
             Trade History ({total})
           </h1>
         </div>
@@ -195,9 +192,8 @@ const TradeHistory = () => {
 
       <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        {/* ❌ OVERLAY LOADER REMOVED */}
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
 
           <table className="min-w-[900px] w-full text-sm border-collapse">
 
@@ -315,6 +311,13 @@ const TradeHistory = () => {
             </tbody>
 
           </table>
+          {/* Loader */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+              {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
+              <Loader />
+            </div>
+          )}
         </div>
 
         {/* Pagination */}

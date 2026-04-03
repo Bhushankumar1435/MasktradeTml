@@ -5,6 +5,7 @@ import {
   ManageAdminTicketApi,
 } from "../ApiService/Adminapi";
 import "react-toastify/dist/ReactToastify.css";
+import Loader from "../components/ui/Loader";
 
 const PAGE_SIZE = 10;
 
@@ -18,32 +19,29 @@ const TicketHistory = () => {
   const [message, setMessage] = useState("");
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
- const fetchTickets = async () => {
-  setLoading(true);
-  try {
-    const res = await GetAdminTicketHistoryApi(page, PAGE_SIZE); // ✅ FIX
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const res = await GetAdminTicketHistoryApi(page, PAGE_SIZE);
 
-    if (res?.data?.success) {
-      const ticketsData = res?.data?.data?.tickets || [];
-
-      setTickets(Array.isArray(ticketsData) ? ticketsData : []);
-
-      setTotal(res?.data?.data?.pagination?.totalTickets || 0);
-
-    } else {
-      toast.error(res?.data?.message || "Failed to fetch tickets");
+      if (res?.data?.success) {
+        const ticketsData = res?.data?.data?.tickets || [];
+        setTickets(Array.isArray(ticketsData) ? ticketsData : []);
+        setTotal(res?.data?.data?.pagination?.totalTickets || 0);
+      } else {
+        toast.error(res?.data?.message || "Failed to fetch tickets");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message || "Server error");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.log(err); // 👈 DEBUG
-    toast.error(err?.response?.data?.message || "Server error");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
- useEffect(() => {
-  fetchTickets();
-}, [page]); 
+  useEffect(() => {
+    fetchTickets();
+  }, [page]);
 
   const openPopup = (index) => {
     setSelectedIndex(index);
@@ -109,8 +107,8 @@ const TicketHistory = () => {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-       <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-        <h1 className="text-lg md:text-xl font-semibold text-white">
+        <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+        <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
           Ticket List ({tickets.length})
         </h1>
       </div>
@@ -118,15 +116,8 @@ const TicketHistory = () => {
       {/* Main Container */}
       <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        {/* Loader */}
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-            <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-        )}
-
-        {/* ✅ TABLE FOR ALL SCREENS */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
+        {/* TABLE */}
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
           <table className="min-w-[700px] md:min-w-[900px] w-full text-sm border-collapse">
 
@@ -167,10 +158,10 @@ const TicketHistory = () => {
 
                     <td className="px-3 py-3 border border-gray-700">
                       <span className={`px-2 py-1 text-xs rounded ${t.status === "OPEN"
-                          ? "bg-yellow-500/20 text-yellow-400"
-                          : t.status === "IN_PROGRESS"
-                            ? "bg-blue-500/20 text-blue-400"
-                            : "bg-green-500/20 text-green-400"
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : t.status === "IN_PROGRESS"
+                          ? "bg-blue-500/20 text-blue-400"
+                          : "bg-green-500/20 text-green-400"
                         }`}>
                         {t.status}
                       </span>
@@ -199,20 +190,26 @@ const TicketHistory = () => {
             </tbody>
 
           </table>
+
+          {/* ✅ NEW LOADER (Transactions jaisa) */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+              {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+              <Loader/>
+            </div>
+          )}
+
         </div>
 
         {/* Pagination */}
         <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
 
-          {/* LEFT */}
           <span className="text-gray-400">
             Page {page} of {totalPages}
           </span>
 
-          {/* RIGHT (GROUP ALL BUTTONS) */}
           <div className="flex items-center gap-2 flex-wrap">
 
-            {/* Previous */}
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
@@ -221,7 +218,6 @@ const TicketHistory = () => {
               ‹
             </button>
 
-            {/* Page Numbers */}
             {getPageNumbers().map((num, index) =>
               num === "..." ? (
                 <span key={index} className=" text-gray-400 text-sm">
@@ -241,7 +237,6 @@ const TicketHistory = () => {
               )
             )}
 
-            {/* Next */}
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}

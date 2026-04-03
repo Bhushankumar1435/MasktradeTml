@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { getUserBalanceApi } from "../ApiService/Adminapi";
 import { FaSyncAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import Loader from "../components/ui/Loader";
 
 const BindUsers = () => {
 
@@ -95,9 +96,9 @@ const BindUsers = () => {
 
             {/* HEADER + FILTER */}
             <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-4 ">
                     <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                    <h1 className="text-lg md:text-xl font-semibold text-white">
+                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
                         API Users ({total})
                     </h1>
                 </div>
@@ -105,15 +106,9 @@ const BindUsers = () => {
             </div>
 
             {/* TABLE */}
-            <div className="bg-[#020817] rounded-lg border border-gray-700 overflow-hidden relative">
+            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
 
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                        <div className="w-10 h-10 border-4 border-gray-500 border-t-blue-500 rounded-full animate-spin"></div>
-                    </div>
-                )}
-
-                <div className="overflow-x-auto">
                     <table className="min-w-[900px] w-full text-sm">
 
                         <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase">
@@ -191,7 +186,7 @@ const BindUsers = () => {
                                         <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
                                             <button
                                                 onClick={() => navigate(`/binance-orders/${item.userId}`)}
-                                                className="px-3 py-1 bg-[#d6a210] rounded text-sm hover:bg-blue-700"
+                                                className="px-3 py-1 bg-[#d6a210] rounded text-sm hover:bg-[#ebb318]"
                                             >
                                                 View
                                             </button>
@@ -211,6 +206,12 @@ const BindUsers = () => {
                         </tbody>
 
                     </table>
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                            {/* <div className="w-10 h-10 border-4 border-gray-500 border-t-blue-500 rounded-full animate-spin"></div> */}
+                            <Loader />
+                        </div>
+                    )}
                 </div>
 
                 {/* PAGINATION */}

@@ -5,6 +5,7 @@ import {
 } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
 import { FaCopy } from "react-icons/fa";
+import Loader from "../components/ui/Loader";
 
 const WithdrawOrders = () => {
     const [data, setData] = useState([]);
@@ -141,14 +142,14 @@ const WithdrawOrders = () => {
         <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
 
             {/* Header */}
-            <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div className="flex items-center gap-4 mb-6">
+            <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                <div className="flex items-center gap-4 ">
                     <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                    <h1 className="text-lg md:text-xl font-semibold text-white">
+                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
                         Withdraw Orders ({total})
                     </h1>
                 </div>
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-2 flex-wrap md:gap-2 lg:gap-3 w-full lg:w-auto">
                     <input
                         type="text"
                         placeholder="Search by User ID / Address"
@@ -157,7 +158,7 @@ const WithdrawOrders = () => {
                             setSearch(e.target.value);
                             setPage(1);
                         }}
-                        className="px-4 py-1.5 rounded bg-[#1e293b] border border-gray-600 text-sm"
+                        className="w-full md:w-[220px] lg:w-auto px-3 py-1.5 rounded bg-[#1e293b] border border-gray-600 text-sm"
                     />
 
                     {/* ALL */}
@@ -220,14 +221,7 @@ const WithdrawOrders = () => {
             </div>
 
             {/* Main */}
-            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-
-                {/* Loader */}
-                {loading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                        <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div>
-                    </div>
-                )}
+            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
                 {/* ✅ TABLE FOR ALL DEVICES */}
                 <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
@@ -289,6 +283,7 @@ const WithdrawOrders = () => {
                                                 )}
 
                                             </div>
+
                                         </td>
                                         <td className="px-3 py-3 border border-gray-700 max-w-[200px]">
                                             <p className="truncate" title={item.remarks || "-"}>
@@ -307,8 +302,8 @@ const WithdrawOrders = () => {
                                             </span>
                                         </td>
 
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            <div className="flex gap-2 justify-center flex-wrap">
+                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
+                                            <div className="flex gap-2 justify-center ">
                                                 <button
                                                     onClick={() => handleApprove(item._id)}
                                                     disabled={item.status !== "PENDING"}
@@ -336,18 +331,24 @@ const WithdrawOrders = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !loading && (
-                                    <tr>
-                                        <td colSpan="8" className="text-center py-6 text-gray-500">
-                                            No data found
-                                        </td>
-                                    </tr>
+                                data.length === 0 && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
                                 )
                             )}
                         </tbody>
 
                     </table>
+                    {loading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                            {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                            <Loader />
+                        </div>
+                    )}
                 </div>
+
 
                 {/* Pagination */}
                 <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
