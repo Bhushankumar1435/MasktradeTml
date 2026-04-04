@@ -13,7 +13,7 @@ const TradeHistory = () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [userId, setUserId] = useState("");
-
+  const [showNoData, setShowNoData] = useState(false);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const fetchTrades = async () => {
@@ -43,6 +43,7 @@ const TradeHistory = () => {
   const handleCloseTrade = async (tradeId) => {
     try {
       setLoading(true);
+      setShowNoData(false);
 
       const res = await closeTradeApi(tradeId);
 
@@ -110,7 +111,16 @@ const TradeHistory = () => {
   };
 
   useEffect(() => {
-    fetchTrades();
+    const delay = setTimeout(() => {
+      fetchTrades();
+    }, 200);
+    const timer = setTimeout(() => {
+      setShowNoData(true);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+      clearTimeout(timer);
+    };
   }, [page, userId]);
 
   useEffect(() => {
@@ -162,7 +172,7 @@ const TradeHistory = () => {
 
       <ToastContainer />
 
-    
+
 
       <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="flex items-center gap-4 ">
@@ -190,28 +200,28 @@ const TradeHistory = () => {
 
       </div>
 
-      <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+      <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
 
 
           <table className="min-w-[900px] w-full text-sm border-collapse">
 
-            <thead className="bg-[#1e293b] text-gray-400 text-sm whitespace-nowrap uppercase sticky top-0 border-b border-gray-700">
+            <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm whitespace-nowrap uppercase sticky top-0 border-b border-[#d6a210]">
               <tr>
-                <th className="px-3 py-2 border-r border-gray-700">#</th>
-                <th className="px-3 py-2 border-r border-gray-700">User ID</th>
-                <th className="px-3 py-2 border-r border-gray-700">Pair</th>
-                <th className="px-3 py-2 border-r border-gray-700">Percentage</th>
-                <th className="px-3 py-2 border-r border-gray-700">Amount</th>
-                <th className="px-3 py-2 border-r border-gray-700">Leverage</th>
-                <th className="px-3 py-2 border-r border-gray-700">Entry</th>
-                <th className="px-3 py-2 border-r border-gray-700">Current</th>
-                <th className="px-3 py-2 border-r border-gray-700">PnL</th>
-                <th className="px-3 py-2 border-r border-gray-700">Mode</th>
-                <th className="px-3 py-2 border-r border-gray-700">Status</th>
-                <th className="px-3 py-2 border-r border-gray-700">Action</th>
-                <th className="px-3 py-2 border-r border-gray-700">Date</th>
+                <th className="px-3 py-2 ">#</th>
+                <th className="px-3 py-2 ">User ID</th>
+                <th className="px-3 py-2 ">Pair</th>
+                <th className="px-3 py-2 ">Percentage</th>
+                <th className="px-3 py-2 ">Amount</th>
+                <th className="px-3 py-2 ">Leverage</th>
+                <th className="px-3 py-2 ">Entry</th>
+                <th className="px-3 py-2 ">Current</th>
+                <th className="px-3 py-2 ">PnL</th>
+                <th className="px-3 py-2 ">Mode</th>
+                <th className="px-3 py-2 ">Status</th>
+                <th className="px-3 py-2 ">Action</th>
+                <th className="px-3 py-2 ">Date</th>
               </tr>
             </thead>
 
@@ -300,13 +310,15 @@ const TradeHistory = () => {
                   );
                 })
               ) : (
-                !loading && (
-                  <tr>
-                    <td colSpan="12" className="text-center py-6 text-gray-500">
-                      No trades found
-                    </td>
-                  </tr>
-                )
+                loading || !showNoData ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                    {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                    <Loader />
+                  </div>
+                ) :
+                  (
+                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                  )
               )}
             </tbody>
 

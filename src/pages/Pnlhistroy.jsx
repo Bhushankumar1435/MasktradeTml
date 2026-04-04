@@ -13,11 +13,14 @@ const PnlHistory = () => {
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState("");
     const [type, setType] = useState("");
+    const [showNoData, setShowNoData] = useState(false);
 
     const totalPages = Math.ceil(total / PAGE_SIZE);
 
     const fetchData = async () => {
         setLoading(true);
+        setShowNoData(false);
+
         try {
             const res = await getMyProfitHistoryApi(
                 page,
@@ -40,8 +43,18 @@ const PnlHistory = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        const delay = setTimeout(() => {
+            fetchData();
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [page, search, type]);
+
 
     // ✅ SAME PAGINATION LOGIC
     const getPageNumbers = () => {
@@ -141,25 +154,25 @@ const PnlHistory = () => {
             </div>
 
             {/* MAIN CONTAINER */}
-            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
                 {/* TABLE */}
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+                <div className="w-full overflow-x-auto min-h-[200px] scrollbar-thin scrollbar-thumb-gray-700 ">
 
                     <table className="min-w-[900px] w-full text-sm border-collapse">
 
-                        <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
                             <tr>
-                                <th className="px-3 py-2 border-r border-gray-700">#</th>
-                                <th className="px-3 py-2 border-r border-gray-700">User</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Pair</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Type</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Side</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Qty</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Price</th>
-                                <th className="px-3 py-2 border-r border-gray-700">PnL</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Fee</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Date</th>
+                                <th className="px-3 py-2  ">#</th>
+                                <th className="px-3 py-2  ">User</th>
+                                <th className="px-3 py-2  ">Pair</th>
+                                <th className="px-3 py-2  ">Type</th>
+                                <th className="px-3 py-2  ">Side</th>
+                                <th className="px-3 py-2  ">Qty</th>
+                                <th className="px-3 py-2  ">Price</th>
+                                <th className="px-3 py-2  ">PnL</th>
+                                <th className="px-3 py-2  ">Fee</th>
+                                <th className="px-3 py-2  ">Date</th>
                             </tr>
                         </thead>
 
@@ -190,7 +203,7 @@ const PnlHistory = () => {
                                             ? "text-green-400"
                                             : "text-red-400"
                                             }`}>
-                                            {item.pnl}
+                                            {item.pnl.toFixed(2)}
                                         </td>
 
                                         <td className="px-3 py-3 border border-gray-700">{item.commission}</td>
@@ -199,13 +212,15 @@ const PnlHistory = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !loading && (
-                                    <tr>
-                                        <td colSpan="11" className="text-center py-6 text-gray-500">
-                                            No Data Found
-                                        </td>
-                                    </tr>
-                                )
+                                loading || !showNoData ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
 

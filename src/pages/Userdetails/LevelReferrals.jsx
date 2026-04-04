@@ -14,11 +14,11 @@ const LevelReferrals = () => {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
+    const [showNoData, setShowNoData] = useState(false);
     const fetchReferrals = async () => {
         try {
             setLoading(true);
-
+            setShowNoData(false);
             const res = await getReferralByLevelApi(userId, level, page, PAGE_SIZE);
 
             if (res.data?.success) {
@@ -34,8 +34,18 @@ const LevelReferrals = () => {
     };
 
     useEffect(() => {
-        fetchReferrals();
+        const delay = setTimeout(() => {
+            fetchReferrals();
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [userId, level, page]);
+
 
     useEffect(() => {
         setPage(1);
@@ -91,15 +101,15 @@ const LevelReferrals = () => {
             </div>
 
             {/* MAIN CONTAINER */}
-            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
                 {/* ✅ TABLE FOR ALL DEVICES */}
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
 
 
                     <table className="min-w-[900px] w-full text-sm border-collapse table-auto">
 
-                        <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
                             <tr>
                                 <th className="px-3 py-3 whitespace-nowrap">#</th>
                                 <th className="px-3 py-3 whitespace-nowrap">User ID</th>
@@ -156,13 +166,15 @@ const LevelReferrals = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !loading && (
-                                    <tr>
-                                        <td colSpan="7" className="text-center py-6 text-gray-500">
-                                            No data found
-                                        </td>
-                                    </tr>
-                                )
+                                loading || !showNoData ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
 

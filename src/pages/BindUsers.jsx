@@ -17,11 +17,14 @@ const BindUsers = () => {
     const [limit] = useState(10);
     const [total, setTotal] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
+    const [showNoData, setShowNoData] = useState(false);
+
     const navigate = useNavigate();
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
+            setShowNoData(false);
 
             const res = await getBindUsersApi(page, limit, "bind");
 
@@ -60,7 +63,16 @@ const BindUsers = () => {
     };
 
     useEffect(() => {
-        fetchUsers();
+        const delay = setTimeout(() => {
+            fetchUsers();
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [page]);
 
     const getPageNumbers = () => {
@@ -106,12 +118,12 @@ const BindUsers = () => {
             </div>
 
             {/* TABLE */}
-            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
 
                     <table className="min-w-[900px] w-full text-sm">
 
-                        <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase border-[#d6a210]">
                             <tr>
                                 <th className="px-3 py-2">#</th>
                                 <th className="px-3 py-2">Name</th>
@@ -195,22 +207,24 @@ const BindUsers = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !loading && (
-                                    <tr>
-                                        <td colSpan="6" className="text-center py-6 text-gray-500">
-                                            No data found
-                                        </td>
-                                    </tr>
-                                )
+                                loading || !showNoData ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
 
                     </table>
                     {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                            {/* <div className="w-10 h-10 border-4 border-gray-500 border-t-blue-500 rounded-full animate-spin"></div> */}
-                            <Loader />
-                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
                     )}
                 </div>
 

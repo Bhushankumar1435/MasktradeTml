@@ -41,12 +41,11 @@ const AdminWalletAdd = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0f172a] flex items-center justify-center px-4 rounded-md">
+        <div className="bg-[#0f172a] flex items-center justify-center px-4 h-full">
 
             {/* CARD */}
             <div className="relative w-full max-w-md bg-[#1e293b] rounded-xl shadow-lg p-6">
 
-                {/* 🔥 SMOOTH LOADER (NO JUMP) */}
                 {loading && (
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-xl z-10">
                         <div className="w-10 h-10 border-4 border-gray-400 border-t-blue-500 rounded-full animate-spin"></div>
@@ -78,7 +77,7 @@ const AdminWalletAdd = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition  p-2 rounded text-white font-semibold "
+                        className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition p-2 rounded text-white font-semibold"
                     >
                         {loading ? "Adding..." : "Add Balance"}
                     </button>

@@ -8,19 +8,20 @@ import { useNavigate } from "react-router-dom";
 const AllBatches = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(true);
+    // const [initialLoading, setInitialLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState("");
     const [selectedBatch, setSelectedBatch] = useState(null);
     const totalPages = Math.ceil(total / limit);
+    const [showNoData, setShowNoData] = useState(false);
     const navigate = useNavigate();
 
     const fetchBatches = async () => {
         try {
             setLoading(true);
-
+            setShowNoData(false);
             const res = await getAllBatchesApi(page, limit, search);
 
             setData(res?.data?.data || []);
@@ -30,19 +31,23 @@ const AllBatches = () => {
             toast.error("Failed to fetch batches");
         } finally {
             setLoading(false);
-            setInitialLoading(false);
+            // setInitialLoading(false);
         }
     };
 
     useEffect(() => {
         const delay = setTimeout(() => {
             fetchBatches();
-        }, 500);
-
-        return () => clearTimeout(delay);
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [page, search]);
 
-  
 
     const copyText = async (text) => {
         await navigator.clipboard.writeText(text);
@@ -75,9 +80,12 @@ const AllBatches = () => {
 
             {/* HEADER */}
             <div className="mb-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-                <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-                    All Batches ({total})
-                </h1>
+                <div className="flex items-center gap-4 ">
+                    <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
+                        All Batches ({total})
+                    </h1>
+                </div>
 
                 {/* SEARCH */}
                 <input
@@ -93,19 +101,12 @@ const AllBatches = () => {
             </div>
 
             {/* MAIN */}
-            <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 relative">
+            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-                {/* LOADER */}
-                {initialLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center z-50">
-                        <Loader />
-                    </div>
-                )}
-
-                <div className="w-full overflow-x-auto relative">
+                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
 
                     <table className="min-w-[900px] w-full text-sm border-collapse">
-                        <thead className="bg-[#1e293b] text-gray-400 uppercase border-b border-gray-700">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d3b769] text-white uppercase border-b border-[#d6a210]">
                             <tr>
                                 <th className="px-3 py-2">#</th>
                                 <th className="px-3 py-2">Batch ID</th>
@@ -128,33 +129,29 @@ const AllBatches = () => {
                                             {(page - 1) * limit + index + 1}
                                         </td>
 
-                                        {/* BATCH ID + COPY */}
-                                        <td className="px-3 py-3 border border-gray-700 cursor-pointer">
-                                            <div onClick={() => setSelectedBatch(item)} className="flex items-center justify-center gap-2">
+                                        <td className="px-3 py-3 border border-gray-700 ">
+                                            <div className="flex items-center justify-center gap-2">
                                                 {item.batchId}
-
-                                                <FaCopy
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        copyText(item.batchId);
-
-                                                    }}
+                                                <FaCopy onClick={(e) => { e.stopPropagation(); copyText(item.batchId); }}
                                                     className="cursor-pointer text-gray-400 hover:text-blue-400"
                                                 />
                                             </div>
                                         </td>
 
                                         {/* USERS */}
-                                        <td className="px-3 py-3 border border-gray-700 max-w-[200px] cursor-pointer">
-                                            <p onClick={() => setSelectedBatch(item)} className="truncate" title={item.userIds.join(", ")}>
-                                                {item.userIds.slice(0, 2).join(", ")}
-                                                {item.userIds.length > 2 && " ..."}
-                                            </p>
+                                        <td className="px-3 py-3 border border-gray-700">
+                                            <button
+                                                onClick={() => setSelectedBatch(item)}
+                                                title={item.userIds.join(", ")}
+                                                className="px-2 py-1 bg-[#d6a210] rounded text-xs hover:bg-[#ad8619] transition"
+                                            >
+                                                VIEW
+                                            </button>
                                         </td>
 
                                         {/* STATUS */}
                                         <td className="px-3 py-3 border border-gray-700">
-                                            <span className="px-2 py-1 text-xs rounded bg-yellow-500 text-white">
+                                            <span className="px-2 py-1 text-xs rounded bg-[#d6a210] text-white">
                                                 {item.status}
                                             </span>
                                         </td>
@@ -182,21 +179,24 @@ const AllBatches = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !initialLoading && (
-                                    <tr>
-                                        <td colSpan="6" className="text-center py-6 text-gray-500">
-                                            No batches found
-                                        </td>
-                                    </tr>
-                                )
+                                loading || !showNoData ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
                     </table>
 
                     {/* LOADING */}
                     {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40">
-                            <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+                            {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
+                            <Loader />
                         </div>
                     )}
                 </div>

@@ -53,7 +53,7 @@ const CreateBatch = () => {
     };
 
     return (
-        <div className="w-full max-h-[2000vh] flex bg-[#0f172a] p-3 sm:p-6 text-white overflow-hidden">
+        <div className="w-full max-h-[2000vh] flex bg-[#0f172a] p-3 sm:p-6 text-white overflow-hidden rounded-md">
 
             <div className="w-full  bg-[#020817] p-2 sm:p-6 rounded-lg border border-gray-700">
 
@@ -91,6 +91,13 @@ const CreateBatch = () => {
                     ))}
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5">
+                    {/* ADD */}
+                    <button
+                        onClick={addInput}
+                        className="w-full sm:w-auto px-3 py-2 bg-green-600 rounded hover:bg-green-700"
+                    >
+                        + Add
+                    </button>
 
                     {/* SUBMIT */}
                     <button
@@ -101,13 +108,6 @@ const CreateBatch = () => {
                         {loading ? "Creating..." : "Create Batch"}
                     </button>
 
-                    {/* ADD */}
-                    <button
-                        onClick={addInput}
-                        className="w-full sm:w-auto px-3 py-2 bg-green-600 rounded hover:bg-green-700"
-                    >
-                        + Add
-                    </button>
                 </div>
                 {/* RESULT */}
                 {result && (

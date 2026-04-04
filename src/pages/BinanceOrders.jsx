@@ -16,6 +16,7 @@ const BinanceOrders = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [userName, setUserName] = useState("");
     const [checkingUser, setCheckingUser] = useState(false);
+    const [showNoData, setShowNoData] = useState(false);
 
     const navigate = useNavigate();
 
@@ -23,6 +24,7 @@ const BinanceOrders = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
+            setShowNoData(false);
 
             const res = await getAllBinanceOrdersapi(
                 page,
@@ -49,9 +51,17 @@ const BinanceOrders = () => {
     };
 
     useEffect(() => {
-        fetchOrders();
+        const delay = setTimeout(() => {
+            fetchOrders();
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [page, userId]);
-
 
 
     // 🔥 Fetch user
@@ -160,21 +170,21 @@ const BinanceOrders = () => {
 
                     <table className="min-w-[900px] w-full text-sm border-collapse">
 
-                        <thead className="bg-[#1e293b] text-gray-400 uppercase whitespace-nowrap border-b  border-gray-700">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white uppercase whitespace-nowrap border-b  border-[#d6a210]">
                             <tr>
-                                <th className="px-3 py-2 border-r border-gray-700">#</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Order Id</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Pair</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Entry</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Current</th>
-                                <th className="px-3 py-2 border-r border-gray-700">PNL</th>
-                                <th className="px-3 py-2 border-r border-gray-700">PNL %</th>
-                                <th className="px-3 py-2 border-r border-gray-700">QTY</th>
-                                <th className="px-3 py-2 border-r border-gray-700">USED USDT</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Type</th>
-                                <th className="px-3 py-2 border-r border-gray-700">TRADE ACTION</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Status</th>
-                                <th className="px-3 py-2 border-r border-gray-700">Date</th>
+                                <th className="px-3 py-2 ">#</th>
+                                <th className="px-3 py-2 ">Order Id</th>
+                                <th className="px-3 py-2 ">Pair</th>
+                                <th className="px-3 py-2 ">Entry</th>
+                                <th className="px-3 py-2 ">Current</th>
+                                <th className="px-3 py-2 ">PNL</th>
+                                <th className="px-3 py-2 ">PNL %</th>
+                                <th className="px-3 py-2 ">QTY</th>
+                                <th className="px-3 py-2 ">USED USDT</th>
+                                <th className="px-3 py-2 ">Type</th>
+                                <th className="px-3 py-2 ">TRADE ACTION</th>
+                                <th className="px-3 py-2 ">Status</th>
+                                <th className="px-3 py-2 ">Date</th>
                             </tr>
                         </thead>
 
@@ -245,13 +255,15 @@ const BinanceOrders = () => {
                                     </tr>
                                 ))
                             ) : (
-                                !loading && (
-                                    <tr>
-                                        <td colSpan="10" className="text-center py-6 text-gray-500">
-                                            No orders found
-                                        </td>
-                                    </tr>
-                                )
+                                loading || !showNoData ? (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                                        <Loader />
+                                    </div>
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
 

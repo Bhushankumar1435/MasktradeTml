@@ -47,7 +47,7 @@ const Addbanner = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0f172a] flex items-center justify-center px-4 rounded-md text-white">
+        <div className="h-full bg-[#0f172a] flex items-center justify-center px-4 rounded-md text-white">
 
 
             <div className="w-full max-w-4xl mx-auto bg-[#1e293b] rounded-xl shadow-lg p-2 md:p-4">

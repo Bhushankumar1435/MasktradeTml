@@ -148,7 +148,7 @@ const PackageList = () => {
 
         <table className="w-full text-sm">
 
-          <thead className="bg-[#1e293b] text-gray-400">
+          <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white border-[#d6a210]">
             <tr>
               <th className="p-3 text-left text-base">Name</th>
               <th className="p-3 text-left text-base">Price</th>

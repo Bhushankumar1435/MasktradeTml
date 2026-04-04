@@ -42,7 +42,7 @@ const Addincome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center px-4 rounded-md">
+    <div className=" bg-[#0f172a] flex items-center justify-center px-4 rounded-md h-full">
 
       {/* CARD */}
       <div className="relative w-full max-w-md bg-[#1e293b] rounded-xl shadow-lg p-6">

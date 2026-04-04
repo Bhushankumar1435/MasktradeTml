@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    getWithdrawOrdersApi,
-    manageWithdrawApi,
-} from "../ApiService/Adminapi";
+import { getWithdrawOrdersApi, manageWithdrawApi, } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
 import { FaCopy } from "react-icons/fa";
 import Loader from "../components/ui/Loader";
@@ -18,11 +15,12 @@ const WithdrawOrders = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [remark, setRemark] = useState("");
-
+    const [showNoData, setShowNoData] = useState(false);
     // Fetch
     const fetchWithdraws = async () => {
         try {
             setLoading(true);
+            setShowNoData(false);
             const res = await getWithdrawOrdersApi(page, limit, status, search);
 
             setData(res?.data?.data?.data || []);
@@ -37,11 +35,15 @@ const WithdrawOrders = () => {
     useEffect(() => {
         const delay = setTimeout(() => {
             fetchWithdraws();
-        }, 500);
-
-        return () => clearTimeout(delay);
+        }, 200);
+        const timer = setTimeout(() => {
+            setShowNoData(true);
+        }, 1000);
+        return () => {
+            clearTimeout(delay);
+            clearTimeout(timer);
+        };
     }, [page, status, search]);
-
     // Approve
     const handleApprove = async (id) => {
         const confirmApprove = window.confirm("Are you sure you want to approve this request?");
@@ -223,12 +225,11 @@ const WithdrawOrders = () => {
             {/* Main */}
             <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
-                {/* ✅ TABLE FOR ALL DEVICES */}
                 <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
 
                     <table className="min-w-[1000px] w-full text-sm border-collapse table-auto">
 
-                        <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
+                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
                             <tr>
                                 <th className="px-3 py-2 whitespace-nowrap">#</th>
                                 <th className="px-3 py-2 whitespace-nowrap">User</th>
@@ -331,12 +332,15 @@ const WithdrawOrders = () => {
                                     </tr>
                                 ))
                             ) : (
-                                data.length === 0 && (
+                                loading || !showNoData ? (
                                     <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
                                         {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
                                         <Loader />
                                     </div>
-                                )
+                                ) :
+                                    (
+                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                                    )
                             )}
                         </tbody>
 

@@ -32,17 +32,17 @@
       {
         "title": "Create Batch",
         "path": "/createbatch",
-        "icon": "FaArrowUp"
+        "icon": "FaLayerGroup"
       },
       {
         "title": "Place Single Trade",
         "path": "/placetrade",
-        "icon": "FaArrowUp"
+        "icon": "FaExchangeAlt"
       },
       {
         "title": "Place Batch Trade",
         "path": "/Placebatchtrade",
-        "icon": "FaArrowUp"
+        "icon": "FaRandom"
       },
       {
         "title": "Trade History",

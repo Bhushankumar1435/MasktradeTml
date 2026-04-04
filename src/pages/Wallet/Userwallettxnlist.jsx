@@ -10,12 +10,15 @@ const Userwallettxnlist = () => {
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showNoData, setShowNoData] = useState(false);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const getWallets = async () => {
     try {
       setLoading(true);
+      setShowNoData(false);
+
       const res = await getWalletListApi(page, PAGE_SIZE, search);
 
       if (res.data?.success) {
@@ -30,7 +33,16 @@ const Userwallettxnlist = () => {
   };
 
   useEffect(() => {
-    getWallets();
+    const delay = setTimeout(() => {
+      getWallets();
+    }, 200);
+    const timer = setTimeout(() => {
+      setShowNoData(true);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+      clearTimeout(timer);
+    };
   }, [page, search]);
 
   const getPageNumbers = () => {
@@ -85,14 +97,16 @@ const Userwallettxnlist = () => {
       </div>
 
       {/* MAIN */}
-      <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+      <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+
 
         {/* ✅ TABLE FOR ALL DEVICES */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
+
 
           <table className="min-w-[800px] w-full text-sm border-collapse table-auto">
 
-            <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
+            <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
               <tr>
                 <th className="px-3 py-2 whitespace-nowrap">#</th>
                 <th className="px-3 py-2 whitespace-nowrap">User</th>
@@ -146,13 +160,15 @@ const Userwallettxnlist = () => {
                   </tr>
                 ))
               ) : (
-                !loading && (
-                  <tr>
-                    <td colSpan="6" className="text-center py-6 text-gray-500">
-                      No data found
-                    </td>
-                  </tr>
-                )
+                loading || !showNoData ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                    {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                    <Loader />
+                  </div>
+                ) :
+                  (
+                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                  )
               )}
             </tbody>
 
@@ -160,7 +176,8 @@ const Userwallettxnlist = () => {
 
           {/* Loader */}
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+
               {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
               <Loader />
             </div>

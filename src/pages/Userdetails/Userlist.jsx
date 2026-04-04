@@ -15,7 +15,7 @@ const User = () => {
   const [page, setPage] = useState(1);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-
+  const [showNoData, setShowNoData] = useState(false);
   const navigate = useNavigate();
 
   const [stats, setStats] = useState({
@@ -29,6 +29,7 @@ const User = () => {
   const getUsers = async () => {
     try {
       setLoading(true);
+      setShowNoData(false);
       const res = await getUsersApi(page, PAGE_SIZE, search, formatDate(fromDate), formatDate(toDate));
 
       if (res.data?.success) {
@@ -51,8 +52,18 @@ const User = () => {
   };
 
   useEffect(() => {
-    getUsers();
+    const delay = setTimeout(() => {
+      getUsers();
+    }, 200);
+    const timer = setTimeout(() => {
+      setShowNoData(true);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+      clearTimeout(timer);
+    };
   }, [page, search, fromDate, toDate]);
+
 
   const getPageNumbers = () => {
     const pages = [];
@@ -222,34 +233,34 @@ const User = () => {
       </div>
 
       {/* Main Container */}
-      <div className="flex-1 bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
+      <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
 
         {/* TABLE */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 relative">
+        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
 
           <table className="min-w-[1100px] w-full text-sm border-collapse table-auto">
-            <thead className="bg-[#1e293b] text-gray-400 text-sm uppercase sticky top-0 border-b border-gray-700">
+            <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm  whitespace-nowrap uppercase sticky top-0 border-b border-[#d6a210]">
               <tr>
-                <th className="px-3 py-2 whitespace-nowrap">#</th>
-                <th className="px-3 py-2 whitespace-nowrap">User</th>
-                <th className="px-3 py-2 whitespace-nowrap">User ID</th>
-                <th className="px-3 py-2 whitespace-nowrap">Sponsor</th>
-                <th className="px-3 py-2 whitespace-nowrap">Email</th>
-                <th className="px-3 py-2 whitespace-nowrap">Package</th>
-                <th className="px-3 py-2 whitespace-nowrap">Amount</th>
-                <th className="px-3 py-2 whitespace-nowrap">Balance</th>
-                <th className="px-3 py-2 whitespace-nowrap">Expire</th>
-                <th className="px-3 py-2 whitespace-nowrap">Paid</th>
-                <th className="px-3 py-2 whitespace-nowrap">Level</th>
-                <th className="px-3 py-2 whitespace-nowrap">Details</th>
-                <th className="px-3 py-2 whitespace-nowrap">Joined</th>
+                <th className="px-3 py-2 ">#</th>
+                <th className="px-3 py-2 ">User</th>
+                <th className="px-3 py-2 ">User ID</th>
+                <th className="px-3 py-2 ">Sponsor</th>
+                <th className="px-3 py-2 ">Email</th>
+                <th className="px-3 py-2 ">Package</th>
+                <th className="px-3 py-2 ">Amount</th>
+                <th className="px-3 py-2 ">Balance</th>
+                <th className="px-3 py-2 ">Expire</th>
+                <th className="px-3 py-2 ">Paid</th>
+                <th className="px-3 py-2 ">Level</th>
+                <th className="px-3 py-2 ">Details</th>
+                <th className="px-3 py-2 ">Joined</th>
               </tr>
             </thead>
 
             <tbody>
               {userData.length > 0 ? (
                 userData.map((user, index) => (
-                  <tr key={user._id || index} className="hover:bg-[#1e293b] font-semibold transition text-center">
+                  <tr key={user._id || index} className="hover:bg-[#1e293b] font-semibold whitespace-nowrap transition text-center">
 
                     <td className="px-3 py-3 border border-gray-700">
                       {(page - 1) * PAGE_SIZE + index + 1}
@@ -317,13 +328,15 @@ const User = () => {
                   </tr>
                 ))
               ) : (
-                !loading && (
-                  <tr>
-                    <td colSpan="13" className="text-center py-6 text-gray-500">
-                      No users found
-                    </td>
-                  </tr>
-                )
+                loading || !showNoData ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
+                    {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+                    <Loader />
+                  </div>
+                ) :
+                  (
+                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                  )
               )}
             </tbody>
           </table>
@@ -332,7 +345,7 @@ const User = () => {
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
               {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-              <Loader/>
+              <Loader />
             </div>
           )}
 

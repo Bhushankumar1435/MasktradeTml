@@ -21,7 +21,10 @@ import {
   FaArrowUp,
   FaChartBar,
   FaCheckCircle,
-  FaChartPie
+  FaChartPie,
+  FaLayerGroup,
+  FaExchangeAlt,
+  FaRandom
 } from "react-icons/fa";
 
 const Header = ({ closeSidebar }) => {
@@ -47,7 +50,10 @@ const Header = ({ closeSidebar }) => {
     FaArrowUp,
     FaChartBar,
     FaCheckCircle,
-    FaChartPie
+    FaChartPie,
+    FaLayerGroup,
+    FaExchangeAlt,
+    FaRandom
   };
 
   const handleToggle = (index) => {

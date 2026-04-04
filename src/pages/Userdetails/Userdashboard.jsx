@@ -206,21 +206,21 @@ const UserDashboard = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-center min-w-[600px]">
 
-                <thead className="bg-[#1e293b] text-gray-400 uppercase text-xs">
+                <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white uppercase text-xs">
                   <tr>
-                    <th className="px-3 py-2 border border-gray-700">#</th>
-                    <th className="px-3 py-2 border border-gray-700">Level</th>
-                    <th className="px-3 py-2 border border-gray-700">Total Team</th>
-                    <th className="px-3 py-2 border border-gray-700">Active</th>
-                    <th className="px-3 py-2 border border-gray-700">Inactive</th>
-                    <th className="px-3 py-2 border border-gray-700">Business</th>
-                    <th className="px-3 py-2 border border-gray-700">Details</th>
+                    <th className="px-3 py-2 ">#</th>
+                    <th className="px-3 py-2 ">Level</th>
+                    <th className="px-3 py-2 ">Total Team</th>
+                    <th className="px-3 py-2 ">Active</th>
+                    <th className="px-3 py-2 ">Inactive</th>
+                    <th className="px-3 py-2 ">Business</th>
+                    <th className="px-3 py-2 ">Details</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {filteredLevels.map((item, index) => (
-                    <tr key={index} className="font-semibold hover:bg-[#1e293b]">
+                    <tr key={index} className="font-semibold hover:bg-[#1e293b] border-collapse">
 
                       <td className="px-3 py-2 border border-gray-700">
                         {index + 1}
@@ -282,7 +282,7 @@ const Card = ({ title, value }) => {
       <div className="relative z-10 flex flex-col justify-between h-full">
 
         {/* Title */}
-        <p className="text-gray-400 text-xs sm:text-sm tracking-wide font-semibold">
+        <p className="text-[#d6a210] text-xs sm:text-sm tracking-wide font-semibold">
           {title}
         </p>
 

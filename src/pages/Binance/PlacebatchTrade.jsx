@@ -80,9 +80,9 @@ const PlacebatchTrade = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex justify-center items-center p-3 sm:p-5 md:p-8">
+    <div className=" bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex justify-center items-center p-3 sm:p-5 md:p-8 rounded-md">
 
-      <div className="w-full max-w-4xl bg-gray-800/80 backdrop-blur-md border border-gray-700 text-white rounded-2xl shadow-2xl p-4 sm:p-5 md:p-6">
+      <div className="w-full max-w-4xl bg-gray-800/80 backdrop-blur-md border border-gray-700 text-white rounded-2xl shadow-2xl p-2 sm:p-4 md:p-6">
 
         <h2 className="text-xl sm:text-2xl text-[#d6a210] font-semibold mb-5 sm:mb-6 text-center">
           Batch Place Trade
