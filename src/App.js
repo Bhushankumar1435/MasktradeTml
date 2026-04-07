@@ -31,9 +31,10 @@ import Opentrades from "./pages/Binance/Opentrades";
 import CloseTrades from "./pages/Binance/Closetrades";
 import BinanceOrders from "./pages/BinanceOrders";
 import PnlHistory from "./pages/Pnlhistroy";
-import CreateBatch from "./pages/Binance/CreateBatch";
 import PlacebatchTrade from "./pages/Binance/PlacebatchTrade";
 import AllBatches from "./pages/Binance/AllBatcheshistory";
+import BatchDetails from "./pages/Binance/BatchDetails";
+import NotificationHistory from "./pages/Notifications/NotificationHistory";
 
 function App() {
   return (
@@ -73,14 +74,15 @@ function App() {
             <Route path="/addbanner" element={<Addbanner />} />
             <Route path="/bannerList" element={<BannerList />} />
             <Route path="/placetrade" element={<PlaceTrade />} />
-            <Route path="/createbatch" element={<CreateBatch />} />
             <Route path="/placebatchTrade" element={<PlacebatchTrade />} />
             <Route path="/tradehistory" element={<TradeHistory />} />
             <Route path="/batchhistory" element={<AllBatches />} />
+            <Route path="/batchdetails/:batchId" element={<BatchDetails />} />
             <Route path="/opentrades" element={<Opentrades />} />
             <Route path="/closeTrades" element={<CloseTrades />} />
             <Route path="/binance-orders/:userId" element={<BinanceOrders />} />
             <Route path="/pnlhistory" element={<PnlHistory />} />
+            <Route path="/notificationhistory" element={<NotificationHistory />} />
 
           </Route>
         </Route>

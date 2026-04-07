@@ -52,24 +52,31 @@ const BannerList = () => {
     };
 
     // UPDATE
-    const handleUpdate = async () => {
-        try {
-            setActionLoading(true);
+   const handleUpdate = async () => {
+    try {
+        setActionLoading(true);
 
-            const res = await updateBannerApi(editData._id, {
-                title: editData.title,
-                image: editData.image,
-            });
+        const formData = new FormData();
+        formData.append("title", editData.title);
 
-            toast.success(res.data?.message || "Updated");
-            setEditData(null);
-            getBanners();
-        } catch (err) {
-            toast.error("Update failed");
-        } finally {
-            setActionLoading(false);
+        // 🔥 only if new image selected
+        if (editData.imageFile) {
+            formData.append("ticketImage", editData.imageFile);
         }
-    };
+
+        const res = await updateBannerApi(editData._id, formData);
+
+        toast.success(res.data?.message || "Updated ✅");
+
+        setEditData(null);
+        getBanners();
+
+    } catch (err) {
+        toast.error("Update failed ❌");
+    } finally {
+        setActionLoading(false);
+    }
+};
 
     return (
         <div className=" bg-[#0f172a] text-white p-3 md:p-6 rounded-md">
@@ -99,7 +106,13 @@ const BannerList = () => {
 
                             <div className="flex gap-2 mt-3">
                                 <button
-                                    onClick={() => setEditData(item)}
+                                    onClick={() =>
+                                        setEditData({
+                                            ...item,
+                                            imageFile: null,
+                                            preview: item.image,
+                                        })
+                                    }
                                     className="flex-1 py-1 bg-blue-600 rounded text-sm"
                                 >
                                     Edit
@@ -206,17 +219,22 @@ const BannerList = () => {
                         />
 
                         <input
-                            value={editData.image}
+                            type="file"
+                            accept="image/*"
                             onChange={(e) =>
-                                setEditData({ ...editData, image: e.target.value })
+                                setEditData({
+                                    ...editData,
+                                    imageFile: e.target.files[0],
+                                    preview: URL.createObjectURL(e.target.files[0]),
+                                })
                             }
                             className="w-full mb-3 p-2 bg-white/10 rounded"
                         />
 
                         <img
-                            src={editData.image}
+                            src={editData.preview}
                             alt=""
-                            className="w-full h-40  mb-3 rounded"
+                            className="w-full h-40 mb-3 rounded object-contain"
                         />
 
                         <div className="flex gap-2">

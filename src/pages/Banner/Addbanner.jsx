@@ -5,7 +5,7 @@ import { addBannerApi } from "../../ApiService/Adminapi";
 const Addbanner = () => {
     const [formData, setFormData] = useState({
         title: "",
-        image: "",
+        image: null,
     });
 
     const [loading, setLoading] = useState(false);
@@ -27,14 +27,18 @@ const Addbanner = () => {
         try {
             setLoading(true);
 
-            const res = await addBannerApi(formData);
+            const data = new FormData();
+            data.append("title", formData.title);
+            data.append("ticketImage", formData.image);
+
+            const res = await addBannerApi(data);
 
             if (res.data?.success) {
                 toast.success(res.data.message || "Banner added");
 
                 setFormData({
                     title: "",
-                    image: "",
+                    image: null,
                 });
             } else {
                 toast.error(res.data.message);
@@ -79,12 +83,15 @@ const Addbanner = () => {
                         <div>
                             <label className=" text-gray-400 font-semibold">Image URL</label>
                             <input
-                                type="text"
-                                name="image"
-                                placeholder="Enter image URL"
-                                value={formData.image}
-                                onChange={handleChange}
-                                className="w-full mt-1 p-2.5 rounded bg-[#020817] border border-gray-700 outline-none focus:ring-1 focus:ring-blue-500"
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        image: e.target.files[0],
+                                    })
+                                }
+                                className="w-full mt-1 p-2.5 rounded bg-[#020817] border border-gray-700"
                             />
                         </div>
 
@@ -106,13 +113,11 @@ const Addbanner = () => {
                         <p className="font-semibold text-gray-400">Preview</p>
 
                         {formData.image ? (
-                            <div className="w-full h-40 md:h-56 flex items-center justify-center bg-[#020817] border border-gray-700 rounded-lg p-2">
-                                <img
-                                    src={formData.image}
-                                    alt="preview"
-                                    className="max-h-full max-w-full object-contain"
-                                />
-                            </div>
+                            <img
+                                src={URL.createObjectURL(formData.image)}
+                                alt="preview"
+                                className=" object-contain"
+                            />
                         ) : (
                             <div className="w-full h-40 md:h-[216px] flex items-center justify-center bg-[#020817] border border-gray-700 rounded-lg text-gray-500 text-sm">
                                 Image preview will appear here

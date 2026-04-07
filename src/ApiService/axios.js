@@ -8,7 +8,7 @@ const api = axios.create({
 
 });
 
-// 🔐 Token auto attach
+//  Token auto attach
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("admin_token");
   if (token) {
@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🚫 401 handle
+//  401 handle
 api.interceptors.response.use(
   (res) => res,
   (err) => {

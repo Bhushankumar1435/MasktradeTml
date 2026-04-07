@@ -2,7 +2,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import headerjson from "../../json/Header.json";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { adminLogoutApi } from "../../ApiService/Adminapi";
+import { adminLogoutApi, getAllNotificationsApi } from "../../ApiService/Adminapi";
 import {
   FaHome,
   FaUsers,
@@ -29,6 +29,7 @@ import {
 
 const Header = ({ closeSidebar }) => {
   const [openMenu, setOpenMenu] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,6 +56,26 @@ const Header = ({ closeSidebar }) => {
     FaExchangeAlt,
     FaRandom
   };
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await getAllNotificationsApi(1, 20);
+
+      const unread = res?.data?.data?.filter(n => !n.isRead)?.length || 0;
+
+      setUnreadCount(unread);
+    } catch (err) {
+      console.error("Notification fetch error", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    const interval = setInterval(fetchNotifications, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleToggle = (index) => {
     setOpenMenu(openMenu === index ? null : index);
@@ -86,9 +107,13 @@ const Header = ({ closeSidebar }) => {
         onClick={() => closeSidebar?.()}
         className="p-5 border-b border-gray-700 cursor-pointer md:cursor-default"
       >
-        <h1 className="text-xl md:text-2xl text-[#d6a210] font-semibold">
-          Admin Panel
-        </h1>
+
+        <div className="flex items-center gap-4 mb-6">
+                <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+                <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210]">
+                    Admin Panel
+                </h2>
+            </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
@@ -129,7 +154,15 @@ const Header = ({ closeSidebar }) => {
                         {React.createElement(iconMap[item.icon])}
                       </span>
                     )}
-                    <span className="font-medium">{item.title}</span>
+                    {item.title === "Notification" ? unreadCount > 0 && (
+                      <>
+                      <span>{item.title}</span>
+                      <span className="ml-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full animate-pulse">
+                        {unreadCount > 10 ? "10+" : unreadCount}
+                      </span>
+                      </>
+                    ):<span>{item.title}</span>
+                  }
                   </span>
 
                   {item.children && (
@@ -167,8 +200,8 @@ const Header = ({ closeSidebar }) => {
                       {subItem.icon && iconMap[subItem.icon] && (
                         <span
                           className={`text-sm ${location.pathname === subItem.path
-                              ? "text-white"
-                              : "text-[#d6a210]"
+                            ? "text-white"
+                            : "text-[#d6a210]"
                             }`}
                         >
                           {React.createElement(iconMap[subItem.icon])}

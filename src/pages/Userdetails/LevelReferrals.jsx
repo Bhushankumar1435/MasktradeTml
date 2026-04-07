@@ -94,7 +94,7 @@ const LevelReferrals = () => {
 
                 <button
                     onClick={() => navigate(-1)}
-                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-sm"
                 >
                     ← Back
                 </button>

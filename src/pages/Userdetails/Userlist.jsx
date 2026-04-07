@@ -335,7 +335,9 @@ const User = () => {
                   </div>
                 ) :
                   (
-                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
+                    <tr>
+                      <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td>
+                    </tr>
                   )
               )}
             </tbody>

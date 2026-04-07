@@ -29,11 +29,7 @@
     "title": "Trade Management",
     "icon": "FaChartBar",
     "children": [
-      {
-        "title": "Create Batch",
-        "path": "/createbatch",
-        "icon": "FaLayerGroup"
-      },
+      
       {
         "title": "Place Single Trade",
         "path": "/placetrade",
@@ -50,10 +46,11 @@
         "icon": "FaList"
       },
       {
-        "title": "batch History",
+        "title": "Batch History",
         "path": "/batchhistory",
         "icon": "FaList"
       },
+      
       {
         "title": "Open Trades",
         "path": "/opentrades",
@@ -137,6 +134,17 @@
       {
         "title": "Ticket History",
         "path": "/ticketHistory",
+        "icon": "FaTicketAlt"
+      }
+    ]
+  },
+   {
+    "title": "Notification",
+    "icon": "FaTicketAlt",
+    "children": [
+      {
+        "title": "Notification History",
+        "path": "/notificationHistory",
         "icon": "FaTicketAlt"
       }
     ]

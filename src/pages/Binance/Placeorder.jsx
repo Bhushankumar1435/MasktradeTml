@@ -234,7 +234,7 @@ const PlaceTrade = () => {
                     </div>
 
                     {/* AUTO CLOSE */}
-                    <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-3 rounded-xl">
+                    {/* <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-3 rounded-xl">
 
                         <div className="flex flex-col">
                             <span className="text-sm font-medium text-white">
@@ -252,10 +252,10 @@ const PlaceTrade = () => {
                             onChange={handleChange}
                             className="w-5 h-5 accent-[#d6a210] cursor-pointer"
                         />
-                    </div>
+                    </div> */}
 
                     {/* EXPIRY */}
-                    {formData.autoClose && (
+                    {/* {formData.autoClose && (
                         <div className="flex flex-col gap-2 bg-gray-700/50 border border-gray-600 p-4 rounded-xl">
 
                             <label className="text-sm text-gray-400">
@@ -272,14 +272,13 @@ const PlaceTrade = () => {
                                     className="w-full p-3 pr-16 rounded-lg bg-gray-800 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
                                 />
 
-                                {/* MIN BADGE */}
                                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-gray-600 px-2 py-1 rounded text-gray-300">
                                     min
                                 </span>
                             </div>
 
                         </div>
-                    )}
+                    )} */}
 
                     {/* CONFIRM (MOVED TO BOTTOM) */}
                     <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-3 rounded-xl">

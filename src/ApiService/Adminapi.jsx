@@ -11,18 +11,10 @@ export const resendOtpApi = (email) => {
 };
 
 // USERS
-export const getUsersApi = (
-  page = 1,
-  limit = 10,
-  search = "",
-  fromDate = "",
-  toDate = ""
-) => {
+export const getUsersApi = ( page = 1, limit = 10, search = "", fromDate = "", toDate = "") => {
   let url = `/admin/users?page=${page}&limit=${limit}&search=${search}`;
-
   if (fromDate) url += `&fromDate=${fromDate}`;
   if (toDate) url += `&toDate=${toDate}`;
-
   return api.get(url);
 };
 
@@ -102,7 +94,11 @@ export const deletePackageApi = (id) => {
 ////////// BANNER ////////////////
 
 export const addBannerApi = (data) => {
-  return api.post("/admin/banner/add", data);
+  return api.post("/admin/banner/add", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const getBannerListApi = () => {
@@ -114,7 +110,11 @@ export const deleteBannerApi = (id) => {
 };
 
 export const updateBannerApi = (id, data) => {
-  return api.put(`/admin/banner/update/${id}`, data);
+  return api.put(`/admin/banner/update/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 ///////////// Dashboard ////////////////////
@@ -209,16 +209,24 @@ export const createBatchApi = (data) => {
   return api.post("/admin/createBatch", data);
 };
 
-export const batchPlaceTradeApi = (data) => {
-  return api.post("/admin/batchPlaceTrade", data);
+export const multiPlaceTradeApi = (data) => {
+  return api.post("/admin/multiPlaceTrade", data);
 };
 
 export const getAllBatchesApi = (page = 1, limit = 10, search = "") => {
   return api.get(
-    `/admin/getAllBatches?page=${page}&limit=${limit}${
+    `/admin/getAllBatchHistory?page=${page}&limit=${limit}${
       search ? `&search=${search}` : ""
     }`
   );
+};
+
+export const getBatchHistoryApi = (batchId, page = 1, limit = 10) => {
+  return api.get(`/admin/getBatchHistory?batchId=${batchId}&page=${page}&limit=${limit}`);
+};
+
+export const closeTradeByBatchApi = (batchId) => {
+  return api.post(`/admin/closeTradeByBatch?batchId=${batchId}`);
 };
 
 export const getAllBinanceOrdersapi = (page = 1, limit = 10,userId) => {
@@ -229,11 +237,47 @@ export const getAllBinanceOrdersapi = (page = 1, limit = 10,userId) => {
 
 
 
-
-// ApiService/Adminapi.js
-
 export const getMyProfitHistoryApi = (page = 1,limit = 10,search = "",type = "") => {
   return api.get(
     `/admin/getMyProfitHistory?page=${page}&limit=${limit}&search=${search}&type=${type}`
   );
+};
+
+
+
+
+/////////////NOTIFICATION////////////////// 
+
+
+export const getAllNotificationsApi = (page = 1, limit = 10) => {
+  return api.get(`/admin/getAllNotifications?page=${page}&limit=${limit}`);
+};
+
+// Adminapi.js
+
+export const markNotificationReadApi = (id) => {
+  return api.post(`/admin/adminMarkAsRead?id=${id}`);
+};
+
+
+// Adminapi.js
+export const deleteNotificationApi = (ids) => {
+  return api.delete(`/admin/adminDeleteNotification`, {
+    data: { ids } 
+  });
+};
+
+export const sendNotificationApi = (payload) => {
+  return api.post(
+    `/admin/sendNotificationToUser`,
+    payload
+  );
+};
+
+
+export const broadcastNotificationApi = (data) => {
+    return api.post(
+        "/admin/broadcastNotification",
+        data
+    );
 };
