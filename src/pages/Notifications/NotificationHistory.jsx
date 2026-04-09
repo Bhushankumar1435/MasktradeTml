@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllNotificationsApi, markNotificationReadApi, deleteNotificationApi, sendNotificationApi, broadcastNotificationApi } from "../../ApiService/Adminapi";
+import { getAllNotificationsApi, markNotificationReadApi, sendNotificationApi, broadcastNotificationApi } from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
 import { toast } from "react-toastify";
 import { FaTrash } from "react-icons/fa";
@@ -67,38 +67,9 @@ const Notifications = () => {
                 : [...prev, id]
         );
     };
-    const handleDeleteSingle = async (id) => {
-        try {
-            await deleteNotificationApi([id]);
+   
 
-            setData(prev => prev.filter(item => item._id !== id));
-
-            toast.success("Deleted ✅");
-
-        } catch (err) {
-            toast.error("Delete Failed ❌");
-        }
-    };
-
-    const handleDeleteMultiple = async () => {
-        if (selectedIds.length === 0) {
-            return toast.error("Select notifications first");
-        }
-
-        try {
-            await deleteNotificationApi(selectedIds);
-
-            setData(prev => prev.filter(item => !selectedIds.includes(item._id)));
-
-            setSelectedIds([]);
-
-            toast.success("Deleted selected ✅");
-
-        } catch (err) {
-            toast.error("Bulk delete failed ❌");
-        }
-    };
-
+    
 
 
     useEffect(() => {
@@ -157,33 +128,7 @@ const Notifications = () => {
                     Send To All
                 </button>
 
-                {!selectionMode ? (
-                    <button
-                        onClick={() => setSelectionMode(true)}
-                        className="px-3 py-2 bg-red-600 rounded text-sm font-semibold hover:bg-red-700"
-                    >
-                        Remove Items
-                    </button>
-                ) : (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => {
-                                setSelectionMode(false);
-                                setSelectedIds([]);
-                            }}
-                            className="px-3 py-2 bg-gray-600 font-semibold rounded text-sm"
-                        >
-                            Cancel
-                        </button>
-
-                        <button
-                            onClick={handleDeleteMultiple}
-                            className="px-3 py-2 bg-red-600 rounded font-semibold text-sm hover:bg-red-700"
-                        >
-                            Delete ({selectedIds.length})
-                        </button>
-                    </div>
-                )}
+                
                 </div>
             </div>
 
@@ -250,19 +195,7 @@ const Notifications = () => {
                                             }`}
                                     >
 
-                                        {/* CHECKBOX */}
-                                        {selectionMode && (
-                                            <td
-                                                className="px-3 py-3 border border-gray-700"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedIds.includes(item._id)}
-                                                    onChange={() => handleSelect(item._id)}
-                                                />
-                                            </td>
-                                        )}
+                                       
 
                                         {/* INDEX */}
                                         <td className="px-3 py-3 border border-gray-700">
@@ -319,20 +252,7 @@ const Notifications = () => {
                                             {new Date(item.createdAt).toLocaleString()}
                                         </td>
 
-                                        {/* DELETE ICON */}
-                                        {selectionMode && (
-                                            <td
-                                                className="px-3 py-3 border border-gray-700"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <div className="flex justify-center items-center">
-                                                    <FaTrash
-                                                        onClick={() => handleDeleteSingle(item._id)}
-                                                        className="cursor-pointer text-red-500 hover:text-red-700"
-                                                    />
-                                                </div>
-                                            </td>
-                                        )}
+                                       
 
                                     </tr>
                                 ))

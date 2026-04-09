@@ -16,6 +16,7 @@ const BatchDetails = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [prices, setPrices] = useState({});
 
   const totalPages = Math.ceil(total / limit);
 
@@ -38,20 +39,97 @@ const BatchDetails = () => {
     }
   };
 
-  
+  const fetchPrice = async (pair) => {
+    try {
+      const res = await fetch(
+        `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`
+      );
+      const data = await res.json();
+      return parseFloat(data.markPrice);
+    } catch {
+      return null;
+    }
+  };
 
-   useEffect(() => {
-      const delay = setTimeout(() => {
-        if (batchId) fetchBatch();
-      }, 200);
-      const timer = setTimeout(() => {
-        setShowNoData(true);
-      }, 1000);
-      return () => {
-        clearTimeout(delay);
-        clearTimeout(timer);
-      };
-    }, [batchId, page]);
+  const updatePrices = async () => {
+    if (!trades.length) return;
+
+    const activeTrades = trades.filter(t => t.status !== "CLOSED");
+    const uniquePairs = [...new Set(activeTrades.map(t => t.pair))];
+
+    const updated = {};
+
+    await Promise.all(
+      uniquePairs.map(async (pair) => {
+        const price = await fetchPrice(pair);
+        if (price) updated[pair] = price;
+      })
+    );
+
+    setPrices(prev => {
+      const changed = Object.keys(updated).some(
+        key => prev[key] !== updated[key]
+      );
+      return changed ? updated : prev;
+    });
+  };
+
+  const calculatePnL = (trade) => {
+    if (trade.status === "CLOSED") return trade.pnl || 0;
+
+    const current = prices[trade.pair];
+    if (!current) return 0;
+
+    const entry = trade.entryPrice;
+    const qty = trade.quantity;
+
+    let pnl =
+      trade.mode === "LONG"
+        ? (current - entry) * qty
+        : (entry - current) * qty;
+
+    const fee = trade.usedUSDT * 0.0004 * trade.leverage;
+
+    return pnl - fee;
+  };
+
+  const calculateTotalPnL = () => {
+    if (!trades.length) return 0;
+
+    return trades.reduce((total, trade) => {
+      return total + calculatePnL(trade);
+    }, 0);
+  };
+
+  useEffect(() => {
+    let interval;
+
+    const hasActiveTrades = trades.some(t => t.status !== "CLOSED");
+
+    if (hasActiveTrades) {
+      updatePrices();
+
+      interval = setInterval(() => {
+        updatePrices();
+      }, 2000);
+    }
+
+    return () => clearInterval(interval);
+  }, [trades]);
+
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      if (batchId) fetchBatch();
+    }, 200);
+    const timer = setTimeout(() => {
+      setShowNoData(true);
+    }, 1000);
+    return () => {
+      clearTimeout(delay);
+      clearTimeout(timer);
+    };
+  }, [batchId, page]);
 
   const handlePageChange = (p) => {
     if (p < 1 || p > totalPages) return;
@@ -79,6 +157,8 @@ const BatchDetails = () => {
 
     return [...new Set(pages)];
   };
+
+
 
   return (
     <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
@@ -110,7 +190,7 @@ const BatchDetails = () => {
               <p className="text-xs text-gray-400">{item.label}</p>
               <p className="text-sm font-semibold">
                 {item.key === "totalPnl"
-                  ? batchDetails.stats[item.key]?.toFixed(4)
+                  ? calculateTotalPnL().toFixed(2)
                   : batchDetails.stats[item.key]}
               </p>
             </div>
@@ -135,7 +215,7 @@ const BatchDetails = () => {
                 <th className="px-3 py-2">Amount</th>
                 <th className="px-3 py-2">Leverage</th>
                 <th className="px-3 py-2">Entry</th>
-                <th className="px-3 py-2">Exit</th>
+                <th className="px-3 py-2">Current</th>
                 <th className="px-3 py-2">PnL</th>
                 <th className="px-3 py-2">Status</th>
               </tr>
@@ -177,11 +257,16 @@ const BatchDetails = () => {
                     </td>
 
                     <td className="px-3 py-3 border border-gray-700">
-                      {t.exitPrice || "-"}
+                      {t.status === "CLOSED"
+                        ? Number(t.exitPrice).toFixed(5)
+                        : prices[t.pair]
+                          ? Number(prices[t.pair]).toFixed(5)
+                          : "Loading..."}
                     </td>
 
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.pnl?.toFixed(2)}
+                    <td className={`px-3 py-3 border border-gray-700 ${calculatePnL(t) >= 0 ? "text-green-400" : "text-red-400"
+                      }`}>
+                      {calculatePnL(t).toFixed(2)}
                     </td>
 
                     <td className="px-3 py-3 border border-gray-700">

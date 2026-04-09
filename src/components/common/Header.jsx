@@ -24,7 +24,8 @@ import {
   FaChartPie,
   FaLayerGroup,
   FaExchangeAlt,
-  FaRandom
+  FaRandom,
+  FaBell
 } from "react-icons/fa";
 
 const Header = ({ closeSidebar }) => {
@@ -54,7 +55,8 @@ const Header = ({ closeSidebar }) => {
     FaChartPie,
     FaLayerGroup,
     FaExchangeAlt,
-    FaRandom
+    FaRandom,
+    FaBell
   };
 
   const fetchNotifications = async () => {
@@ -72,9 +74,7 @@ const Header = ({ closeSidebar }) => {
   useEffect(() => {
     fetchNotifications();
 
-    const interval = setInterval(fetchNotifications, 5000);
-
-    return () => clearInterval(interval);
+   
   }, []);
 
   const handleToggle = (index) => {
@@ -109,11 +109,11 @@ const Header = ({ closeSidebar }) => {
       >
 
         <div className="flex items-center gap-4 mb-6">
-                <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210]">
-                    Admin Panel
-                </h2>
-            </div>
+          <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
+          <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210]">
+            Admin Panel
+          </h2>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
@@ -156,13 +156,13 @@ const Header = ({ closeSidebar }) => {
                     )}
                     {item.title === "Notification" ? unreadCount > 0 && (
                       <>
-                      <span>{item.title}</span>
-                      <span className="ml-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full animate-pulse">
-                        {unreadCount > 10 ? "10+" : unreadCount}
-                      </span>
+                        <span>{item.title}</span>
+                        <span className="ml-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full animate-pulse">
+                          {unreadCount > 10 ? "10+" : unreadCount}
+                        </span>
                       </>
-                    ):<span>{item.title}</span>
-                  }
+                    ) : <span>{item.title}</span>
+                    }
                   </span>
 
                   {item.children && (

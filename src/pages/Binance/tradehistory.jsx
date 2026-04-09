@@ -62,17 +62,18 @@ const TradeHistory = () => {
 
   ////////////////// BINANCE //////////////////
 
-  const fetchPrice = async (pair) => {
-    try {
-      const res = await fetch(
-        `https://api.binance.com/api/v3/ticker/price?symbol=${pair}`
-      );
-      const data = await res.json();
-      return parseFloat(data.price);
-    } catch {
-      return null;
-    }
-  };
+const fetchPrice = async (pair) => {
+  try {
+    const res = await fetch(
+      `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`
+    );
+    const data = await res.json();
+
+    return parseFloat(data.markPrice); // 🔥 important
+  } catch {
+    return null;
+  }
+};
 
   const updatePrices = async () => {
     if (!trades.length) return;
@@ -96,19 +97,24 @@ const TradeHistory = () => {
       return changed ? updated : prev;
     });
   };
+const calculatePnL = (trade) => {
+  if (trade.status === "CLOSED") return trade.pnl || 0;
 
-  const calculatePnL = (trade) => {
-    if (trade.status === "CLOSED") {
-      return trade.pnl || 0;
-    }
+  const current = prices[trade.pair];
+  if (!current) return 0;
 
-    const current = prices[trade.pair];
-    if (!current) return 0;
+  const entry = trade.entryPrice;
+  const qty = trade.quantity;
 
-    return trade.mode === "LONG"
-      ? (current - trade.entryPrice) * trade.quantity
-      : (trade.entryPrice - current) * trade.quantity;
-  };
+  let pnl =
+    trade.mode === "LONG"
+      ? (current - entry) * qty
+      : (entry - current) * qty;
+
+  // optional fee adjust
+  const fee = trade.usedUSDT * 0.0004 * trade.leverage;
+  return pnl - fee;
+};
 
   useEffect(() => {
     const delay = setTimeout(() => {

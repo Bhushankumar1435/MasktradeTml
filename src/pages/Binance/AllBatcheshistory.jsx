@@ -35,6 +35,8 @@ const AllBatches = () => {
         }
     };
 
+    
+
     useEffect(() => {
         const delay = setTimeout(() => {
             fetchBatches();
@@ -127,8 +129,10 @@ const AllBatches = () => {
                             <tr>
                                 <th className="px-3 py-2">#</th>
                                 <th className="px-3 py-2">Batch ID</th>
+                                <th className="px-3 py-2">Pair</th>
                                 <th className="px-3 py-2">Total Trades</th>
-                                <th className="px-3 py-2">Total PnL</th>
+                                {/* <th className="px-3 py-2">Total PnL</th> */}
+                                <th className="px-3 py-2">Amount</th>
                                 <th className="px-3 py-2">Status</th>
                                 <th className="px-3 py-2">Action</th>
                                 <th className="px-3 py-2">Created</th>
@@ -140,7 +144,7 @@ const AllBatches = () => {
                                 data.map((item, index) => (
                                     <tr
                                         key={item._id}
-                                       
+
                                         className="text-center font-semibold hover:bg-[#1e293b]  whitespace-nowrap cursor-pointer transition"
                                     >
                                         {/* INDEX */}
@@ -161,6 +165,9 @@ const AllBatches = () => {
                                                 />
                                             </div>
                                         </td>
+                                        <td className="px-3 py-3 border border-gray-700">
+                                            {item.pair}
+                                        </td>
 
                                         {/* TOTAL TRADES */}
                                         <td className="px-3 py-3 border border-gray-700">
@@ -168,11 +175,14 @@ const AllBatches = () => {
                                         </td>
 
                                         {/* PNL */}
-                                        <td
+                                        {/* <td
                                             className={`px-3 py-3 border border-gray-700 ${item.totalPnl >= 0 ? "text-green-400" : "text-red-400"
                                                 }`}
                                         >
                                             {item.totalPnl.toFixed(2)}
+                                        </td> */}
+                                        <td className="px-3 py-3 border border-gray-700">
+                                            {Number(item.totalUsedUSDT).toFixed(4)}
                                         </td>
 
                                         {/* STATUS BADGE */}

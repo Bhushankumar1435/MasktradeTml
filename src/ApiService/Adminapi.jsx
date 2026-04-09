@@ -261,11 +261,11 @@ export const markNotificationReadApi = (id) => {
 
 
 // Adminapi.js
-export const deleteNotificationApi = (ids) => {
-  return api.delete(`/admin/adminDeleteNotification`, {
-    data: { ids } 
-  });
-};
+// export const deleteNotificationApi = (ids) => {
+//   return api.delete(`/admin/adminDeleteNotification`, {
+//     data: { ids } 
+//   });
+// };
 
 export const sendNotificationApi = (payload) => {
   return api.post(

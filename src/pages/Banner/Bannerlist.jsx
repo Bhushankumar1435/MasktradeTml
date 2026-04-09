@@ -20,7 +20,7 @@ const BannerList = () => {
             const res = await getBannerListApi();
 
             if (res.data?.success) {
-                setBanners(res.data.banners || []);
+                setBanners(res.data?.data || []);
             }
         } catch (err) {
             toast.error("Failed to fetch banners");
@@ -52,31 +52,39 @@ const BannerList = () => {
     };
 
     // UPDATE
-   const handleUpdate = async () => {
-    try {
-        setActionLoading(true);
+    const handleUpdate = async () => {
+        try {
+            setActionLoading(true);
 
-        const formData = new FormData();
-        formData.append("title", editData.title);
+            const formData = new FormData();
+            formData.append("title", editData.title);
 
-        // 🔥 only if new image selected
-        if (editData.imageFile) {
-            formData.append("ticketImage", editData.imageFile);
+            // 🔥 only if new image selected
+            if (editData.imageFile) {
+                formData.append("ticketImage", editData.imageFile);
+            }
+
+            const res = await updateBannerApi(editData._id, formData);
+
+            toast.success(res.data?.message || "Updated ✅");
+
+            setEditData(null);
+            getBanners();
+
+        } catch (err) {
+            toast.error("Update failed ❌");
+        } finally {
+            setActionLoading(false);
         }
+    };
 
-        const res = await updateBannerApi(editData._id, formData);
+    const getImageUrl = (img) => {
+        if (!img) return "";
 
-        toast.success(res.data?.message || "Updated ✅");
+        if (img.startsWith("http")) return img;
 
-        setEditData(null);
-        getBanners();
-
-    } catch (err) {
-        toast.error("Update failed ❌");
-    } finally {
-        setActionLoading(false);
-    }
-};
+        return `https://api.robofict.mail-go.site/${img}`;
+    };
 
     return (
         <div className=" bg-[#0f172a] text-white p-3 md:p-6 rounded-md">
@@ -95,7 +103,7 @@ const BannerList = () => {
                         <div key={item._id} className="bg-[#1e293b] p-4 rounded-lg">
 
                             <img
-                                src={item.image}
+                                src={getImageUrl(item.image)}
                                 alt=""
                                 className="w-full h-40 object-contain mb-2 rounded"
                             />
@@ -156,7 +164,7 @@ const BannerList = () => {
                                     {/* IMAGE */}
                                     <td className="p-3 align-middle text-center">
                                         <img
-                                            src={item.image}
+                                            src={getImageUrl(item.image)}
                                             alt=""
                                             className="h-16 object-contain mx-auto"
                                         />
@@ -232,7 +240,9 @@ const BannerList = () => {
                         />
 
                         <img
-                            src={editData.preview}
+                            src={editData.imageFile
+                                ? editData.preview
+                                : getImageUrl(editData.image)}
                             alt=""
                             className="w-full h-40 mb-3 rounded object-contain"
                         />

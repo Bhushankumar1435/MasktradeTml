@@ -61,7 +61,7 @@ const Addbanner = () => {
                 </h2>
 
                 {/* 🔥 Responsive Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                     {/* LEFT - FORM */}
                     <form onSubmit={handleSubmit} className="flex flex-col gap-7">
@@ -108,27 +108,33 @@ const Addbanner = () => {
                     </form>
 
                     {/* RIGHT - PREVIEW */}
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-2">
 
-                        <p className="font-semibold text-gray-400">Preview</p>
-
-                        {formData.image ? (
-                            <img
-                                src={URL.createObjectURL(formData.image)}
-                                alt="preview"
-                                className=" object-contain"
-                            />
-                        ) : (
-                            <div className="w-full h-40 md:h-[216px] flex items-center justify-center bg-[#020817] border border-gray-700 rounded-lg text-gray-500 text-sm">
-                                Image preview will appear here
-                            </div>
-                        )}
-
-                        {formData.title && (
-                            <p className="text-center text-sm mt-2 text-gray-300">
-                                {formData.title}
+                        {/* FIXED HEADER */}
+                        <div className="flex items-center justify-between">
+                            <p className="font-semibold text-gray-400 uppercase text-xs tracking-wide">
+                                Preview
                             </p>
-                        )}
+                        </div>
+
+                        {/* IMAGE BOX (SIZE FIXED) */}
+                        <div className="w-full h-40 md:h-[216px] rounded-lg overflow-hidden border border-gray-700 bg-[#020817] flex items-center justify-center">
+
+                            {formData.image ? (
+                                <img
+                                    src={URL.createObjectURL(formData.image)}
+                                    alt="preview"
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <span className="text-gray-500 text-sm">
+                                    Image preview will appear here
+                                </span>
+                            )}
+
+                        </div>
+
+                        
 
                     </div>
 
