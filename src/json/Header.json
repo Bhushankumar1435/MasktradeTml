@@ -103,15 +103,16 @@
     "icon": "FaChartLine",
     "children": [
       {
-        "title": "Income Txn List",
-        "path": "/incometxnlist",
-        "icon": "FaList"
-      },
-      {
         "title": "Add Income",
         "path": "/addincome",
         "icon": "FaPlusCircle"
+      },
+      {
+        "title": "Income Txn List",
+        "path": "/incometxnlist",
+        "icon": "FaList"
       }
+      
     ]
   },
   {

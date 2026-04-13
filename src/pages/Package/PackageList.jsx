@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  getPackagesApi,
-  // deletePackageApi,
-  updatePackageApi,
-} from "../../ApiService/Adminapi";
+import { getPackagesApi, updatePackageApi } from "../../ApiService/Adminapi";
 import { toast } from "react-toastify";
-import TableSkeleton from "../../components/ui/skeleton/tableskeleton";
-import ListSkeleton from "../../components/ui/skeleton/Listskeleton";
+import Loader from "../../components/ui/Loader";
+import { FaBox, FaEdit, FaCheck } from "react-icons/fa";
 
 const PackageList = () => {
   const [packages, setPackages] = useState([]);
@@ -18,249 +14,128 @@ const PackageList = () => {
     try {
       setLoading(true);
       const res = await getPackagesApi();
-
-      if (res.data?.success) {
-        setPackages(res.data.packages || []);
-      }
-    } catch (err) {
-      toast.error("Failed to fetch packages");
-    } finally {
-      setLoading(false);
-    }
+      if (res.data?.success) setPackages(res.data.packages || []);
+    } catch { toast.error("Failed to fetch packages"); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    getPackages();
-  }, []);
+  useEffect(() => { getPackages(); }, []);
 
-  // DELETE
-  // const handleDelete = async (id) => {
-  //   if (!window.confirm("Delete this package?")) return;
-
-  //   try {
-  //     const res = await deletePackageApi(id);
-
-  //     if (res.data?.success) {
-  //       toast.success(res.data.message);
-
-  //       setPackages((prev) =>
-  //         prev.filter((pkg) => pkg._id !== id)
-  //       );
-  //     } else {
-  //       toast.error(res.data.message);
-  //     }
-  //   } catch (err) {
-  //     toast.error("Delete failed");
-  //   }
-  // };
-
-  // UPDATE
   const handleUpdate = async () => {
     try {
       setActionLoading(true);
-
       const res = await updatePackageApi(editData._id, {
         name: editData.name,
         price: Number(editData.price),
         validityDays: Number(editData.validityDays),
       });
-
       toast.success(res.data?.message || "Updated successfully");
       setEditData(null);
       getPackages();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Update failed");
-    } finally {
-      setActionLoading(false);
-    }
+    } finally { setActionLoading(false); }
   };
 
   return (
-    <div className=" bg-[#0f172a] text-white p-3 md:p-6 rounded-md">
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}
-      <div className="flex items-center gap-4 mb-6">
-        <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-        <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210] ">
-          Packages ({packages.length})
-        </h2>
+      <div className="mb-6 flex items-center gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+          <FaBox className="text-brand-gold text-xl" />
+        </div>
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+            Package List
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">{packages.length} packages</p>
+        </div>
       </div>
+
       {/* LOADING */}
-
-
-      {/* EMPTY */}
-      {!loading && packages.length === 0 && (
-        <div className="text-center py-10 text-gray-500">
-          No packages found
+      {loading && (
+        <div className="flex justify-center items-center py-20 relative z-10">
+          <Loader />
         </div>
       )}
 
-      {/* 📱 MOBILE CARD VIEW */}
-      <div className="md:hidden flex flex-col gap-3">
-        {loading ? (
-          <ListSkeleton count={packages.length > 0 ? packages.length : 5} />
-        ) : packages.length > 0 ? (
-          packages.map((item) => (
-            <div
-              key={item._id}
-              className="bg-[#1e293b] p-2 rounded-lg shadow flex flex-col gap-1"
-            >
-              <p className="text-sm">
-                <span className="text-gray-400">Name:</span> {item.name}
-              </p>
+      {/* PACKAGES GRID */}
+      {!loading && (
+        <div className="relative z-10">
+          {packages.length === 0 ? (
+            <div className="glass-panel rounded-2xl p-12 text-center text-gray-500 font-medium">No packages found</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {packages.map((item) => (
+                <div key={item._id}
+                  className="glass-panel rounded-2xl p-5 border border-white/10 hover:-translate-y-1 transition-transform cursor-default group relative overflow-hidden">
+                  {/* Gold accent line */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-gold/0 via-brand-gold to-brand-gold/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-              <p className="text-sm">
-                <span className="text-gray-400">Price:</span>{" "}
-                <span className="text-green-400 font-medium">
-                  {item.price}
-                </span>
-              </p>
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-brand-gold/10 border border-brand-gold/20 mb-4 mx-auto">
+                    <FaBox className="text-brand-gold text-xl" />
+                  </div>
 
-              <p className="text-sm">
-                <span className="text-gray-400">Validity:</span>{" "}
-                {item.validityDays} Days
-              </p>
+                  <h3 className="text-white font-bold text-center text-lg mb-3">{item.name}</h3>
 
-              <div className="flex gap-2 mt-3">
-                <button
-                  onClick={() => setEditData(item)}
-                  className="flex-1 py-1 bg-blue-600 rounded text-sm"
-                >
-                  Edit
-                </button>
+                  <div className="space-y-2 mb-5">
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                      <span className="text-gray-400 text-sm">Price</span>
+                      <span className="text-emerald-400 font-bold">₹{item.price}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-400 text-sm">Validity</span>
+                      <span className="text-white font-semibold">{item.validityDays} Days</span>
+                    </div>
+                  </div>
 
-                {/* <button
-                  onClick={() => handleDelete(item._id)}
-                  className="flex-1 py-1 bg-red-600 rounded text-sm"
-                >
-                  Delete
-                </button> */}
-              </div>
+                  <button onClick={() => setEditData(item)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold hover:text-yellow-300 rounded-xl text-sm font-semibold transition-all hover:shadow-glow-gold">
+                    <FaEdit className="text-xs" /> Edit Package
+                  </button>
+                </div>
+              ))}
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">No packages found</p>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
-      {/* 💻 DESKTOP TABLE */}
-      <div className="hidden md:block overflow-x-auto border border-gray-700 rounded-lg">
-
-        <table className="w-full text-sm">
-
-          <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white border-[#d6a210]">
-            <tr>
-              <th className="p-3 text-left text-base">Name</th>
-              <th className="p-3 text-left text-base">Price</th>
-              <th className="p-3 text-left text-base">Validity</th>
-              <th className="p-3 text-center text-base">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {loading ? (
-              <TableSkeleton rows={5} columns={4} />
-            ) : packages.length > 0 ? (
-              packages.map((item) => (
-                <tr
-                  key={item._id}
-                  className="border-t border-gray-700 font-semibold hover:bg-[#1e293b]"
-                >
-                  <td className="p-3">{item.name}</td>
-
-                  <td className="p-3 text-green-400 ">
-                    {item.price}
-                  </td>
-
-                  <td className="p-3">
-                    {item.validityDays} Days
-                  </td>
-
-                  <td className="p-3 flex gap-2 justify-center">
-                    <button
-                      onClick={() => setEditData(item)}
-                      className="px-3 py-1 bg-[#d6a210] rounded text-sm"
-                    >
-                      Edit
-                    </button>
-
-                    {/* <button
-                      onClick={() => handleDelete(item._id)}
-                      className="px-3 py-1 bg-red-600 rounded text-sm"
-                    >
-                      Delete
-                    </button> */}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="text-center py-6 text-gray-500">
-                  No packages found
-                </td>
-              </tr>
-            )}
-          </tbody>
-
-        </table>
-      </div>
-
-      {/* ✏️ EDIT MODAL */}
+      {/* EDIT MODAL */}
       {editData && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-3">
-
-          <div className="bg-[#1e293b] p-5 md:p-6 rounded-xl w-full max-w-md">
-
-            <h3 className="mb-4 text-lg font-semibold">
-              Edit Package
-            </h3>
-
-            <input
-              value={editData.name}
-              onChange={(e) =>
-                setEditData({ ...editData, name: e.target.value })
-              }
-              className="w-full mb-3 p-2 bg-white/10 rounded"
-            />
-
-            <input
-              type="number"
-              value={editData.price}
-              onChange={(e) =>
-                setEditData({ ...editData, price: e.target.value })
-              }
-              className="w-full mb-3 p-2 bg-white/10 rounded"
-            />
-
-            <input
-              type="number"
-              value={editData.validityDays}
-              onChange={(e) =>
-                setEditData({
-                  ...editData,
-                  validityDays: e.target.value,
-                })
-              }
-              className="w-full mb-4 p-2 bg-white/10 rounded"
-            />
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setEditData(null)}
-                className="flex-1 py-2 bg-gray-600 rounded"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleUpdate}
-                disabled={actionLoading}
-                className="flex-1 py-2 bg-blue-600 rounded"
-              >
-                {actionLoading ? "Updating..." : "Update"}
-              </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+                <FaEdit className="text-brand-gold" /> Edit Package
+              </h3>
+              <button onClick={() => setEditData(null)} className="text-gray-400 hover:text-white transition text-xl">✕</button>
             </div>
 
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Package Name</label>
+            <input value={editData.name} onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+              className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
+              placeholder="Package Name" />
+
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Price (₹)</label>
+            <input type="number" value={editData.price} onChange={(e) => setEditData({ ...editData, price: e.target.value })}
+              className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
+              placeholder="Price" />
+
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Validity (Days)</label>
+            <input type="number" value={editData.validityDays} onChange={(e) => setEditData({ ...editData, validityDays: e.target.value })}
+              className="w-full mb-5 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
+              placeholder="Validity Days" />
+
+            <div className="flex gap-3">
+              <button onClick={() => setEditData(null)}
+                className="flex-1 py-2.5 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
+              <button onClick={handleUpdate} disabled={actionLoading}
+                className="flex-1 py-2.5 bg-brand-gold/90 hover:bg-brand-gold text-brand-darker rounded-xl text-sm font-bold transition-all shadow-glow-gold disabled:opacity-50 flex items-center justify-center gap-2">
+                {actionLoading ? "Saving..." : <><FaCheck /> Update</>}
+              </button>
+            </div>
           </div>
         </div>
       )}

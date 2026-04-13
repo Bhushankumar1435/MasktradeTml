@@ -1,289 +1,190 @@
 import React, { useEffect, useState } from "react";
-import { getBindUsersApi } from "../ApiService/Adminapi";
+import { getBindUsersApi, getUserBalanceApi } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
-import { getUserBalanceApi } from "../ApiService/Adminapi";
-import { FaSyncAlt } from "react-icons/fa";
+import { FaSyncAlt, FaLink } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/ui/Loader";
 
 const BindUsers = () => {
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [balanceData, setBalanceData] = useState(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showNoData, setShowNoData] = useState(false);
+  const navigate = useNavigate();
 
-    const [selectedUserId, setSelectedUserId] = useState(null);
-    const [balanceData, setBalanceData] = useState(null);
-    const [balanceLoading, setBalanceLoading] = useState(false);
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [limit] = useState(10);
-    const [total, setTotal] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-    const [showNoData, setShowNoData] = useState(false);
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setShowNoData(false);
+      const res = await getBindUsersApi(page, limit, "bind");
+      if (res.data?.success) {
+        const apiData = res.data.data;
+        setData(apiData?.users || []);
+        setTotal(apiData?.count || 0);
+        setTotalPages(apiData?.totalPages || 1);
+      }
+    } catch (err) {
+      toast.error("Failed to fetch users");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setShowNoData(true), 300);
+    }
+  };
 
-    const navigate = useNavigate();
+  const fetchBalance = async (userId) => {
+    try {
+      setBalanceLoading(true);
+      const res = await getUserBalanceApi(userId);
+      if (res.data?.success) {
+        setBalanceData(res?.data?.data?.[0]?.availableBalance);
+      }
+    } catch { toast.error("Failed to fetch balance"); }
+    finally { setBalanceLoading(false); }
+  };
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true);
-            setShowNoData(false);
+  useEffect(() => {
+    const delay = setTimeout(() => fetchUsers(), 200);
+    return () => clearTimeout(delay);
+  }, [page]);
 
-            const res = await getBindUsersApi(page, limit, "bind");
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
+      pages.push(1, 2, 3);
+      if (page > 4) pages.push("...");
+      if (page > 3 && page < totalPages - 2) pages.push(page);
+      if (page < totalPages - 3) pages.push("...");
+      pages.push(totalPages - 1, totalPages);
+    }
+    return [...new Set(pages)];
+  };
+  const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
-            if (res.data?.success) {
-                const apiData = res.data.data;
-                setData(apiData?.users || []);
-                setTotal(apiData?.count || 0);
-                setTotalPages(apiData?.totalPages || 1);
-            }
+  return (
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to fetch users");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
-    const fetchBalance = async (userId) => {
-        try {
-            setBalanceLoading(true);
-
-            const res = await getUserBalanceApi(userId);
-
-            if (res.data?.success) {
-                setBalanceData(res?.data?.data?.[0]?.availableBalance);
-            }
-
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to fetch balance");
-        } finally {
-            setBalanceLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            fetchUsers();
-        }, 200);
-        const timer = setTimeout(() => {
-            setShowNoData(true);
-        }, 1000);
-        return () => {
-            clearTimeout(delay);
-            clearTimeout(timer);
-        };
-    }, [page]);
-
-    const getPageNumbers = () => {
-        const pages = [];
-
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            pages.push(1, 2, 3);
-            if (page > 4) {
-                pages.push("...");
-            }
-            if (page > 3 && page < totalPages - 2) {
-                pages.push(page);
-            }
-            if (page < totalPages - 3) {
-                pages.push("...");
-            }
-            pages.push(totalPages - 1, totalPages);
-        }
-        return [...new Set(pages)];
-    };
-
-    const handlePageChange = (p) => {
-        if (p < 1 || p > totalPages) return;
-        setPage(p);
-    };
-
-    return (
-        <div className="w-full flex flex-col bg-[#0f172a] p-4 md:p-6 text-gray-200 rounded-md">
-
-            {/* HEADER + FILTER */}
-            <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div className="flex items-center gap-4 ">
-                    <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-                        API Users ({total})
-                    </h1>
-                </div>
-
-            </div>
-
-            {/* TABLE */}
-            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
-
-                    <table className="min-w-[900px] w-full text-sm">
-
-                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase border-[#d6a210]">
-                            <tr>
-                                <th className="px-3 py-2">#</th>
-                                <th className="px-3 py-2">Name</th>
-                                <th className="px-3 py-2">User ID</th>
-                                <th className="px-3 py-2">E-mail</th>
-                                <th className="px-3 py-2">Balance</th>
-                                <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2">Details</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {data.length > 0 ? (
-                                data.map((item, index) => (
-                                    <tr key={item._id} className="text-center font-semibold hover:bg-[#1e293b]">
-
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            {(page - 1) * limit + index + 1}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            {item.name || "N/A"}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            {item.userId || "N/A"}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            {item.email || "N/A"}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-
-                                            {selectedUserId === item.userId ? (
-
-                                                balanceLoading ? (
-                                                    <FaSyncAlt className="animate-spin text-[#d6a210] text-lg mx-auto" />
-                                                ) : (
-                                                    <span className="text-green-400 text-sm font-semibold">
-                                                        {balanceData}
-                                                    </span>
-                                                )
-
-                                            ) : (
-
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUserId(item.userId);
-                                                        fetchBalance(item.userId);
-                                                    }}
-                                                    className="text-[#d6a210] hover:text-[#ddac24]"
-                                                    title="Fetch Balance"
-                                                >
-                                                    <FaSyncAlt className="text-lg" />
-                                                </button>
-
-                                            )}
-
-                                        </td>
-
-                                        <td className="px-3 py-2 border border-gray-700">
-                                            <span
-                                                className={`px-2 py-1 rounded text-xs ${item.paidStatus
-                                                    ? "bg-green-600"
-                                                    : "bg-red-600"
-                                                    }`}
-                                            >
-                                                {item.paidStatus ? "Paid" : "Unpaid"}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            <button
-                                                onClick={() => navigate(`/binance-orders/${item.userId}`)}
-                                                className="px-3 py-1 bg-[#d6a210] rounded text-sm hover:bg-[#ebb318]"
-                                            >
-                                                View
-                                            </button>
-                                        </td>
-
-                                    </tr>
-                                ))
-                            ) : (
-                                loading || !showNoData ? (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                                        <Loader />
-                                    </div>
-                                ) :
-                                    (
-                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
-                                    )
-                            )}
-                        </tbody>
-
-                    </table>
-                    {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                                        <Loader />
-                                    </div>
-                    )}
-                </div>
-
-                {/* PAGINATION */}
-                {/* Pagination */}
-                <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-                    {/* LEFT */}
-                    <span className="text-gray-400">
-                        Page {page} of {totalPages}
-                    </span>
-
-                    {/* RIGHT (GROUP ALL BUTTONS) */}
-                    <div className="flex items-center gap-2 flex-wrap">
-
-                        {/* Previous */}
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ‹
-                        </button>
-
-                        {/* Page Numbers */}
-                        {getPageNumbers().map((num, index) =>
-                            num === "..." ? (
-                                <span key={index} className=" text-gray-400 text-sm">
-                                    ...
-                                </span>
-                            ) : (
-                                <button
-                                    key={index}
-                                    onClick={() => handlePageChange(num)}
-                                    className={` flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
-                                        ? " text-[#d6a210]"
-                                        : "text-gray-300 hover:text-[#d3b769]"
-                                        }`}
-                                >
-                                    {num}
-                                </button>
-                            )
-                        )}
-
-                        {/* Next */}
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ›
-                        </button>
-
-                    </div>
-                </div>
-
-            </div>
+      {/* HEADER */}
+      <div className="mb-6 flex items-center gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+          <FaLink className="text-brand-gold text-xl" />
         </div>
-    );
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+            API Bound Users
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">Total: {total} users</p>
+        </div>
+      </div>
+
+      {/* TABLE */}
+      <div className="glass-table-container flex flex-col z-10">
+        <div className="w-full overflow-x-auto relative">
+          <table className="min-w-[800px] glass-table whitespace-nowrap">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Email</th>
+                <th className="text-center">Balance</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.length > 0 ? (
+                data.map((item, index) => (
+                  <tr key={item._id}>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
+                    <td className="font-medium text-white">{item.name || "N/A"}</td>
+                    <td><span className="bg-white/5 border border-white/10 px-2 py-1 rounded font-mono text-xs">{item.userId || "N/A"}</span></td>
+                    <td className="text-gray-400 max-w-[200px] truncate">{item.email || "N/A"}</td>
+                    <td className="text-center">
+                      {selectedUserId === item.userId ? (
+                        balanceLoading ? (
+                          <FaSyncAlt className="animate-spin text-brand-gold text-lg mx-auto" />
+                        ) : (
+                          <span className="text-emerald-400 font-semibold">{balanceData ?? 0}</span>
+                        )
+                      ) : (
+                        <button
+                          onClick={() => { setSelectedUserId(item.userId); fetchBalance(item.userId); }}
+                          className="text-brand-gold hover:text-yellow-300 transition" title="Fetch Balance">
+                          <FaSyncAlt className="text-lg mx-auto" />
+                        </button>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      <span className={`glass-badge ${item.paidStatus ? "glass-badge-success" : "glass-badge-danger"}`}>
+                        {item.paidStatus ? "Paid" : "Unpaid"}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <button onClick={() => navigate(`/binance-orders/${item.userId}`)}
+                        className="px-4 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold hover:text-yellow-300 text-xs rounded-lg font-semibold transition-all hover:shadow-glow-gold">
+                        View Orders
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                loading || !showNoData ? (
+                  <tr><td colSpan="7" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+                ) : (
+                  <tr><td colSpan="7" className="text-center py-12 text-gray-500 font-medium">No API Users Found</td></tr>
+                )
+              )}
+            </tbody>
+          </table>
+
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
+              <Loader />
+            </div>
+          )}
+        </div>
+
+        {/* PAGINATION */}
+        <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+          <span className="text-gray-400 font-medium">
+            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+          </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
+            {getPageNumbers().map((num, index) =>
+              num === "..." ? (
+                <span key={index} className="px-0.5 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(num)}
+                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                    ? "text-brand-gold "
+                    : "text-gray-400  hover:brand-gold  "
+                    }`}
+                >
+                  {num}
+                </button>
+              )
+            )}
+            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default BindUsers;

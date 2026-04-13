@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { multiPlaceTradeApi } from "../../ApiService/Adminapi";
+import { FaLayerGroup } from "react-icons/fa";
 
 const PlacebatchTrade = () => {
   const [formData, setFormData] = useState({
@@ -8,38 +9,26 @@ const PlacebatchTrade = () => {
     leverage: 1,
     mode: "LONG",
     confirm: false,
-    autoClose: false,
-    expiryMinutes: 10,
   });
-
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     let newValue = value;
-
     if (name === "pair") newValue = value.toUpperCase();
-
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : newValue,
-    });
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : newValue });
   };
 
   const handleAmountChange = (e) => {
-    let value = e.target.value.replace(/[^0-9.]/g, "");
-    setFormData({ ...formData, amount: value });
+    setFormData({ ...formData, amount: e.target.value.replace(/[^0-9.]/g, "") });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.confirm) {
-      return alert("You must confirm the trade ✅");
-    }
-
+    if (!formData.confirm) return;
     setLoading(true);
-
+    setResult(null);
     try {
       const payload = {
         pair: formData.pair,
@@ -48,158 +37,113 @@ const PlacebatchTrade = () => {
         mode: formData.mode,
         confirm: formData.confirm,
       };
-
-      if (formData.autoClose) {
-        payload.expiryMinutes = Number(formData.expiryMinutes);
-      }
-
       await multiPlaceTradeApi(payload);
-
-      alert("Batch Trade executed ✅");
-
-      setFormData({
-        pair: "SOLUSDT",
-        amount: "",
-        leverage: 1,
-        mode: "LONG",
-        confirm: false,
-        autoClose: false,
-        expiryMinutes: 10,
-      });
-    } catch (error) {
-      console.error(error);
-      alert("Failed to execute batch trade ❌");
+      setResult("success");
+      setFormData({ pair: "SOLUSDT", amount: "", leverage: 1, mode: "LONG", confirm: false });
+    } catch {
+      setResult("error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex justify-center items-center p-3 sm:p-5 md:p-8 rounded-md">
-      <div className="w-full max-w-4xl bg-gray-800/80 backdrop-blur-md border border-gray-700 text-white rounded-2xl shadow-2xl p-2 sm:p-4 md:p-6">
-        <h2 className="text-xl sm:text-2xl text-[#d6a210] font-semibold mb-5 sm:mb-6 text-center">
-          Batch Place Trade
-        </h2>
+    <div className="w-full flex justify-center font-outfit relative py-4">
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-          
-          {/* PAIR */}
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-400 text-sm sm:text-base">Pair</label>
-            <input
-              type="text"
-              name="pair"
-              value={formData.pair}
-              onChange={handleChange}
-              className="p-2.5 sm:p-3 rounded-lg uppercase bg-gray-700 focus:ring-2 focus:ring-[#d3b769]"
-            />
+      <div className="w-full max-w-3xl relative z-10">
+        {/* Header */}
+        <div className="glass-panel p-5 rounded-2xl mb-6 flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+            <FaLayerGroup className="text-brand-gold text-xl" />
           </div>
-
-          {/* LEVERAGE */}
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-400 text-sm sm:text-base">Leverage</label>
-            <input
-              type="number"
-              name="leverage"
-              value={formData.leverage}
-              onChange={handleChange}
-              className="p-2.5 sm:p-3 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769]"
-            />
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Batch Place Trade
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Execute a trade for all bound API users simultaneously</p>
           </div>
+        </div>
 
-          {/* AMOUNT */}
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-400 text-sm sm:text-base">Amount (%)</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={formData.amount ? `${formData.amount}%` : ""}
-                onChange={handleAmountChange}
-                placeholder="Enter %"
-                className="w-full p-2.5 sm:p-3 pr-12 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769]"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                <span className="text-xs sm:text-sm px-2 py-1 rounded bg-gray-600 text-gray-300">%</span>
+        {/* Result Banner */}
+        {result === "success" && (
+          <div className="mb-5 px-5 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 font-semibold text-sm">
+            ✅ Batch trade executed successfully!
+          </div>
+        )}
+        {result === "error" && (
+          <div className="mb-5 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-semibold text-sm">
+            ❌ Failed to execute batch trade. Please try again.
+          </div>
+        )}
+
+        {/* Form */}
+        <div className="glass-panel p-2 sm:p-3 md:p-6 rounded-2xl">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* PAIR */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Pair</label>
+              <input type="text" name="pair" value={formData.pair} onChange={handleChange}
+                className="px-4 py-3 uppercase rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-gold/50 transition" />
+            </div>
+
+            {/* LEVERAGE */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Leverage</label>
+              <input type="number" name="leverage" value={formData.leverage} onChange={handleChange}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-gold/50 transition" />
+            </div>
+
+            {/* AMOUNT */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Amount (%)</label>
+              <div className="relative">
+                <input type="text" value={formData.amount ? `${formData.amount}%` : ""} onChange={handleAmountChange}
+                  placeholder="Enter %" className="w-full px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 transition" />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs px-2 py-1 rounded-lg bg-white/5 text-gray-400">%</span>
               </div>
             </div>
-          </div>
 
-          {/* MODE */}
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold text-gray-400 text-sm sm:text-base">Mode</label>
-            <div className="grid grid-cols-2 bg-gray-700 rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, mode: "LONG" })}
-                className={`py-2 text-sm sm:text-base rounded-md ${
-                  formData.mode === "LONG" ? "bg-green-500 text-white" : "text-gray-300"
-                }`}
-              >
-                📈 LONG
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, mode: "SHORT" })}
-                className={`py-2 text-sm sm:text-base rounded-md ${
-                  formData.mode === "SHORT" ? "bg-red-500 text-white" : "text-gray-300"
-                }`}
-              >
-                📉 SHORT
-              </button>
-            </div>
-          </div>
-
-          {/* AUTO CLOSE */}
-          {/* <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-2.5 sm:p-3 rounded-xl">
-            <span className="text-sm sm:text-base">Auto Close</span>
-            <input
-              type="checkbox"
-              name="autoClose"
-              checked={formData.autoClose}
-              onChange={handleChange}
-              className="w-5 h-5 accent-[#d6a210]"
-            />
-          </div> */}
-
-          {/* EXPIRY */}
-          {/* {formData.autoClose && (
+            {/* MODE */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs sm:text-sm text-gray-400">Expiry Minutes</label>
-              <input
-                type="number"
-                name="expiryMinutes"
-                value={formData.expiryMinutes}
-                onChange={handleChange}
-                className="p-2.5 sm:p-3 rounded-lg bg-gray-700"
-              />
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Mode</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setFormData({ ...formData, mode: "LONG" })}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all ${formData.mode === "LONG" ? "bg-emerald-500/80 text-white shadow-lg shadow-emerald-500/20" : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10"}`}>
+                  📈 LONG
+                </button>
+                <button type="button" onClick={() => setFormData({ ...formData, mode: "SHORT" })}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all ${formData.mode === "SHORT" ? "bg-red-500/80 text-white shadow-lg shadow-red-500/20" : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10"}`}>
+                  📉 SHORT
+                </button>
+              </div>
             </div>
-          )} */}
 
-          {/* CONFIRM */}
-          <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-2.5 sm:p-3 rounded-xl">
-            <span className="text-sm sm:text-base">Confirm Trade</span>
-            <input
-              type="checkbox"
-              name="confirm"
-              required
-              checked={formData.confirm}
-              onChange={handleChange}
-              className="w-5 h-5 accent-[#d6a210]"
-            />
-          </div>
+            {/* WARNING */}
+            <div className="col-span-1 sm:col-span-2 px-5 py-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
+              <p className="text-yellow-400 text-xs font-semibold">⚠️ Warning: This will place trades for ALL bound API users. Proceed with caution.</p>
+            </div>
 
-          {/* SUBMIT BUTTON */}
-          <div className="col-span-1 sm:col-span-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-[#d6a210] to-[#d3b769] py-2.5 sm:py-3 rounded-lg font-semibold text-sm sm:text-base"
-            >
-              {loading ? "Placing..." : "Execute Batch Trade"}
-            </button>
-          </div>
+            {/* CONFIRM */}
+            <div className="col-span-1 sm:col-span-2 flex items-center justify-between px-5 py-4 bg-white/5 border border-white/10 rounded-xl">
+              <div>
+                <p className="text-white text-sm font-semibold">Confirm Batch Trade</p>
+                <p className="text-gray-500 text-xs mt-0.5">You must confirm before executing</p>
+              </div>
+              <input type="checkbox" name="confirm" required checked={formData.confirm} onChange={handleChange}
+                className="w-5 h-5 accent-[#d6a210] cursor-pointer scale-110" />
+            </div>
 
-        </form>
+            {/* SUBMIT */}
+            <div className="col-span-1 sm:col-span-2">
+              <button type="submit" disabled={loading}
+                className="w-full py-4 rounded-xl font-bold text-brand-darker bg-gradient-to-r from-brand-gold to-yellow-400 hover:shadow-glow-gold hover:scale-[1.02] active:scale-[0.99] transition-all disabled:opacity-50 disabled:scale-100 text-sm">
+                {loading ? "Executing..." : "🚀 Execute Batch Trade"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

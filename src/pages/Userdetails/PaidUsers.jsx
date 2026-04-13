@@ -2,230 +2,152 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { getPaidUsersApi } from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
+import { FaCrown } from "react-icons/fa";
 
 const PaidUsers = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [showNoData, setShowNoData] = useState(false);
+
   const fetchPaidUsers = async () => {
     try {
       setLoading(true);
       setShowNoData(false);
       const res = await getPaidUsersApi(page, limit);
-
       setData(res?.data?.data?.users || []);
       setTotal(res?.data?.data?.count || 0);
       setTotalPages(res?.data?.data?.totalPages || 1);
-    } catch {
-      toast.error("Failed to fetch paid users");
-    } finally {
+    } catch { toast.error("Failed to fetch paid users"); }
+    finally {
       setLoading(false);
+      setTimeout(() => setShowNoData(true), 300);
     }
   };
 
   useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchPaidUsers();
-    }, 200);
-    const timer = setTimeout(() => {
-      setShowNoData(true);
-    }, 1000);
-    return () => {
-      clearTimeout(delay);
-      clearTimeout(timer);
-    };
+    const delay = setTimeout(() => fetchPaidUsers(), 200);
+    return () => clearTimeout(delay);
   }, [page]);
 
   const getPageNumbers = () => {
     const pages = [];
-
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
       pages.push(1, 2, 3);
-      if (page > 4) {
-        pages.push("...");
-      }
-      if (page > 3 && page < totalPages - 2) {
-        pages.push(page);
-      }
-      if (page < totalPages - 3) {
-        pages.push("...");
-      }
+      if (page > 4) pages.push("...");
+      if (page > 3 && page < totalPages - 2) pages.push(page);
+      if (page < totalPages - 3) pages.push("...");
       pages.push(totalPages - 1, totalPages);
     }
     return [...new Set(pages)];
   };
 
-  const handlePageChange = (p) => {
-    if (p < 1 || p > totalPages) return;
-    setPage(p);
-  };
+  const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
   return (
-    <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4 ">
-          <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-          <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-            Paid Users ({total})
+      <div className="mb-6 flex items-center gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+          <FaCrown className="text-brand-gold text-xl" />
+        </div>
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+            Paid Users
           </h1>
+          <p className="text-gray-400 text-sm mt-1">Total: {total} users</p>
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-
-
-
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
-          <table className="min-w-[800px] w-full text-sm border-collapse">
-
-            <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase border-b border-[#d6a210]">
+      <div className="glass-table-container flex flex-col z-10">
+        <div className="w-full overflow-x-auto relative">
+          <table className="min-w-[900px] glass-table whitespace-nowrap">
+            <thead>
               <tr>
-                <th className="px-3 py-2 whitespace-nowrap">#</th>
-                <th className="px-3 py-2 whitespace-nowrap">Name</th>
-                <th className="px-3 py-2 whitespace-nowrap">User ID</th>
-                <th className="px-3 py-2 whitespace-nowrap">Sponsor</th>
-                <th className="px-3 py-2 whitespace-nowrap">Email</th>
-                <th className="px-3 py-2 whitespace-nowrap">Amount</th>
-                <th className="px-3 py-2 whitespace-nowrap">Packages</th>
-                <th className="px-3 py-2 whitespace-nowrap">Activation Date</th>
-                <th className="px-3 py-2 whitespace-nowrap">Expiry Date</th>
+                <th>#</th>
+                <th>Name</th>
+                <th>User ID</th>
+                <th>Sponsor</th>
+                <th>Email</th>
+                <th>Amount</th>
+                <th>Packages</th>
+                <th>Activation</th>
+                <th>Expiry</th>
               </tr>
             </thead>
-
             <tbody>
               {data.length > 0 ? (
                 data.map((item, index) => (
-                  <tr key={item._id} className="text-center whitespace-nowrap font-semibold hover:bg-[#1e293b]">
-
-                    <td className="px-3 py-3 border border-gray-700 ">
-                      {(page - 1) * limit + index + 1}
+                  <tr key={item._id}>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
+                    <td className="font-medium text-white">{item.name || "—"}</td>
+                    <td><span className="bg-white/5 border border-white/10 px-2 py-1 rounded font-mono text-xs">{item.userId || "—"}</span></td>
+                    <td className="text-gray-400">{item.sponsorId || "—"}</td>
+                    <td className="text-gray-400 max-w-[180px] truncate">{item.email || "—"}</td>
+                    <td className="font-semibold text-brand-gold">{item?.package?.totalPackageAmount || "—"}</td>
+                    <td className="text-gray-300">{item?.package?.totalPackageCount || "—"}</td>
+                    <td className="text-gray-500 text-xs">
+                      {item?.package?.activationDate ? new Date(item.package.activationDate).toLocaleDateString() : "—"}
                     </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item.name || "___"}
+                    <td className="text-gray-500 text-xs">
+                      {item?.package?.expiryDate ? new Date(item.package.expiryDate).toLocaleDateString() : "—"}
                     </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item.userId || "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item.sponsorId || "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item.email || "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item?.package?.totalPackageAmount || "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item?.package?.totalPackageCount || "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item?.package.activationDate
-                        ? new Date(item?.package.activationDate).toLocaleString()
-                        : "___"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {item?.package.expiryDate
-                        ? new Date(item?.package.expiryDate).toLocaleString()
-                        : "___"}
-                    </td>
-
                   </tr>
                 ))
               ) : (
                 loading || !showNoData ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                    {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                    <Loader />
-                  </div>
-                ) :
-                  (
-                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
-                  )
+                  <tr><td colSpan="9" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+                ) : (
+                  <tr><td colSpan="9" className="text-center py-12 text-gray-500 font-medium">No Data Found</td></tr>
+                )
               )}
             </tbody>
-
           </table>
-          {/* ✅ NEW LOADER (same as transactions) */}
+
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-              {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
               <Loader />
             </div>
           )}
         </div>
 
         {/* Pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-          {/* LEFT */}
-          <span className="text-gray-400">
-            Page {page} of {totalPages}
+        <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+          <span className="text-gray-400 font-medium">
+            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
           </span>
-
-          {/* RIGHT (GROUP ALL BUTTONS) */}
-          <div className="flex items-center gap-2 flex-wrap">
-
-            {/* Previous */}
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-            >
-              ‹
-            </button>
-
-            {/* Page Numbers */}
+          <div className="flex items-center gap-1 flex-wrap">
+            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
             {getPageNumbers().map((num, index) =>
               num === "..." ? (
-                <span key={index} className=" text-gray-400 text-sm">
+                <span key={index} className="px-0.5 text-gray-500">
                   ...
                 </span>
               ) : (
                 <button
                   key={index}
                   onClick={() => handlePageChange(num)}
-                  className={` flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
-                    ? " text-[#d6a210]"
-                    : "text-gray-300 hover:text-[#d3b769]"
+                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                    ? "text-brand-gold "
+                    : "text-gray-400  hover:brand-gold  "
                     }`}
                 >
                   {num}
                 </button>
               )
             )}
-
-            {/* Next */}
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page === totalPages}
-              className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-            >
-              ›
-            </button>
-
+            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
           </div>
         </div>
-
       </div>
     </div>
   );

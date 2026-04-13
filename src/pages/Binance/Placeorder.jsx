@@ -1,322 +1,187 @@
 import React, { useState, useEffect } from "react";
 import { placeTradeApi, getUserDashboardApi } from "../../ApiService/Adminapi";
+import { FaBolt } from "react-icons/fa";
 
 const PlaceTrade = () => {
-    const [formData, setFormData] = useState({
-        userId: "",
-        pair: "SOLUSDT",
-        amount: "",
-        leverage: 1,
-        mode: "LONG",
-        confirm: false,
-        autoClose: false,
-        expiryMinutes: 10,
-    });
+  const [formData, setFormData] = useState({
+    userId: "",
+    pair: "SOLUSDT",
+    amount: "",
+    leverage: 1,
+    mode: "LONG",
+    confirm: false,
+    autoClose: false,
+    expiryMinutes: 10,
+  });
+  const [userName, setUserName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [checkingUser, setCheckingUser] = useState(false);
+  const [result, setResult] = useState(null); 
 
-    const [userName, setUserName] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [checkingUser, setCheckingUser] = useState(false);
-
-    // 🔥 Fetch user
-    useEffect(() => {
-        const fetchUser = async () => {
-            if (!formData.userId) {
-                setUserName("");
-                return;
-            }
-
-            setCheckingUser(true);
-
-            try {
-                const res = await getUserDashboardApi(formData.userId);
-
-                const user = res?.data?.data?.user;
-
-                setUserName(user?.name || "User Found");
-
-            } catch (err) {
-                setUserName("User not found ❌");
-            } finally {
-                setCheckingUser(false);
-            }
-        };
-
-        const delay = setTimeout(fetchUser, 500);
-        return () => clearTimeout(delay);
-    }, [formData.userId]);
-
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-
-        let newValue = value;
-
-        if (name === "userId" || name === "pair") {
-            newValue = value.toUpperCase();
-        }
-
-        setFormData({
-            ...formData,
-            [name]: type === "checkbox" ? checked : newValue,
-        });
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!formData.userId) { setUserName(""); return; }
+      setCheckingUser(true);
+      try {
+        const res = await getUserDashboardApi(formData.userId);
+        setUserName(res?.data?.data?.user?.name || "User Found");
+      } catch { setUserName("User not found"); }
+      finally { setCheckingUser(false); }
     };
+    const delay = setTimeout(fetchUser, 500);
+    return () => clearTimeout(delay);
+  }, [formData.userId]);
 
-    const handleAmountChange = (e) => {
-        let value = e.target.value.replace(/[^0-9]/g, "");
-        setFormData({ ...formData, amount: value });
-    };
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let newValue = value;
+    if (name === "userId" || name === "pair") newValue = value.toUpperCase();
+    setFormData({ ...formData, [name]: type === "checkbox" ? checked : newValue });
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleAmountChange = (e) => {
+    setFormData({ ...formData, amount: e.target.value.replace(/[^0-9]/g, "") });
+  };
 
-        setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setResult(null);
+    try {
+      const payload = {
+        userId: formData.userId,
+        pair: formData.pair,
+        amount: Number(formData.amount),
+        leverage: Number(formData.leverage),
+        mode: formData.mode,
+        confirm: formData.confirm,
+        autoClose: formData.autoClose,
+      };
+      if (formData.autoClose) payload.expiryMinutes = Number(formData.expiryMinutes);
+      await placeTradeApi(payload);
+      setResult("success");
+      setFormData({ userId: "", pair: "SOLUSDT", amount: "", leverage: 1, mode: "LONG", confirm: false, autoClose: false, expiryMinutes: 10 });
+      setUserName("");
+    } catch { setResult("error"); }
+    finally { setLoading(false); }
+  };
 
+  return (
+    <div className="w-full flex justify-center font-outfit relative py-4">
+      <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
-        try {
-
-            let payload = {
-                userId: formData.userId,
-                pair: formData.pair,
-                amount: Number(formData.amount),
-                leverage: Number(formData.leverage),
-                mode: formData.mode,
-                confirm: formData.confirm,
-                autoClose: formData.autoClose,
-            };
-
-            if (formData.autoClose) {
-                payload.expiryMinutes = Number(formData.expiryMinutes);
-            }
-
-            await placeTradeApi(payload);
-
-            alert("Trade has been placed successfully ✅");
-
-            setFormData({
-                userId: "",
-                pair: "SOLUSDT",
-                amount: "",
-                leverage: 1,
-                mode: "LONG",
-                confirm: false,
-                autoClose: false,
-                expiryMinutes: 10,
-            });
-
-            setUserName("");
-
-        } catch (error) {
-            alert("Unable to place trade. Please try again ");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className=" bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex justify-center rounded-md items-center p-3 sm:p-5 md:p-10">
-
-            <div className="w-full max-w-4xl bg-gray-800/80 backdrop-blur-md border border-gray-700 text-white rounded-2xl shadow-2xl p-2 sm:p-4 md:p-6">
-
-                <h2 className="text-2xl text-[#d6a210] font-semibold mb-6 text-center">
-                    Place Trade
-                </h2>
-
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-
-                    {/* USER ID */}
-                    <div className="col-span-1 md:col-span-2 flex flex-col gap-2">
-                        <label className="font-semibold text-gray-400">User ID</label>
-
-                        <div className="relative">
-                            <input
-                                type="text"
-                                name="userId"
-                                value={formData.userId}
-                                onChange={handleChange}
-                                className="w-full p-3 pr-36 uppercase rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
-                            />
-
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                {checkingUser ? (
-                                    <span className="text-xs text-yellow-400">
-                                        Checking...
-                                    </span>
-                                ) : userName ? (
-                                    <span className={`text-xs px-2 py-1 rounded ${userName.includes("not")
-                                        ? "bg-red-500/20 text-red-400"
-                                        : "bg-green-500/20 text-green-400"
-                                        }`}>
-                                        {userName}
-                                    </span>
-                                ) : null}
-                            </div>
-                        </div>
-
-
-                    </div>
-
-                    {/* PAIR */}
-                    <div className="flex flex-col gap-2">
-                        <label className=" font-semibold text-gray-400">Pair</label>
-                        <input
-                            type="text"
-                            name="pair"
-                            value={formData.pair}
-                            onChange={handleChange}
-                            className="p-3 rounded-lg uppercase bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
-                        />
-                    </div>
-
-                    {/* LEVERAGE */}
-                    <div className="flex flex-col gap-2">
-                        <label className="font-semibold text-gray-400">Leverage</label>
-                        <input
-                            type="number"
-                            name="leverage"
-                            value={formData.leverage}
-                            onChange={handleChange}
-                            className="p-3 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
-                        />
-                    </div>
-
-                    {/* AMOUNT */}
-                    <div className="flex flex-col gap-2">
-                        <label className="font-semibold text-gray-400">Amount (%)</label>
-
-                        <div className="relative">
-                            <input
-                                type="text"
-                                value={formData.amount ? `${formData.amount}%` : ""}
-                                onChange={handleAmountChange}
-                                placeholder="Enter %"
-                                className="w-full p-3 pr-12 rounded-lg bg-gray-700 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
-                            />
-
-                            {/* % badge */}
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                                <span className="text-sm px-2 py-1 rounded bg-gray-600 text-gray-300">
-                                    %
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* MODE */}
-                    <div className="flex flex-col gap-2">
-                        <label className="font-semibold text-gray-400">Mode</label>
-
-                        <div className="grid grid-cols-2 bg-gray-700 rounded-lg p-1">
-
-                            {/* LONG */}
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, mode: "LONG" })}
-                                className={`py-2 rounded-md text-sm font-medium transition-all ${formData.mode === "LONG"
-                                    ? "bg-green-500 text-white shadow-md"
-                                    : "text-gray-300 hover:bg-gray-600"
-                                    }`}
-                            >
-                                📈 LONG
-                            </button>
-
-                            {/* SHORT */}
-                            <button
-                                type="button"
-                                onClick={() => setFormData({ ...formData, mode: "SHORT" })}
-                                className={`py-2 rounded-md text-sm font-medium transition-all ${formData.mode === "SHORT"
-                                    ? "bg-red-500 text-white shadow-md"
-                                    : "text-gray-300 hover:bg-gray-600"
-                                    }`}
-                            >
-                                📉 SHORT
-                            </button>
-
-                        </div>
-                    </div>
-
-                    {/* AUTO CLOSE */}
-                    {/* <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-3 rounded-xl">
-
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-white">
-                                Auto Close
-                            </span>
-                            <span className="text-xs text-gray-400">
-                                Enable automatic trade closing
-                            </span>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            name="autoClose"
-                            checked={formData.autoClose}
-                            onChange={handleChange}
-                            className="w-5 h-5 accent-[#d6a210] cursor-pointer"
-                        />
-                    </div> */}
-
-                    {/* EXPIRY */}
-                    {/* {formData.autoClose && (
-                        <div className="flex flex-col gap-2 bg-gray-700/50 border border-gray-600 p-4 rounded-xl">
-
-                            <label className="text-sm text-gray-400">
-                                Expiry Minutes
-                            </label>
-
-                            <div className="relative">
-                                <input
-                                    type="number"
-                                    name="expiryMinutes"
-                                    value={formData.expiryMinutes}
-                                    onChange={handleChange}
-                                    placeholder="Enter minutes"
-                                    className="w-full p-3 pr-16 rounded-lg bg-gray-800 focus:ring-2 focus:ring-[#d3b769] outline-none transition"
-                                />
-
-                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-gray-600 px-2 py-1 rounded text-gray-300">
-                                    min
-                                </span>
-                            </div>
-
-                        </div>
-                    )} */}
-
-                    {/* CONFIRM (MOVED TO BOTTOM) */}
-                    <div className="flex items-center justify-between bg-gray-700/70 border border-gray-600 p-3 rounded-xl">
-
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-white">
-                                Confirm Trade
-                            </span>
-                            <span className="text-xs text-gray-400">
-                                You must confirm before placing trade
-                            </span>
-                        </div>
-
-                        <input
-                            type="checkbox"
-                            name="confirm"
-                            required
-                            checked={formData.confirm}
-                            onChange={handleChange}
-                            className="w-5 h-5 accent-[#d6a210] cursor-pointer scale-110"
-                        />
-                    </div>
-
-                    {/* BUTTON */}
-                    <div className="col-span-1 md:col-span-2">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.02] transition py-3 rounded-lg font-semibold"
-                        >
-                            {loading ? "Placing..." : "Place Trade"}
-                        </button>
-                    </div>
-
-                </form>
-            </div>
+      <div className="w-full max-w-3xl relative z-10">
+        {/* Header */}
+        <div className="glass-panel p-5 rounded-2xl mb-6 flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+            <FaBolt className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Place Trade
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Manually place a trade for a specific user</p>
+          </div>
         </div>
-    );
+
+        {/* Result Banner */}
+        {result === "success" && (
+          <div className="mb-5 px-5 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 font-semibold text-sm flex items-center gap-2">
+            ✅ Trade placed successfully!
+          </div>
+        )}
+        {result === "error" && (
+          <div className="mb-5 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-semibold text-sm flex items-center gap-2">
+            ❌ Unable to place trade. Please try again.
+          </div>
+        )}
+
+        {/* Form */}
+        <div className="glass-panel p-2 sm:p-3 md:p-6 rounded-2xl">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+            {/* USER ID */}
+            <div className="col-span-1 md:col-span-2 flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">User ID</label>
+              <div className="relative">
+                <input type="text" name="userId" value={formData.userId} onChange={handleChange}
+                  className="w-full px-4 py-3 pr-36 uppercase rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition"
+                  placeholder="Enter User ID" />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {checkingUser ? (
+                    <span className="text-xs text-brand-gold animate-pulse">Checking...</span>
+                  ) : userName ? (
+                    <span className={`text-xs px-2 py-1 rounded-lg font-medium ${userName.includes("not") ? "bg-red-500/20 text-red-400" : "bg-emerald-500/20 text-emerald-400"}`}>
+                      {userName}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            {/* PAIR */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Pair</label>
+              <input type="text" name="pair" value={formData.pair} onChange={handleChange}
+                className="px-4 py-3 uppercase rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-gold/50 transition" />
+            </div>
+
+            {/* LEVERAGE */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Leverage</label>
+              <input type="number" name="leverage" value={formData.leverage} onChange={handleChange}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-gold/50 transition" />
+            </div>
+
+            {/* AMOUNT */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Amount (%)</label>
+              <div className="relative">
+                <input type="text" value={formData.amount ? `${formData.amount}%` : ""} onChange={handleAmountChange}
+                  placeholder="Enter %" className="w-full px-4 py-3 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 transition" />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <span className="text-xs px-2 py-1 rounded-lg bg-white/5 text-gray-400">%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* MODE */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Mode</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => setFormData({ ...formData, mode: "LONG" })}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all ${formData.mode === "LONG" ? "bg-emerald-500/80 text-white shadow-lg shadow-emerald-500/20" : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10"}`}>
+                  📈 LONG
+                </button>
+                <button type="button" onClick={() => setFormData({ ...formData, mode: "SHORT" })}
+                  className={`py-3 rounded-xl text-sm font-bold transition-all ${formData.mode === "SHORT" ? "bg-red-500/80 text-white shadow-lg shadow-red-500/20" : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10"}`}>
+                  📉 SHORT
+                </button>
+              </div>
+            </div>
+
+            {/* CONFIRM */}
+            <div className="col-span-1 md:col-span-2 flex items-center justify-between px-5 py-4 bg-white/5 border border-white/10 rounded-xl">
+              <div>
+                <p className="text-white text-sm font-semibold">Confirm Trade</p>
+                <p className="text-gray-500 text-xs mt-0.5">You must confirm before placing trade</p>
+              </div>
+              <input type="checkbox" name="confirm" required checked={formData.confirm} onChange={handleChange}
+                className="w-5 h-5 accent-[#d6a210] cursor-pointer scale-110" />
+            </div>
+
+            {/* SUBMIT */}
+            <div className="col-span-1 md:col-span-2">
+              <button type="submit" disabled={loading}
+                className="w-full py-4 rounded-xl font-bold text-brand-darker bg-gradient-to-r from-brand-gold to-yellow-400 hover:shadow-glow-gold hover:scale-[1.02] active:scale-[0.99] transition-all disabled:opacity-50 disabled:scale-100 text-sm">
+                {loading ? "Placing Trade..." : "⚡ Place Trade"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PlaceTrade;

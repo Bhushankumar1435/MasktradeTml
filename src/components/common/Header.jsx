@@ -25,7 +25,8 @@ import {
   FaLayerGroup,
   FaExchangeAlt,
   FaRandom,
-  FaBell
+  FaBell,
+  FaSignOutAlt
 } from "react-icons/fa";
 
 const Header = ({ closeSidebar }) => {
@@ -35,47 +36,23 @@ const Header = ({ closeSidebar }) => {
   const navigate = useNavigate();
 
   const iconMap = {
-    FaHome,
-    FaUsers,
-    FaLink,
-    FaUserCheck,
-    FaWallet,
-    FaChartLine,
-    FaMoneyBillWave,
-    FaBox,
-    FaImage,
-    FaTicketAlt,
-    FaPlusCircle,
-    FaList,
-    FaUserShield,
-    FaMinusCircle,
-    FaArrowUp,
-    FaChartBar,
-    FaCheckCircle,
-    FaChartPie,
-    FaLayerGroup,
-    FaExchangeAlt,
-    FaRandom,
-    FaBell
+    FaHome, FaUsers, FaLink, FaUserCheck, FaWallet, FaChartLine,
+    FaMoneyBillWave, FaBox, FaImage, FaTicketAlt, FaPlusCircle, FaList,
+    FaUserShield, FaMinusCircle, FaArrowUp, FaChartBar, FaCheckCircle,
+    FaChartPie, FaLayerGroup, FaExchangeAlt, FaRandom, FaBell
   };
 
   const fetchNotifications = async () => {
     try {
       const res = await getAllNotificationsApi(1, 20);
-
       const unread = res?.data?.data?.filter(n => !n.isRead)?.length || 0;
-
       setUnreadCount(unread);
     } catch (err) {
       console.error("Notification fetch error", err);
     }
   };
 
-  useEffect(() => {
-    fetchNotifications();
-
-   
-  }, []);
+  useEffect(() => { fetchNotifications(); }, []);
 
   const handleToggle = (index) => {
     setOpenMenu(openMenu === index ? null : index);
@@ -101,32 +78,48 @@ const Header = ({ closeSidebar }) => {
   };
 
   return (
-    <div className="h-[100dvh] w-[250px] min-w-[250px] bg-[#0f172a] text-white flex flex-col">
+    <div className="h-[100dvh] w-full bg-[#020817]/80 backdrop-blur-md text-gray-200 flex flex-col font-outfit relative overflow-hidden">
 
+      {/* Ambient glow inside sidebar */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-brand-gold/5 blur-[60px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-blue-900/10 blur-[60px] pointer-events-none"></div>
+
+      {/* LOGO AREA — slide down on mount */}
       <div
         onClick={() => closeSidebar?.()}
-        className="p-5 border-b border-gray-700 cursor-pointer md:cursor-default"
+        className="p-6 border-b border-white/5 cursor-pointer md:cursor-default relative animate-slide-down"
+        style={{ animationDuration: '0.4s' }}
       >
-
-        <div className="flex items-center gap-4 mb-6">
-          <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-          <h2 className="text-lg md:text-2xl font-semibold text-[#d6a210]">
-            Admin Panel
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/5 to-transparent opacity-50 pointer-events-none"></div>
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-2 border border-brand-gold/30 rounded-full shadow-glow-gold/20 glow-animate transition-transform hover:scale-110">
+            <img className="w-8 h-8 md:w-9 md:h-9 object-contain" src={"/Images/favicon.png"} alt="logo" />
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold tracking-wide text-brand-gold text-glow">
+            Masktrades
           </h2>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
+      {/* NAV ITEMS */}
+      <div className="flex-1 overflow-y-auto no-scrollbar p-4 flex flex-col gap-2">
 
         {headerjson.map((item, index) => {
           const isParentActive = item.children
             ? item.children.some((sub) => location.pathname === sub.path)
             : location.pathname === item.path;
 
-          return (
-            <div key={index}>
+          // Stagger delay per nav item
+          const delay = `${0.08 + index * 0.05}s`;
 
-              {/* MAIN MENU */}
+          return (
+            <div
+              key={index}
+              className="animate-fade-in-up"
+              style={{ animationDelay: delay, animationFillMode: 'both' }}
+            >
+
+              {/* MAIN MENU ITEM */}
               <div
                 onClick={(e) => {
                   if (item.children) {
@@ -139,84 +132,82 @@ const Header = ({ closeSidebar }) => {
               >
                 <NavLink
                   to={item.path || "#"}
-                  className={`relative px-4 py-2 rounded-lg flex justify-between items-center transition group overflow-hidden
+                  className={`relative px-4 py-3 rounded-xl flex justify-between items-center transition-all duration-300 group overflow-hidden border border-transparent
                ${isParentActive
-                      ? "bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.01] transition text-white"
-                      : "hover:bg-white/10 text-gray-300"
+                      ? "bg-brand-gold/10 border-brand-gold/30 shadow-[inset_0_0_20px_rgba(214,162,16,0.15)] text-white"
+                      : "hover:bg-white/5 hover:border-white/10 text-gray-400 hover:text-gray-100"
                     }`}
                 >
+                  {/* Active left-bar indicator */}
+                  {isParentActive && (
+                    <div className="absolute left-0 top-0 w-1 h-full bg-brand-gold shadow-glow-gold rounded-r-md block animate-scale-in"></div>
+                  )}
+
+                  {/* Hover shimmer sweep */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/3 to-transparent pointer-events-none"></div>
+
                   <span className="flex items-center gap-3">
                     {item.icon && iconMap[item.icon] && (
                       <span
-                        className={`text-lg ${isParentActive ? "text-white" : "text-[#d6a210]"
-                          }`}
+                        className={`text-xl transition-all duration-300 group-hover:scale-110 ${
+                          isParentActive ? "text-brand-gold drop-shadow-md" : "text-gray-500 group-hover:text-brand-gold/80"
+                        }`}
                       >
                         {React.createElement(iconMap[item.icon])}
                       </span>
                     )}
                     {item.title === "Notification" ? unreadCount > 0 && (
-                      <>
+                      <span className="flex items-center font-medium">
                         <span>{item.title}</span>
-                        <span className="ml-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full animate-pulse">
+                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500/20 text-red-400 rounded-full border border-red-500/30 animate-pulse">
                           {unreadCount > 10 ? "10+" : unreadCount}
                         </span>
-                      </>
-                    ) : <span>{item.title}</span>
+                      </span>
+                    ) : <span className="font-medium tracking-wide">{item.title}</span>
                     }
                   </span>
 
                   {item.children && (
-                    <span className="text-sm ">
-                      {openMenu === index ? <FaChevronUp /> : <FaChevronDown />}
+                    <span className={`text-xs transition-all duration-300 text-gray-500 group-hover:text-gray-300 ${openMenu === index ? "rotate-180" : "rotate-0"}`}>
+                      <FaChevronDown />
                     </span>
                   )}
-
-                  {/*  SMOOTH ANIMATION LINE */}
-                  <span
-                    className={`absolute left-0 bottom-0 h-[2px] bg-[#d6a210] transition-all duration-300
-              ${isParentActive ? "w-full" : "w-0 group-hover:w-full"}`}
-                  ></span>
                 </NavLink>
-
               </div>
 
-              {/* SUB MENU */}
+              {/* SUB MENU — slides down with stagger */}
               {item.children && openMenu === index && (
-                <div className="ml-4 mt-2 flex flex-col gap-1">
-
+                <div className="ml-4 mt-2 flex flex-col gap-1 animate-slide-down" style={{ animationDuration: '0.25s' }}>
                   {item.children.map((subItem, subIndex) => (
                     <NavLink
                       key={subIndex}
                       to={subItem.path}
                       onClick={() => closeSidebar?.()}
+                      style={{ animationDelay: `${subIndex * 0.04}s`, animationFillMode: 'both' }}
                       className={({ isActive }) =>
-                        `relative px-3 py-2 text-sm rounded-lg flex items-center gap-2 transition group overflow-hidden
+                        `relative px-4 py-2.5 text-sm rounded-lg flex items-center gap-3 transition-all duration-300 group animate-fade-in-up
                         ${isActive
-                          ? "bg-gradient-to-r from-[#d6a210] to-[#d3b769] hover:scale-[1.01] transition text-white"
-                          : "text-gray-400 hover:bg-white/10"
+                          ? "bg-white/5 text-white border-l-2 border-brand-gold"
+                          : "text-gray-400 hover:bg-white/5 hover:text-gray-200 border-l-2 border-transparent hover:border-brand-gold/30"
                         }`
                       }
                     >
+                      {/* Sub-item shimmer */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/3 to-transparent pointer-events-none rounded-lg"></div>
+
                       {subItem.icon && iconMap[subItem.icon] && (
                         <span
-                          className={`text-sm ${location.pathname === subItem.path
-                            ? "text-white"
-                            : "text-[#d6a210]"
+                          className={`text-[15px] transition-all duration-300 group-hover:scale-110 ${location.pathname === subItem.path
+                            ? "text-brand-gold"
+                            : "text-gray-500 group-hover:text-brand-gold/70"
                             }`}
                         >
                           {React.createElement(iconMap[subItem.icon])}
                         </span>
                       )}
-                      <span>{subItem.title}</span>
-
-                      {/* BOTTOM LINE */}
-                      <span
-                        className={`absolute left-0 bottom-0 h-[2px] bg-[#d6a210] transition-all duration-300
-                       ${location.pathname === subItem.path ? "w-full" : "w-0 group-hover:w-full"}`}
-                      ></span>
+                      <span className="font-medium">{subItem.title}</span>
                     </NavLink>
                   ))}
-
                 </div>
               )}
 
@@ -225,12 +216,14 @@ const Header = ({ closeSidebar }) => {
         })}
 
       </div>
+
       {/* LOGOUT */}
-      <div className="p-4 mb-4 border-t border-gray-700">
+      <div className="p-4 mt-auto border-t border-white/5 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
         <button
           onClick={handleLogout}
-          className="w-full bg-red-500 hover:bg-red-700 py-2 font-semibold rounded-lg transition"
+          className="w-full bg-red-500/10 hover:bg-red-500/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:-translate-y-0.5 active:translate-y-0 border border-red-500/30 text-red-400 hover:text-red-300 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
         >
+          <FaSignOutAlt className="transition-transform duration-300 group-hover:-translate-x-1" />
           Log Out
         </button>
       </div>
@@ -240,3 +233,4 @@ const Header = ({ closeSidebar }) => {
 };
 
 export default Header;
+

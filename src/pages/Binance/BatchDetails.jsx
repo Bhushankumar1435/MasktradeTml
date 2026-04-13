@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Loader from "../../components/ui/Loader";
 import { getBatchHistoryApi } from "../../ApiService/Adminapi";
+import { FaArrowLeft, FaLayerGroup } from "react-icons/fa";
 
 const BatchDetails = () => {
   const { batchId } = useParams();
@@ -9,24 +10,19 @@ const BatchDetails = () => {
 
   const [showNoData, setShowNoData] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [batchDetails, setBatchDetails] = useState(null);
   const [trades, setTrades] = useState([]);
-
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
   const [prices, setPrices] = useState({});
-
   const totalPages = Math.ceil(total / limit);
 
   const fetchBatch = async () => {
     try {
       setLoading(true);
       setShowNoData(false);
-
       const res = await getBatchHistoryApi(batchId, page, limit);
-
       if (res.data.success) {
         setBatchDetails(res.data.data);
         setTrades(res.data.data.trades || []);
@@ -36,268 +32,182 @@ const BatchDetails = () => {
       console.error("Failed to fetch batch details", err);
     } finally {
       setLoading(false);
+      setTimeout(() => setShowNoData(true), 300);
     }
   };
 
   const fetchPrice = async (pair) => {
     try {
-      const res = await fetch(
-        `https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`
-      );
+      const res = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`);
       const data = await res.json();
       return parseFloat(data.markPrice);
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   };
 
   const updatePrices = async () => {
     if (!trades.length) return;
-
     const activeTrades = trades.filter(t => t.status !== "CLOSED");
     const uniquePairs = [...new Set(activeTrades.map(t => t.pair))];
-
     const updated = {};
-
-    await Promise.all(
-      uniquePairs.map(async (pair) => {
-        const price = await fetchPrice(pair);
-        if (price) updated[pair] = price;
-      })
-    );
-
+    await Promise.all(uniquePairs.map(async (pair) => {
+      const price = await fetchPrice(pair);
+      if (price) updated[pair] = price;
+    }));
     setPrices(prev => {
-      const changed = Object.keys(updated).some(
-        key => prev[key] !== updated[key]
-      );
+      const changed = Object.keys(updated).some(key => prev[key] !== updated[key]);
       return changed ? updated : prev;
     });
   };
 
   const calculatePnL = (trade) => {
     if (trade.status === "CLOSED") return trade.pnl || 0;
-
     const current = prices[trade.pair];
     if (!current) return 0;
-
-    const entry = trade.entryPrice;
-    const qty = trade.quantity;
-
-    let pnl =
-      trade.mode === "LONG"
-        ? (current - entry) * qty
-        : (entry - current) * qty;
-
+    const pnl = trade.mode === "LONG"
+      ? (current - trade.entryPrice) * trade.quantity
+      : (trade.entryPrice - current) * trade.quantity;
     const fee = trade.usedUSDT * 0.0004 * trade.leverage;
-
     return pnl - fee;
   };
 
-  const calculateTotalPnL = () => {
-    if (!trades.length) return 0;
-
-    return trades.reduce((total, trade) => {
-      return total + calculatePnL(trade);
-    }, 0);
-  };
+  const calculateTotalPnL = () =>
+    trades.reduce((total, trade) => total + calculatePnL(trade), 0);
 
   useEffect(() => {
     let interval;
-
     const hasActiveTrades = trades.some(t => t.status !== "CLOSED");
-
     if (hasActiveTrades) {
       updatePrices();
-
-      interval = setInterval(() => {
-        updatePrices();
-      }, 2000);
+      interval = setInterval(updatePrices, 2000);
     }
-
     return () => clearInterval(interval);
   }, [trades]);
 
-
   useEffect(() => {
-    const delay = setTimeout(() => {
-      if (batchId) fetchBatch();
-    }, 200);
-    const timer = setTimeout(() => {
-      setShowNoData(true);
-    }, 1000);
-    return () => {
-      clearTimeout(delay);
-      clearTimeout(timer);
-    };
+    const delay = setTimeout(() => { if (batchId) fetchBatch(); }, 200);
+    return () => clearTimeout(delay);
   }, [batchId, page]);
 
-  const handlePageChange = (p) => {
-    if (p < 1 || p > totalPages) return;
-    setPage(p);
-  };
+  const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
   const getPageNumbers = () => {
     const pages = [];
-
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
       pages.push(1, 2, 3);
-
       if (page > 4) pages.push("...");
-
-      if (page > 3 && page < totalPages - 2) {
-        pages.push(page);
-      }
-
+      if (page > 3 && page < totalPages - 2) pages.push(page);
       if (page < totalPages - 3) pages.push("...");
-
       pages.push(totalPages - 1, totalPages);
     }
-
     return [...new Set(pages)];
   };
 
-
+  const totalPnl = calculateTotalPnL();
 
   return (
-    <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-          Batch Details ({batchDetails?.batchId})
-        </h1>
-
-        <button
-          onClick={() => navigate("/batchhistory")}
-          className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-sm"
-        >
-          ← Back
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+            <FaLayerGroup className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Batch Details
+            </h1>
+            <p className="text-gray-400 text-sm mt-1 font-mono">{batchDetails?.batchId}</p>
+          </div>
+        </div>
+        <button onClick={() => navigate("/batchhistory")}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold text-white transition-all">
+          <FaArrowLeft className="text-xs" /> Back to Batches
         </button>
       </div>
 
-      {/* STATS */}
+      {/* STATS CARDS */}
       {batchDetails && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 relative z-10">
           {[
-            { label: "Total Trades", key: "totalTrades" },
-            { label: "Open Trades", key: "openTrades" },
-            { label: "Closed Trades", key: "closedTrades" },
-            { label: "Total PnL", key: "totalPnl" },
+            { label: "Total Trades", value: batchDetails.stats?.totalTrades, color: "text-white" },
+            { label: "Open Trades", value: batchDetails.stats?.openTrades, color: "text-emerald-400" },
+            { label: "Closed Trades", value: batchDetails.stats?.closedTrades, color: "text-red-400" },
+            { label: "Total PnL", value: totalPnl.toFixed(2), color: totalPnl >= 0 ? "text-emerald-400" : "text-red-400" },
           ].map((item, i) => (
-            <div key={i} className="bg-[#1e293b] p-3 rounded text-center border border-gray-700">
-              <p className="text-xs text-gray-400">{item.label}</p>
-              <p className="text-sm font-semibold">
-                {item.key === "totalPnl"
-                  ? calculateTotalPnL().toFixed(2)
-                  : batchDetails.stats[item.key]}
-              </p>
+            <div key={i} className="glass-panel p-4 rounded-2xl text-center hover:-translate-y-1 transition-transform cursor-default">
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-2">{item.label}</p>
+              <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
             </div>
           ))}
         </div>
       )}
 
       {/* TABLE */}
-      <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-
-        {/* TABLE */}
-        <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700 ">
-
-          <table className="min-w-[1000px] w-full text-sm border-collapse">
-
-            <thead className="bg-[#1e293b] text-gray-400 uppercase border-b  whitespace-nowrap border-gray-700 sticky top-0">
+      <div className="glass-table-container flex flex-col z-10">
+        <div className="w-full overflow-x-auto relative">
+          <table className="min-w-[1000px] glass-table whitespace-nowrap">
+            <thead>
               <tr>
-                <th className="px-3 py-2">#</th>
-                <th className="px-3 py-2">User ID</th>
-                <th className="px-3 py-2">Pair</th>
-                <th className="px-3 py-2">Mode</th>
-                <th className="px-3 py-2">Amount</th>
-                <th className="px-3 py-2">Leverage</th>
-                <th className="px-3 py-2">Entry</th>
-                <th className="px-3 py-2">Current</th>
-                <th className="px-3 py-2">PnL</th>
-                <th className="px-3 py-2">Status</th>
+                <th>#</th>
+                <th>User ID</th>
+                <th>Pair</th>
+                <th className="text-center">Mode</th>
+                <th>%</th>
+                <th>Amount</th>
+                <th>Leverage</th>
+                <th>Entry</th>
+                <th>Current</th>
+                <th className="text-center">PnL</th>
+                <th className="text-center">Status</th>
               </tr>
             </thead>
-
             <tbody>
               {trades.length > 0 ? (
-                trades.map((t, i) => (
-                  <tr
-                    key={t._id}
-                    className="text-center font-semibold  whitespace-nowrap hover:bg-[#1e293b]"
-                  >
-                    <td className="px-3 py-3 border border-gray-700">
-                      {(page - 1) * limit + i + 1}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.userId}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.pair}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.mode}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.amount}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.leverage}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.entryPrice || "-"}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      {t.status === "CLOSED"
-                        ? Number(t.exitPrice).toFixed(5)
-                        : prices[t.pair]
-                          ? Number(prices[t.pair]).toFixed(5)
-                          : "Loading..."}
-                    </td>
-
-                    <td className={`px-3 py-3 border border-gray-700 ${calculatePnL(t) >= 0 ? "text-green-400" : "text-red-400"
-                      }`}>
-                      {calculatePnL(t).toFixed(2)}
-                    </td>
-
-                    <td className="px-3 py-3 border border-gray-700">
-                      <span className={`px-2 py-1 text-xs rounded text-white ${t.status === "OPEN"
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                        }`}>
-                        {t.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
+                trades.map((t, i) => {
+                  const pnl = calculatePnL(t);
+                  return (
+                    <tr key={t._id}>
+                      <td><span className="text-gray-500">{(page - 1) * limit + i + 1}</span></td>
+                      <td className="text-white font-medium">{t.userId}</td>
+                      <td className="font-mono text-gray-300">{t.pair}</td>
+                      <td className="text-center">
+                        <span className={`glass-badge ${t.mode === "LONG" ? "glass-badge-success" : "glass-badge-danger"}`}>{t.mode}</span>
+                      </td>
+                      <td className="text-gray-300">{t.amount}%</td>
+                      <td className="font-semibold text-brand-gold">{t.usedUSDT}</td>
+                      <td className="text-gray-300">{t.leverage}x</td>
+                      <td className="text-gray-300">{t.entryPrice || "—"}</td>
+                      <td className="text-gray-300">
+                        {t.status === "CLOSED"
+                          ? Number(t.exitPrice).toFixed(5)
+                          : prices[t.pair]
+                            ? Number(prices[t.pair]).toFixed(5)
+                            : <span className="text-gray-600 text-xs animate-pulse">Loading...</span>}
+                      </td>
+                      <td className={`text-center font-bold ${pnl >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        {pnl.toFixed(2)}
+                      </td>
+                      <td className="text-center">
+                        <span className={`glass-badge ${t.status === "OPEN" ? "glass-badge-success" : "glass-badge-danger"}`}>{t.status}</span>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 loading || !showNoData ? (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                    {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                    <Loader />
-                  </div>
-                ) :
-                  (
-                    <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
-                  )
+                  <tr><td colSpan="11" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+                ) : (
+                  <tr><td colSpan="11" className="text-center py-12 text-gray-500 font-medium">No Data Found</td></tr>
+                )
               )}
             </tbody>
           </table>
 
-          {/* PAGINATION LOADER */}
           {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-
-              {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
               <Loader />
             </div>
           )}
@@ -305,51 +215,36 @@ const BatchDetails = () => {
 
         {/* PAGINATION */}
         {totalPages > 1 && (
-          <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-            <span className="text-gray-400">
-              Page {page} of {totalPages}
+          <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+            <span className="text-gray-400 font-medium">
+              Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
             </span>
-
-            <div className="flex items-center gap-2 flex-wrap">
-
-              <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className="px-3 py-1.5 border border-gray-600 rounded-md disabled:opacity-40"
-              >
-                ‹
-              </button>
-
-              {getPageNumbers().map((num, i) =>
-                num === "..." ? (
-                  <span key={i}>...</span>
-                ) : (
-                  <button
-                    key={i}
-                    onClick={() => handlePageChange(num)}
-                    className={`px-2 ${page === num
-                      ? "text-[#d6a210]"
-                      : "text-gray-300 hover:text-[#d3b769]"
-                      }`}
-                  >
-                    {num}
-                  </button>
-                )
-              )}
-
-              <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-                className="px-3 py-1.5 border border-gray-600 rounded-md disabled:opacity-40"
-              >
-                ›
-              </button>
-
+            <div className="flex items-center gap-1 flex-wrap">
+              <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+                className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
+              {getPageNumbers().map((num, index) =>
+              num === "..." ? (
+                <span key={index} className="px-0.5 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(num)}
+                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                    ? "text-brand-gold "
+                    : "text-gray-400  hover:brand-gold  "
+                    }`}
+                >
+                  {num}
+                </button>
+              )
+            )}
+              <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+                className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

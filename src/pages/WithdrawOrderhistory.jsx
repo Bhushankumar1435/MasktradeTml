@@ -1,447 +1,261 @@
 import React, { useEffect, useState } from "react";
-import { getWithdrawOrdersApi, manageWithdrawApi, } from "../ApiService/Adminapi";
+import { getWithdrawOrdersApi, manageWithdrawApi } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
-import { FaCopy } from "react-icons/fa";
+import { FaCopy, FaArrowUp } from "react-icons/fa";
 import Loader from "../components/ui/Loader";
 
 const WithdrawOrders = () => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [limit] = useState(10);
-    const [total, setTotal] = useState(0);
-    const [status, setStatus] = useState("");
-    const [search, setSearch] = useState("");
-    const [showModal, setShowModal] = useState(false);
-    const [selectedId, setSelectedId] = useState(null);
-    const [remark, setRemark] = useState("");
-    const [showNoData, setShowNoData] = useState(false);
-    // Fetch
-    const fetchWithdraws = async () => {
-        try {
-            setLoading(true);
-            setShowNoData(false);
-            const res = await getWithdrawOrdersApi(page, limit, status, search);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [remark, setRemark] = useState("");
+  const [showNoData, setShowNoData] = useState(false);
 
-            setData(res?.data?.data?.data || []);
-            setTotal(res?.data?.data?.count || 0);
-        } catch {
-            toast.error("Failed to fetch withdraw orders");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchWithdraws = async () => {
+    try {
+      setLoading(true);
+      setShowNoData(false);
+      const res = await getWithdrawOrdersApi(page, limit, status, search);
+      setData(res?.data?.data?.data || []);
+      setTotal(res?.data?.data?.count || 0);
+    } catch {
+      toast.error("Failed to fetch withdraw orders");
+    } finally {
+      setLoading(false);
+      setTimeout(() => setShowNoData(true), 300);
+    }
+  };
 
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            fetchWithdraws();
-        }, 200);
-        const timer = setTimeout(() => {
-            setShowNoData(true);
-        }, 1000);
-        return () => {
-            clearTimeout(delay);
-            clearTimeout(timer);
-        };
-    }, [page, status, search]);
-    // Approve
-    const handleApprove = async (id) => {
-        const confirmApprove = window.confirm("Are you sure you want to approve this request?");
+  useEffect(() => {
+    const delay = setTimeout(() => fetchWithdraws(), 200);
+    return () => clearTimeout(delay);
+  }, [page, status, search]);
 
-        if (!confirmApprove) return;
+  const handleApprove = async (id) => {
+    if (!window.confirm("Are you sure you want to approve this request?")) return;
+    try {
+      await manageWithdrawApi({ id, status: "APPROVED", remarks: "Approved" });
+      toast.success("Approved");
+      fetchWithdraws();
+    } catch { toast.error("Error"); }
+  };
 
-        try {
-            await manageWithdrawApi({
-                id,
-                status: "APPROVED",
-                remarks: "Approved",
-            });
+  const openRejectModal = (id) => { setSelectedId(id); setRemark(""); setShowModal(true); };
 
-            toast.success("Approved");
-            fetchWithdraws();
-        } catch {
-            toast.error("Error");
-        }
-    };
+  const submitReject = async () => {
+    if (!remark.trim()) return toast.error("Enter remark");
+    try {
+      await manageWithdrawApi({ id: selectedId, status: "REJECTED", remarks: remark });
+      toast.success("Rejected");
+      setShowModal(false);
+      fetchWithdraws();
+    } catch { toast.error("Error"); }
+  };
 
-    // Reject
-    const openRejectModal = (id) => {
-        setSelectedId(id);
-        setRemark("");
-        setShowModal(true);
-    };
+  const totalPages = Math.ceil(total / limit);
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
+      pages.push(1, 2, 3);
+      if (page > 4) pages.push("...");
+      if (page > 3 && page < totalPages - 2) pages.push(page);
+      if (page < totalPages - 3) pages.push("...");
+      pages.push(totalPages - 1, totalPages);
+    }
+    return [...new Set(pages)];
+  };
+  const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
-    const submitReject = async () => {
-        if (!remark.trim()) return toast.error("Enter remark");
+  const copyText = async (text) => {
+    if (!text) return toast.error("Nothing to copy");
+    try { await navigator.clipboard.writeText(text); toast.success("Copied!"); }
+    catch { toast.error("Failed to copy"); }
+  };
 
-        try {
-            await manageWithdrawApi({
-                id: selectedId,
-                status: "REJECTED",
-                remarks: remark,
-            });
+  const truncateAddress = (address) => {
+    if (!address) return "—";
+    if (address.length <= 15) return address;
+    return `${address.slice(0, 7)}.....${address.slice(-7)}`;
+  };
 
-            toast.success("Rejected");
-            setShowModal(false);
-            fetchWithdraws();
-        } catch {
-            toast.error("Error");
-        }
-    };
+  const statusFilter = [
+    { label: "All", value: "", cls: "bg-white/5 border border-white/10 hover:bg-white/10" },
+    { label: "Pending", value: "PENDING", cls: "bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 hover:bg-yellow-500/20" },
+    { label: "Approved", value: "APPROVED", cls: "bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20" },
+    { label: "Rejected", value: "REJECTED", cls: "bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20" },
+  ];
 
-    const totalPages = Math.ceil(total / limit);
+  return (
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
-    const getPageNumbers = () => {
-        const pages = [];
-
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) {
-                pages.push(i);
-            }
-        } else {
-            pages.push(1, 2, 3);
-            if (page > 4) {
-                pages.push("...");
-            }
-            if (page > 3 && page < totalPages - 2) {
-                pages.push(page);
-            }
-            if (page < totalPages - 3) {
-                pages.push("...");
-            }
-            pages.push(totalPages - 1, totalPages);
-        }
-        return [...new Set(pages)];
-    };
-
-    const handlePageChange = (p) => {
-        if (p < 1 || p > totalPages) return;
-        setPage(p);
-    };
-
-    const copyText = async (text) => {
-        if (!text) {
-            toast.error("Nothing to copy");
-            return;
-        }
-
-        try {
-            await navigator.clipboard.writeText(text);
-            toast.success("Copied to clipboard!");
-        } catch (err) {
-            toast.error("Failed to copy");
-        }
-    };
-
-    const truncateAddress = (address) => {
-        if (!address) return "-";
-        if (address.length <= 15) return address;
-
-        return `${address.slice(0, 7)}.....${address.slice(-7)}`;
-    };
-
-    return (
-        <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
-
-            {/* Header */}
-            <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                <div className="flex items-center gap-4 ">
-                    <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-                        Withdraw Orders ({total})
-                    </h1>
-                </div>
-                <div className="flex gap-2 flex-wrap md:gap-2 lg:gap-3 w-full lg:w-auto">
-                    <input
-                        type="text"
-                        placeholder="Search by User ID / Address"
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                        className="w-full md:w-[220px] lg:w-auto px-3 py-1.5 rounded bg-[#1e293b] border border-gray-600 text-sm"
-                    />
-
-                    {/* ALL */}
-                    <button
-                        onClick={() => {
-                            setStatus("");
-                            setPage(1);
-                        }}
-                        className={`px-3 py-1.5 rounded text-sm border font-semibold ${status === ""
-                            ? "bg-blue-600 text-white border-blue-600"
-                            : "bg-[#1e293b] border-gray-600"
-                            }`}
-                    >
-                        All
-                    </button>
-
-                    {/* PENDING */}
-                    <button
-                        onClick={() => {
-                            setStatus("PENDING");
-                            setPage(1);
-                        }}
-                        className={`px-3 py-1.5 rounded text-sm font-semibold ${status === "PENDING"
-                            ? "bg-yellow-500 text-white"
-                            : " text-white bg-yellow-500"
-                            }`}
-                    >
-                        Pending
-                    </button>
-
-                    {/* APPROVED */}
-                    <button
-                        onClick={() => {
-                            setStatus("APPROVED");
-                            setPage(1);
-                        }}
-                        className={`px-3 py-1.5 rounded text-sm font-semibold ${status === "APPROVED"
-                            ? "bg-green-700 text-white"
-                            : " text-white  bg-green-500"
-                            }`}
-                    >
-                        Approved
-                    </button>
-
-                    {/* REJECTED */}
-                    <button
-                        onClick={() => {
-                            setStatus("REJECTED");
-                            setPage(1);
-                        }}
-                        className={`px-3 py-1.5 rounded text-sm font-semibold ${status === "REJECTED"
-                            ? "bg-red-700 text-white"
-                            : "text-white  bg-red-500"
-                            }`}
-                    >
-                        Rejected
-                    </button>
-
-                </div>
-            </div>
-
-            {/* Main */}
-            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-
-                <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-700">
-
-                    <table className="min-w-[1000px] w-full text-sm border-collapse table-auto">
-
-                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
-                            <tr>
-                                <th className="px-3 py-2 whitespace-nowrap">#</th>
-                                <th className="px-3 py-2 whitespace-nowrap">User</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Amount</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Payable</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Address</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Remark</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Status</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Action</th>
-                                <th className="px-3 py-2 whitespace-nowrap">Created</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {data.length > 0 ? (
-                                data.map((item, index) => (
-                                    <tr key={item._id} className="hover:bg-[#1e293b] font-semibold text-center">
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            {(page - 1) * limit + index + 1}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            {item.userId}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            {item.amount}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            {item.payableAmount}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 max-w-[200px]">
-                                            <div className="flex items-center justify-center gap-2">
-
-                                                <p
-                                                    className="truncate max-w-[140px]"
-                                                    title={item.address || "___"}
-                                                >
-                                                    {truncateAddress(item.address)}
-                                                </p>
-
-                                                {item.address && (
-                                                    <button
-                                                        onClick={() => copyText(item.address)}
-                                                        className="flex items-center"
-                                                    >
-                                                        <FaCopy className="cursor-pointer text-gray-400 hover:text-blue-400 transition" />
-                                                    </button>
-                                                )}
-
-                                            </div>
-
-                                        </td>
-                                        <td className="px-3 py-3 border border-gray-700 max-w-[200px]">
-                                            <p className="truncate" title={item.remarks || "-"}>
-                                                {item.remarks || "___"}
-                                            </p>
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            <span className={`px-2 py-1 text-white text-xs rounded ${item.status === "APPROVED"
-                                                ? "bg-green-500"
-                                                : item.status === "REJECTED"
-                                                    ? "bg-red-500"
-                                                    : "bg-yellow-500"
-                                                }`}>
-                                                {item.status}
-                                            </span>
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            <div className="flex gap-2 justify-center ">
-                                                <button
-                                                    onClick={() => handleApprove(item._id)}
-                                                    disabled={item.status !== "PENDING"}
-                                                    className="px-3 py-1 bg-green-600 rounded text-sm hover:bg-green-700 disabled:opacity-40"
-                                                >
-                                                    Approve
-                                                </button>
-
-                                                <button
-                                                    onClick={() => openRejectModal(item._id)}
-                                                    disabled={item.status !== "PENDING"}
-                                                    className="px-3 py-1 bg-red-600 rounded text-sm hover:bg-red-700 disabled:opacity-40"
-                                                >
-                                                    Reject
-                                                </button>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700 whitespace-nowrap">
-                                            {item.createdAt
-                                                ? new Date(item.createdAt).toLocaleString()
-                                                : "N/A"}
-                                        </td>
-
-                                    </tr>
-                                ))
-                            ) : (
-                                loading || !showNoData ? (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                                        <Loader />
-                                    </div>
-                                ) :
-                                    (
-                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
-                                    )
-                            )}
-                        </tbody>
-
-                    </table>
-                    {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                            {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                            <Loader />
-                        </div>
-                    )}
-                </div>
-
-
-                {/* Pagination */}
-                <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-                    {/* LEFT */}
-                    <span className="text-gray-400">
-                        Page {page} of {totalPages}
-                    </span>
-
-                    {/* RIGHT (GROUP ALL BUTTONS) */}
-                    <div className="flex items-center gap-2 flex-wrap">
-
-                        {/* Previous */}
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ‹
-                        </button>
-
-                        {/* Page Numbers */}
-                        {getPageNumbers().map((num, index) =>
-                            num === "..." ? (
-                                <span key={index} className=" text-gray-400 text-sm">
-                                    ...
-                                </span>
-                            ) : (
-                                <button
-                                    key={index}
-                                    onClick={() => handlePageChange(num)}
-                                    className={` flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
-                                        ? " text-[#d6a210]"
-                                        : "text-gray-300 hover:text-[#d3b769]"
-                                        }`}
-                                >
-                                    {num}
-                                </button>
-                            )
-                        )}
-
-                        {/* Next */}
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ›
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-            {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-                    <div className="bg-white w-full sm:w-[400px] rounded-t-2xl sm:rounded-lg p-4">
-                        <h3 className="text-lg font-semibold mb-3 text-gray-900">
-                            Enter Reject Remark
-                        </h3>
-
-                        <textarea
-                            value={remark}
-                            onChange={(e) => setRemark(e.target.value)}
-                            className="w-full border p-2 rounded mb-3 text-sm text-gray-900"
-                            rows={4}
-                        />
-
-                        <div className="flex gap-2 justify-end">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="px-3 py-1 border rounded text-sm"
-                            >
-                                Cancel
-                            </button>
-
-                            <button
-                                onClick={submitReject}
-                                className="bg-red-500 text-white px-3 py-1 rounded text-sm"
-                            >
-                                Submit
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+      {/* Header */}
+      <div className="mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl shadow-glow-gold/20 bg-brand-gold/10">
+            <FaArrowUp className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Withdraw Orders
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Total: {total} records</p>
+          </div>
         </div>
-    );
+        <div className="flex gap-2 flex-wrap items-center">
+          <input
+            type="text"
+            placeholder="Search by User ID / Address"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="w-full md:w-[220px] px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 transition"
+          />
+          {statusFilter.map((f) => (
+            <button key={f.value} onClick={() => { setStatus(f.value); setPage(1); }}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${f.cls} ${status === f.value ? "ring-1 ring-white/20" : ""}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main */}
+      <div className="glass-table-container flex flex-col z-10">
+        <div className="w-full overflow-x-auto relative">
+          <table className="min-w-[1000px] glass-table whitespace-nowrap">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Payable</th>
+                <th>Address</th>
+                <th>Remark</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Action</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.length > 0 ? (
+                data.map((item, index) => (
+                  <tr key={item._id}>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
+                    <td className="font-medium text-white">{item.userId}</td>
+                    <td className="font-semibold text-brand-gold">{item.amount}</td>
+                    <td className="font-semibold text-emerald-400">{item.payableAmount}</td>
+                    <td className="max-w-[200px]">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-gray-400 max-w-[140px]" title={item.address || "—"}>{truncateAddress(item.address)}</p>
+                        {item.address && (
+                          <button onClick={() => copyText(item.address)}>
+                            <FaCopy className="text-gray-400 hover:text-blue-400 transition cursor-pointer" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="max-w-[200px]">
+                      <p className="truncate text-gray-400" title={item.remarks || "—"}>{item.remarks || "—"}</p>
+                    </td>
+                    <td className="text-center">
+                      <span className={`glass-badge ${item.status === "APPROVED" ? "glass-badge-success" : item.status === "REJECTED" ? "glass-badge-danger" : "glass-badge-warning"}`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex gap-2 justify-center">
+                        <button onClick={() => handleApprove(item._id)} disabled={item.status !== "PENDING"}
+                          className="px-3 py-1 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 text-green-400 text-xs rounded-lg font-semibold transition disabled:opacity-30">
+                          Approve
+                        </button>
+                        <button onClick={() => openRejectModal(item._id)} disabled={item.status !== "PENDING"}
+                          className="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs rounded-lg font-semibold transition disabled:opacity-30">
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                    <td className="text-gray-500 text-xs">
+                      {item.createdAt ? new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "N/A"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                loading || !showNoData ? (
+                  <tr><td colSpan="9" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+                ) : (
+                  <tr><td colSpan="9" className="text-center py-12 text-gray-500 font-medium">No Data Found</td></tr>
+                )
+              )}
+            </tbody>
+          </table>
+
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
+              <Loader />
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+          <span className="text-gray-400 font-medium">
+            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+          </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
+            {getPageNumbers().map((num, index) =>
+              num === "..." ? (
+                <span key={index} className="px-0.5 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(num)}
+                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                    ? "text-brand-gold "
+                    : "text-gray-400  hover:brand-gold  "
+                    }`}
+                >
+                  {num}
+                </button>
+              )
+            )}
+            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Reject Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
+            <h3 className="text-lg font-bold text-white mb-4">Enter Reject Remark</h3>
+            <textarea value={remark} onChange={(e) => setRemark(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 p-3 rounded-xl mb-4 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 resize-none"
+              rows={4} placeholder="Reason for rejection..." />
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowModal(false)}
+                className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
+              <button onClick={submitReject}
+                className="bg-red-500/10 hover:bg-red-500 border border-red-500/30 text-red-400 hover:text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all">
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default WithdrawOrders;

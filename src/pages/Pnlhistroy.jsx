@@ -3,285 +3,186 @@ import { getMyProfitHistoryApi } from "../ApiService/Adminapi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Loader from "../components/ui/Loader";
+import { FaChartPie } from "react-icons/fa";
 
 const PAGE_SIZE = 10;
 
 const PnlHistory = () => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
-    const [search, setSearch] = useState("");
-    const [type, setType] = useState("");
-    const [showNoData, setShowNoData] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState("");
+  const [type, setType] = useState("");
+  const [showNoData, setShowNoData] = useState(false);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
-    const totalPages = Math.ceil(total / PAGE_SIZE);
+  const fetchData = async () => {
+    setLoading(true);
+    setShowNoData(false);
+    try {
+      const res = await getMyProfitHistoryApi(page, PAGE_SIZE, search, type);
+      if (res?.data?.success) {
+        setData(Array.isArray(res.data.data) ? res.data.data : []);
+        setTotal(res.data.total || 0);
+      } else {
+        toast.error("Failed to fetch data");
+      }
+    } catch { toast.error("Server error"); }
+    finally {
+      setLoading(false);
+      setTimeout(() => setShowNoData(true), 300);
+    }
+  };
 
-    const fetchData = async () => {
-        setLoading(true);
-        setShowNoData(false);
+  useEffect(() => {
+    const delay = setTimeout(() => fetchData(), 200);
+    return () => clearTimeout(delay);
+  }, [page, search, type]);
 
-        try {
-            const res = await getMyProfitHistoryApi(
-                page,
-                PAGE_SIZE,
-                search,
-                type
-            );
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
+    else {
+      pages.push(1, 2, 3);
+      if (page > 4) pages.push("...");
+      if (page > 3 && page < totalPages - 2) pages.push(page);
+      if (page < totalPages - 3) pages.push("...");
+      pages.push(totalPages - 1, totalPages);
+    }
+    return [...new Set(pages)];
+  };
 
-            if (res?.data?.success) {
-                setData(Array.isArray(res.data.data) ? res.data.data : []);
-                setTotal(res.data.total || 0);
-            } else {
-                toast.error("Failed to fetch data");
-            }
-        } catch (err) {
-            toast.error("Server error");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
-    useEffect(() => {
-        const delay = setTimeout(() => {
-            fetchData();
-        }, 200);
-        const timer = setTimeout(() => {
-            setShowNoData(true);
-        }, 1000);
-        return () => {
-            clearTimeout(delay);
-            clearTimeout(timer);
-        };
-    }, [page, search, type]);
+  const typeFilters = [
+    { label: "All", value: "", cls: "bg-white/5 border border-white/10 hover:bg-white/10 text-white" },
+    { label: "Profit", value: "PROFIT", cls: "bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20" },
+    { label: "Loss", value: "LOSS", cls: "bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20" },
+  ];
 
+  return (
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <ToastContainer />
+      <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-purple-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
-    // ✅ SAME PAGINATION LOGIC
-    const getPageNumbers = () => {
-        const pages = [];
-
-        if (totalPages <= 5) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
-        } else {
-            pages.push(1, 2, 3);
-            if (page > 4) pages.push("...");
-            if (page > 3 && page < totalPages - 2) pages.push(page);
-            if (page < totalPages - 3) pages.push("...");
-            pages.push(totalPages - 1, totalPages);
-        }
-
-        return [...new Set(pages)];
-    };
-
-    const handlePageChange = (p) => {
-        if (p < 1 || p > totalPages) return;
-        setPage(p);
-    };
-    return (
-        <div className="w-full flex flex-col bg-[#0f172a] p-2 md:p-6 text-gray-200 rounded-md">
-
-            <ToastContainer />
-
-            {/* HEADER */}
-            <div className="mb-4 flex flex-col md:flex-row justify-between gap-3">
-                <div className="flex items-center gap-4 ">
-                    <img className="w-8 h-8 md:w-10 md:h-10" src={"/Images/favicon.png"} alt="logo" />
-                    <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-                        Profit & Loss ({total})
-                    </h1>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    <input
-                        type="text"
-                        placeholder="Search User ID..."
-                        value={search}
-                        onChange={(e) => {
-                            setSearch(e.target.value);
-                            setPage(1);
-                        }}
-                        className="bg-[#1e293b] px-3 py-2 rounded text-sm border border-gray-700"
-                    />
-
-                    <div className="flex flex-wrap gap-2">
-
-                        {/* ALL */}
-                        <button
-                            onClick={() => {
-                                setType("");
-                                setPage(1);
-                            }}
-                            className={`px-4 py-2 rounded text-sm font-semibold transition 
-                              ${type === ""
-                                    ? "bg-blue-700 text-white"
-                                    : "bg-gray-500 text-gray-300 hover:bg-blue-600 hover:text-white"
-                                }`}
-                        >
-                            All
-                        </button>
-
-                        {/* PROFIT */}
-                        <button
-                            onClick={() => {
-                                setType("PROFIT");
-                                setPage(1);
-                            }}
-                            className={`px-4 py-2 rounded text-sm font-semibold transition 
-                            ${type === "PROFIT"
-                                    ? "bg-green-700 text-white"
-                                    : "bg-gray-500 text-gray-300 hover:bg-green-600 hover:text-white"
-                                }`}
-                        >
-                            Profit
-                        </button>
-
-                        {/* LOSS */}
-                        <button
-                            onClick={() => {
-                                setType("LOSS");
-                                setPage(1);
-                            }}
-                            className={`px-4 py-2 rounded text-sm font-semibold transition 
-                                 ${type === "LOSS"
-                                    ? "bg-red-700 text-white"
-                                    : "bg-gray-500 text-gray-300 hover:bg-red-600 hover:text-white"
-                                }`}
-                        >
-                            Loss
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-            {/* MAIN CONTAINER */}
-            <div className="flex-1 min-h-[200px] bg-[#020817] rounded-lg border border-gray-700 flex flex-col overflow-hidden relative">
-
-                {/* TABLE */}
-                <div className="w-full overflow-x-auto min-h-[200px] scrollbar-thin scrollbar-thumb-gray-700 ">
-
-                    <table className="min-w-[900px] w-full text-sm border-collapse">
-
-                        <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white text-sm uppercase sticky top-0 border-b border-[#d6a210]">
-                            <tr>
-                                <th className="px-3 py-2  ">#</th>
-                                <th className="px-3 py-2  ">User</th>
-                                <th className="px-3 py-2  ">Pair</th>
-                                <th className="px-3 py-2  ">Type</th>
-                                <th className="px-3 py-2  ">Side</th>
-                                <th className="px-3 py-2  ">Qty</th>
-                                <th className="px-3 py-2  ">Price</th>
-                                <th className="px-3 py-2  ">PnL</th>
-                                <th className="px-3 py-2  ">Fee</th>
-                                <th className="px-3 py-2  ">Date</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {data.length > 0 ? (
-                                data.map((item, i) => (
-                                    <tr key={i} className="hover:bg-[#1e293b] font-semibold transition text-center">
-
-                                        <td className="px-3 py-3 border border-gray-700">
-                                            {(page - 1) * PAGE_SIZE + i + 1}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">{item.userId}</td>
-                                        <td className="px-3 py-3 border border-gray-700">{item.pair}</td>
-
-                                        <td className={`px-3 py-3 border border-gray-700 ${item.type === "PROFIT"
-                                            ? "text-green-400"
-                                            : "text-red-400"
-                                            }`}>
-                                            {item.type}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">{item.side}</td>
-                                        <td className="px-3 py-3 border border-gray-700">{item.qty}</td>
-                                        <td className="px-3 py-3 border border-gray-700">{item.price}</td>
-
-                                        <td className={`px-3 py-3 border border-gray-700 ${item.isProfit
-                                            ? "text-green-400"
-                                            : "text-red-400"
-                                            }`}>
-                                            {item.pnl.toFixed(2)}
-                                        </td>
-
-                                        <td className="px-3 py-3 border border-gray-700">{item.commission}</td>
-                                        <td className="px-3 py-3 border border-gray-700">{`${item.date} ${item.time}`}</td>
-
-                                    </tr>
-                                ))
-                            ) : (
-                                loading || !showNoData ? (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/40 backdrop-blur-[1px]">
-                                        {/* <div className="w-8 h-8 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
-                                        <Loader />
-                                    </div>
-                                ) :
-                                    (
-                                        <tr> <td colSpan="11" className="text-center py-6 text-gray-500"> No Data Found </td> </tr>
-                                    )
-                            )}
-                        </tbody>
-
-                    </table>
-
-                    {loading && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                            {/* <div className="w-10 h-10 border-4 border-gray-600 border-t-blue-500 rounded-full animate-spin"></div> */}
-                            <Loader />
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex flex-col md:flex-row items-center justify-between px-3 py-3 border-t border-gray-700 text-sm gap-3 mt-3">
-
-                    <span className="text-gray-400">
-                        Page {page} of {totalPages}
-                    </span>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-
-                        <button
-                            onClick={() => handlePageChange(page - 1)}
-                            disabled={page === 1}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ‹
-                        </button>
-
-                        {getPageNumbers().map((num, index) =>
-                            num === "..." ? (
-                                <span key={index} className="text-gray-400 text-sm">
-                                    ...
-                                </span>
-                            ) : (
-                                <button
-                                    key={index}
-                                    onClick={() => handlePageChange(num)}
-                                    className={`flex items-center justify-center rounded-md text-sm font-semibold transition ${page === num
-                                        ? "text-[#d6a210]"
-                                        : "text-gray-300 hover:text-[#d3b769]"
-                                        }`}
-                                >
-                                    {num}
-                                </button>
-                            )
-                        )}
-
-                        <button
-                            onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPages}
-                            className="px-3 py-1.5 border border-gray-600 rounded-md text-white text-sm font-semibold hover:bg-[#1e293b] transition disabled:opacity-40"
-                        >
-                            ›
-                        </button>
-
-                    </div>
-                </div>
-            </div>
+      {/* HEADER */}
+      <div className="mb-6 flex flex-col md:flex-row justify-between gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl shadow-glow-gold/20 bg-brand-gold/10">
+            <FaChartPie className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Profit & Loss
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Total: {total} records</p>
+          </div>
         </div>
-    );
+        <div className="flex flex-wrap gap-3 items-center">
+          <input type="text" placeholder="Search User ID..."
+            value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 transition"
+          />
+          {typeFilters.map((f) => (
+            <button key={f.value} onClick={() => { setType(f.value); setPage(1); }}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${f.cls} ${type === f.value ? "ring-1 ring-white/20" : ""}`}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* MAIN */}
+      <div className="glass-table-container flex flex-col z-10">
+        <div className="w-full overflow-x-auto relative">
+          <table className="min-w-[900px] glass-table whitespace-nowrap">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Pair</th>
+                <th className="text-center">Type</th>
+                <th>Side</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th className="text-center">PnL</th>
+                <th>Fee</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.length > 0 ? (
+                data.map((item, i) => (
+                  <tr key={i}>
+                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + i + 1}</span></td>
+                    <td className="font-medium text-white">{item.userId}</td>
+                    <td className="font-mono text-gray-300">{item.pair}</td>
+                    <td className="text-center">
+                      <span className={`glass-badge ${item.type === "PROFIT" ? "glass-badge-success" : "glass-badge-danger"}`}>
+                        {item.type}
+                      </span>
+                    </td>
+                    <td className="text-gray-300">{item.side}</td>
+                    <td className="text-gray-300">{item.qty}</td>
+                    <td className="text-gray-300">{item.price}</td>
+                    <td className={`text-center font-bold ${item.isProfit ? "text-green-400" : "text-red-400"}`}>
+                      {item.pnl.toFixed(2)}
+                    </td>
+                    <td className="text-gray-400">{item.commission}</td>
+                    <td className="text-gray-500 text-xs">{`${item.date} ${item.time}`}</td>
+                  </tr>
+                ))
+              ) : (
+                loading || !showNoData ? (
+                  <tr><td colSpan="10" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+                ) : (
+                  <tr><td colSpan="10" className="text-center py-12 text-gray-500 font-medium">No Data Found</td></tr>
+                )
+              )}
+            </tbody>
+          </table>
+
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
+              <Loader />
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+          <span className="text-gray-400 font-medium">
+            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+          </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
+            {getPageNumbers().map((num, index) =>
+              num === "..." ? (
+                <span key={index} className="px-0.5 text-gray-500">
+                  ...
+                </span>
+              ) : (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(num)}
+                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                    ? "text-brand-gold "
+                    : "text-gray-400  hover:brand-gold  "
+                    }`}
+                >
+                  {num}
+                </button>
+              )
+            )}
+            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PnlHistory;

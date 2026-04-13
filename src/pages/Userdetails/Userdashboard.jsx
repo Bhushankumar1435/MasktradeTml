@@ -1,301 +1,214 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUserDashboardApi, getUserLevelViewApi } from "../../ApiService/Adminapi";
+import Loader from "../../components/ui/Loader";
+import { FaUser, FaArrowLeft, FaWallet, FaUsers, FaChartLine } from "react-icons/fa";
 
-// 🔥 Loader
-const Loader = () => (
-  <div className="flex justify-center items-center py-10">
-    <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-  </div>
-);
+const statFields = [
+  { title: "Wallet Balance", key: "walletBalance", color: "text-brand-gold" },
+  { title: "Total Income", key: "totalIncome", color: "text-emerald-400" },
+  { title: "Total Withdraw", key: "totalWithdraw", color: "text-red-400" },
+  { title: "Package Amount", key: "packageAmount", color: "text-blue-400" },
+  { title: "Total Package", key: "totalPackage", color: "text-purple-400" },
+  { title: "Team Business", key: "teamBusiness", color: "text-yellow-400" },
+  { title: "Total Team", key: "totalTeam", color: "text-cyan-400" },
+  { title: "Direct Users", key: "directUsers", color: "text-pink-400" },
+  { title: "Fuel Balance", key: "fuelBalance", color: "text-orange-400" },
+  { title: "Exchange Balance", key: "exchangeBalance", color: "text-teal-400" },
+];
 
 const UserDashboard = () => {
   const { userId } = useParams();
+  const navigate = useNavigate();
   const [levelData, setLevelData] = useState([]);
   const [levelLoading, setLevelLoading] = useState(false);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
-
   const getDashboard = async () => {
     try {
       setLoading(true);
       const res = await getUserDashboardApi(userId);
-
-      if (res.data?.success) {
-        setData(res.data.data);
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
+      if (res.data?.success) setData(res.data.data);
+    } catch (err) { console.log(err); }
+    finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    getDashboard();
-    getLevelData();
-  }, [userId]);
+  const getLevelData = async () => {
+    try {
+      setLevelLoading(true);
+      const res = await getUserLevelViewApi(userId);
+      if (res.data?.success) setLevelData(res.data.data || []);
+    } catch (err) { console.log(err); }
+    finally { setLevelLoading(false); }
+  };
+
+  useEffect(() => { getDashboard(); getLevelData(); }, [userId]);
 
   const user = data?.user;
   const income = data?.income;
   const team = data?.team;
   const pkg = data?.package;
 
+  const filteredLevels = levelData.filter(item => Number(item.level) > 0 && Number(item.totalTeam) > 0);
 
-  const getLevelData = async () => {
-    try {
-      setLevelLoading(true);
-      const res = await getUserLevelViewApi(userId);
-
-      if (res.data?.success) {
-        setLevelData(res.data.data || []);
-      }
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLevelLoading(false);
-    }
+  const stats = {
+    walletBalance: user?.balance,
+    totalIncome: income?.totalIncome,
+    totalWithdraw: income?.totalWithdraw,
+    packageAmount: pkg?.amount,
+    totalPackage: pkg?.totalPackage,
+    teamBusiness: team?.teamBusiness,
+    totalTeam: team?.totalTeam,
+    directUsers: team?.directUsers,
+    fuelBalance: data?.fuelbalance?.balance,
+    exchangeBalance: data?.exchange?.data?.available,
   };
 
-  const filteredLevels = levelData.filter(
-    item => Number(item.level) > 0 && Number(item.totalTeam) > 0
-  );
-
-
   return (
-    <div className="relative  min-h-screen bg-[#0f172a] text-white p-4 md:p-6 rounded-md">
+    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+      <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h1 className="text-lg md:text-xl font-semibold text-[#d6a210]">
-          User Dashboard ({userId})
-        </h1>
-
-        <button
-          onClick={() => navigate(-1)}
-          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm"
-        >
-          ← Back
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+            <FaUser className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              User Dashboard
+            </h1>
+            <p className="text-gray-400 text-sm mt-1 font-mono">{userId}</p>
+          </div>
+        </div>
+        <button onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-semibold text-white transition-all self-start md:self-auto">
+          <FaArrowLeft className="text-xs" /> Back
         </button>
       </div>
 
       {/* LOADING */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0f172a]/60 backdrop-blur-sm z-10">
-          {/* <div className="w-10 h-10 border-4 border-[#d6a210] border-t-transparent rounded-full animate-spin"></div> */}
+        <div className="flex justify-center items-center py-20 relative z-10">
           <Loader />
         </div>
       )}
 
-      {/* DATA */}
+      {/* CONTENT */}
       {!loading && user && (
-        <div className="space-y-6">
+        <div className="space-y-6 relative z-10">
 
-          {/* 👤 USER INFO */}
-          <div className="bg-[#1e293b] p-4 rounded-xl border border-gray-700">
-            <h3 className="text-lg font-semibold text-[#d6a210] mb-3">User Info</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Name:</span> {user.name || "-"}
-              </div>
-
-              <div className="break-all font-semibold">
-                <span className="text-gray-400 font-semibold">Email:</span> {user.email || "-"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Phone:</span> {user.phoneNumber || "-"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Sponsor ID:</span> {user.sponsorId || "-"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Country:</span> {user.country || "-"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Level:</span> {user.level ?? "-"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Paid Status:</span>{" "}
-                <span
-                  className={`ml-2 px-3 py-1 rounded-full text-white text-xs ${user.paidStatus ? "bg-green-600" : "bg-red-600"
-                    }`}
-                >
+          {/* USER INFO */}
+          <div className="glass-panel p-6 rounded-2xl border border-white/10">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-brand-gold mb-5 flex items-center gap-2">
+              <FaUser className="text-brand-gold" /> User Information
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              {[
+                { label: "Name", value: user.name },
+                { label: "Email", value: user.email },
+                { label: "Phone", value: user.phoneNumber },
+                { label: "Sponsor ID", value: user.sponsorId },
+                { label: "Country", value: user.country },
+                { label: "Level", value: user.level ?? "—" },
+                { label: "Joined", value: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A" },
+                { label: "Expiry", value: user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : "N/A" },
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">{item.label}</span>
+                  <span className="text-white font-medium break-all">{item.value || "—"}</span>
+                </div>
+              ))}
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Paid Status</span>
+                <span className={`glass-badge self-start ${user.paidStatus ? "glass-badge-success" : "glass-badge-danger"}`}>
                   {user.paidStatus ? "Paid" : "Unpaid"}
                 </span>
               </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Status:</span>{" "}
-                <span
-                  className={`ml-2 px-3 py-1 rounded-full text-white text-xs ${user.isBlocked ? "bg-red-600" : "bg-green-600"
-                    }`}
-                >
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Account Status</span>
+                <span className={`glass-badge self-start ${user.isBlocked ? "glass-badge-danger" : "glass-badge-success"}`}>
                   {user.isBlocked ? "Blocked" : "Active"}
                 </span>
               </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Joined:</span>{" "}
-                {user.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString()
-                  : "N/A"}
-              </div>
-
-              <div className="font-semibold">
-                <span className="text-gray-400 font-semibold">Expiry:</span>{" "}
-                {user.expiryDate
-                  ? new Date(user.expiryDate).toLocaleDateString()
-                  : "N/A"}
-              </div>
-
             </div>
           </div>
 
-          {/* 💰 WALLET + INCOME */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-            <Card title="Wallet Balance" value={user.balance} />
-            <Card title="Total Income" value={income?.totalIncome} />
-            <Card title="Total Withdraw" value={income?.totalWithdraw} />
-
-            <Card title="Package Amount" value={pkg?.amount} />
-            <Card title="Total Package" value={pkg?.totalPackage} />
-
-            <Card title="Team Business" value={team?.teamBusiness} />
-            <Card title="Total Team" value={team?.totalTeam} />
-            <Card title="Direct Users" value={team?.directUsers} />
-
-            <Card title="Fuel Balance" value={data?.fuelbalance?.balance} />
-            <Card title="Exchange Balance" value={data?.exchange?.data?.available} />
-
+          {/* STATS CARDS */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+              <FaChartLine /> Stats Overview
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {statFields.map((field, i) => (
+                <div key={i}
+                  className="glass-panel p-4 rounded-2xl border border-white/10 hover:-translate-y-1 transition-transform cursor-default group relative overflow-hidden">
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-brand-gold/0 via-brand-gold to-brand-gold/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">{field.title}</p>
+                  <p className={`text-xl font-bold ${field.color}`}>{stats[field.key] ?? 0}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
+          {/* LEVEL TABLE */}
+          {filteredLevels.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+                <FaUsers /> Level View
+              </h3>
+              <div className="glass-table-container relative">
+                <div className="w-full overflow-x-auto relative">
+                  {levelLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
+                      <Loader />
+                    </div>
+                  )}
+                  <table className="min-w-[600px] glass-table">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Level</th>
+                        <th>Total Team</th>
+                        <th className="text-center text-emerald-400">Active</th>
+                        <th className="text-center text-red-400">Inactive</th>
+                        <th>Business</th>
+                        <th className="text-center">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLevels.map((item, index) => (
+                        <tr key={index}>
+                          <td><span className="text-gray-500">{index + 1}</span></td>
+                          <td><span className="text-blue-400 font-semibold">Level {item.level}</span></td>
+                          <td className="text-white font-medium">{item.totalTeam}</td>
+                          <td className="text-center text-emerald-400 font-semibold">{item.activeTeam}</td>
+                          <td className="text-center text-red-400 font-semibold">{item.inactiveTeam}</td>
+                          <td className="font-semibold text-brand-gold">₹{item.teamBusiness}</td>
+                          <td className="text-center">
+                            <button onClick={() => navigate(`/level-referrals/${userId}/${item.level}`)}
+                              className="px-4 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold hover:text-yellow-300 text-xs rounded-lg font-semibold transition-all hover:shadow-glow-gold">
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* EMPTY */}
       {!loading && !user && (
-        <p className="text-center text-gray-500">No data found</p>
-      )}
-
-      {/* 🔽 LEVEL VIEW TABLE */}
-      {filteredLevels.length > 0 && (
-        <div className="bg-[#020817] border border-gray-700 rounded-xl mt-6 overflow-hidden">
-
-          <h3 className="text-lg font-semibold text-[#d6a210] p-4 border-b border-gray-700">
-            Level View
-          </h3>
-
-          <div className="relative">
-            {levelLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-[#020817]/60 backdrop-blur-sm z-10">
-                {/* <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div> */}
-                <Loader/>
-              </div>
-            )}
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-center min-w-[600px]">
-
-                <thead className="bg-gradient-to-r from-[#d6a210] to-[#d4b55e] text-white uppercase text-xs">
-                  <tr>
-                    <th className="px-3 py-2 ">#</th>
-                    <th className="px-3 py-2 ">Level</th>
-                    <th className="px-3 py-2 ">Total Team</th>
-                    <th className="px-3 py-2 ">Active</th>
-                    <th className="px-3 py-2 ">Inactive</th>
-                    <th className="px-3 py-2 ">Business</th>
-                    <th className="px-3 py-2 ">Details</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredLevels.map((item, index) => (
-                    <tr key={index} className="font-semibold hover:bg-[#1e293b] border-collapse">
-
-                      <td className="px-3 py-2 border border-gray-700">
-                        {index + 1}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700 text-blue-400">
-                        Level {item.level}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700">
-                        {item.totalTeam}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700 text-green-400">
-                        {item.activeTeam}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700 text-red-400">
-                        {item.inactiveTeam}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700 text-yellow-400">
-                        ₹ {item.teamBusiness}
-                      </td>
-
-                      <td className="px-3 py-2 border border-gray-700">
-                        <button
-                          onClick={() => navigate(`/level-referrals/${userId}/${item.level}`)}
-                          className="px-3 py-1 bg-[#cca539] rounded text-sm hover:bg-[#d6a210]"
-                        >
-                          View
-                        </button>
-                      </td>
-
-                    </tr>
-                  ))}
-                </tbody>
-
-              </table>
-            </div>
-          </div>
+        <div className="glass-panel rounded-2xl p-12 text-center text-gray-500 font-medium relative z-10">
+          No data found for this user.
         </div>
       )}
-
-    </div>
-
-  );
-};
-
-// 🔥 CARD
-const Card = ({ title, value }) => {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-gray-700 bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-4 shadow-md transition-all duration-300 hover:scale-[1.04] hover:shadow-blue-500/20 group">
-
-      {/* Glow Effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-blue-500/10 blur-2xl transition duration-300"></div>
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col justify-between h-full">
-
-        {/* Title */}
-        <p className="text-[#d6a210] text-xs sm:text-sm tracking-wide font-semibold">
-          {title}
-        </p>
-
-        {/* Value */}
-        <h3 className="text-xl sm:text-2xl font-bold text-white mt-2 break-words">
-          {value ?? 0}
-        </h3>
-
-      </div>
-
-      {/* Bottom Line Animation */}
-      <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-[#d6a210] group-hover:w-full transition-all duration-300"></div>
-
     </div>
   );
 };

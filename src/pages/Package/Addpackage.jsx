@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { adminAddPackageApi } from "../../ApiService/Adminapi";
 import { toast } from "react-toastify";
+import { FaBox, FaCheck } from "react-icons/fa";
 
 const Addpackage = () => {
   const [name, setName] = useState("");
@@ -10,38 +11,22 @@ const Addpackage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // ✅ Validation
-    if (!name || !price || !validityDays) {
-      return toast.error("All fields are required");
-    }
-
-    if (Number(price) <= 0) {
-      return toast.error("Price must be greater than 0");
-    }
-
-    if (Number(validityDays) <= 0) {
-      return toast.error("Validity must be greater than 0");
-    }
+    if (!name || !price || !validityDays) return toast.error("All fields are required");
+    if (Number(price) <= 0) return toast.error("Price must be greater than 0");
+    if (Number(validityDays) <= 0) return toast.error("Validity must be greater than 0");
 
     try {
       setLoading(true);
-
       const res = await adminAddPackageApi({
         name,
         price: Number(price),
         validityDays: Number(validityDays),
       });
-
-      toast.success(res.data?.message || "Package added successfully");
-
-      // reset
+      toast.success(res.data?.message || "Package added successfully!");
       setName("");
       setPrice("");
       setValidityDays("");
-
     } catch (error) {
-      console.log(error);
       toast.error(error?.response?.data?.message || "Error occurred");
     } finally {
       setLoading(false);
@@ -49,55 +34,80 @@ const Addpackage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center px-4 rounded-md">
+    <div className="w-full flex justify-center font-outfit relative py-4">
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
-      {/* CARD */}
-      <div className="w-full max-w-md bg-[#1e293b] rounded-xl shadow-lg p-6">
+      <div className="w-full max-w-lg relative z-10">
+        {/* Header */}
+        <div className="glass-panel p-5 rounded-2xl mb-6 flex items-center gap-4">
+          <div className="p-2 border border-brand-gold/30 rounded-xl bg-brand-gold/10">
+            <FaBox className="text-brand-gold text-xl" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-gold to-yellow-400">
+              Add Package
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">Create a new subscription package</p>
+          </div>
+        </div>
 
-        <h2 className="text-xl font-semibold mb-5 text-white text-center">
-          Add Package
-        </h2>
+        {/* Form Card */}
+        <div className="glass-panel p-6 rounded-2xl">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Package Name</label>
+              <input
+                type="text"
+                placeholder="e.g. 365 Days Premium"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition"
+              />
+            </div>
 
-          {/* NAME */}
-          <input
-            type="text"
-            placeholder="Package Name (e.g. 365 Days)"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="p-2 rounded bg-white/10 text-white border border-gray-600 outline-none focus:border-blue-500"
-          />
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Price (₹)</label>
+              <input
+                type="number"
+                placeholder="Enter price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition"
+              />
+            </div>
 
-          {/* PRICE */}
-          <input
-            type="number"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="p-2 rounded bg-white/10 text-white border border-gray-600 outline-none focus:border-blue-500"
-          />
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">Validity (Days)</label>
+              <input
+                type="number"
+                placeholder="Enter validity in days"
+                value={validityDays}
+                onChange={(e) => setValidityDays(e.target.value)}
+                className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-brand-gold/50 focus:ring-1 focus:ring-brand-gold/30 transition"
+              />
+            </div>
 
-          {/* VALIDITY */}
-          <input
-            type="number"
-            placeholder="Validity (Days)"
-            value={validityDays}
-            onChange={(e) => setValidityDays(e.target.value)}
-            className="p-2 rounded bg-white/10 text-white border border-gray-600 outline-none focus:border-blue-500"
-          />
+            {/* Preview row */}
+            {(name || price || validityDays) && (
+              <div className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm flex flex-col gap-1">
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Preview</p>
+                {name && <p className="text-white"><span className="text-gray-500">Name:</span> {name}</p>}
+                {price && <p className="text-emerald-400 font-semibold"><span className="text-gray-500">Price:</span> ₹{price}</p>}
+                {validityDays && <p className="text-white"><span className="text-gray-500">Validity:</span> {validityDays} Days</p>}
+              </div>
+            )}
 
-          {/* BUTTON */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-green-600 hover:bg-green-700 transition p-2 rounded text-white font-medium disabled:opacity-50"
-          >
-            {loading ? "Adding..." : "Add Package"}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-xl font-bold text-brand-darker bg-gradient-to-r from-brand-gold to-yellow-400 hover:shadow-glow-gold hover:scale-[1.02] active:scale-[0.99] transition-all disabled:opacity-50 disabled:scale-100 text-sm flex items-center justify-center gap-2"
+            >
+              {loading ? "Adding..." : <><FaCheck /> Add Package</>}
+            </button>
 
-        </form>
-
+          </form>
+        </div>
       </div>
     </div>
   );
