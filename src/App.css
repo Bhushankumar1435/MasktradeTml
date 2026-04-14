@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,7 +7,7 @@
 @layer base {
   body {
     margin: 0;
-    font-family: "Outfit", sans-serif;
+    font-family: "Poppins", sans-serif;
     @apply bg-[#050A15] text-gray-200; /* Deep futuristic background */
   }
 

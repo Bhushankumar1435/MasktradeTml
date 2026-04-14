@@ -21,7 +21,7 @@ const PaidUsers = () => {
       setData(res?.data?.data?.users || []);
       setTotal(res?.data?.data?.count || 0);
       setTotalPages(res?.data?.data?.totalPages || 1);
-    } catch { toast.error("Failed to fetch paid users"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch paid users`); }
     finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
@@ -49,7 +49,7 @@ const PaidUsers = () => {
   const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* Header */}

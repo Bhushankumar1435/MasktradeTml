@@ -23,9 +23,7 @@ const AllBatches = () => {
       const res = await getAllBatchesApi(page, limit, search);
       setData(res?.data?.data || []);
       setTotal(res?.data?.pagination?.total || 0);
-    } catch (err) {
-      toast.error("Failed to fetch batches");
-    } finally {
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch batches`); } finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
     }
@@ -68,7 +66,7 @@ const AllBatches = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-purple-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}

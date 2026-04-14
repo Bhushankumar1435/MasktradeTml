@@ -15,7 +15,7 @@ const BannerList = () => {
       setLoading(true);
       const res = await getBannerListApi();
       if (res.data?.success) setBanners(res.data?.data || []);
-    } catch { toast.error("Failed to fetch banners"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch banners`); }
     finally { setLoading(false); }
   };
 
@@ -29,7 +29,7 @@ const BannerList = () => {
         toast.success(res.data.message);
         setBanners((prev) => prev.filter((b) => b._id !== id));
       } else { toast.error(res.data.message); }
-    } catch { toast.error("Delete failed"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Delete failed`); }
   };
 
   const handleUpdate = async () => {
@@ -42,7 +42,7 @@ const BannerList = () => {
       toast.success(res.data?.message || "Updated successfully");
       setEditData(null);
       getBanners();
-    } catch { toast.error("Update failed"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Update failed`); }
     finally { setActionLoading(false); }
   };
 
@@ -57,7 +57,7 @@ const BannerList = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}

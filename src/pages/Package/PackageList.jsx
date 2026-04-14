@@ -15,7 +15,7 @@ const PackageList = () => {
       setLoading(true);
       const res = await getPackagesApi();
       if (res.data?.success) setPackages(res.data.packages || []);
-    } catch { toast.error("Failed to fetch packages"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch packages`); }
     finally { setLoading(false); }
   };
 
@@ -38,7 +38,7 @@ const PackageList = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}

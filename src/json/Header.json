@@ -127,6 +127,17 @@
     ]
   },
   {
+    "title": "Deposit Manage",
+    "icon": "FaArrowDown",
+    "children": [
+      {
+        "title": "Deposit History",
+        "path": "/depositHistory",
+        "icon": "FaArrowDown"
+      } 
+    ]
+  },
+  {
     "title": "Ticket Manage",
     "icon": "FaTicketAlt",
     "children": [

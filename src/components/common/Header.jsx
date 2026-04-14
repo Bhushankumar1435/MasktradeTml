@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import headerjson from "../../json/Header.json";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -26,7 +26,8 @@ import {
   FaExchangeAlt,
   FaRandom,
   FaBell,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaArrowDown
 } from "react-icons/fa";
 
 const Header = ({ closeSidebar }) => {
@@ -39,7 +40,7 @@ const Header = ({ closeSidebar }) => {
     FaHome, FaUsers, FaLink, FaUserCheck, FaWallet, FaChartLine,
     FaMoneyBillWave, FaBox, FaImage, FaTicketAlt, FaPlusCircle, FaList,
     FaUserShield, FaMinusCircle, FaArrowUp, FaChartBar, FaCheckCircle,
-    FaChartPie, FaLayerGroup, FaExchangeAlt, FaRandom, FaBell
+    FaChartPie, FaLayerGroup, FaExchangeAlt, FaRandom, FaBell,FaArrowDown
   };
 
   const fetchNotifications = async () => {
@@ -78,7 +79,7 @@ const Header = ({ closeSidebar }) => {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#020817]/80 backdrop-blur-md text-gray-200 flex flex-col font-outfit relative overflow-hidden">
+    <div className="h-[100dvh] w-full bg-[#020817]/80 backdrop-blur-md text-gray-200 flex flex-col font-poppins relative overflow-hidden">
 
       {/* Ambient glow inside sidebar */}
       <div className="absolute top-0 left-0 w-full h-32 bg-brand-gold/5 blur-[60px] pointer-events-none"></div>
@@ -92,9 +93,9 @@ const Header = ({ closeSidebar }) => {
       >
         <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/5 to-transparent opacity-50 pointer-events-none"></div>
         <div className="flex items-center gap-4 relative z-10">
-          <div className="p-2 border border-brand-gold/30 rounded-full shadow-glow-gold/20 glow-animate transition-transform hover:scale-110">
-            <img className="w-8 h-8 md:w-9 md:h-9 object-contain" src={"/Images/favicon.png"} alt="logo" />
-          </div>
+          <Link to="/" className="p-2 border border-brand-gold/30 rounded-xl shadow-glow-gold/20 glow-animate transition-transform hover:scale-110">
+            <img className="w-8 h-6 md:w-9 md:h-7 object-contain" src={"/Images/favicon.png"} alt="logo" />
+          </Link>
           <h2 className="text-xl md:text-2xl font-bold tracking-wide text-brand-gold text-glow">
             Masktrades
           </h2>
@@ -146,10 +147,10 @@ const Header = ({ closeSidebar }) => {
                   {/* Hover shimmer sweep */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/3 to-transparent pointer-events-none"></div>
 
-                  <span className="flex items-center gap-3">
+                  <span className="flex items-center gap-2">
                     {item.icon && iconMap[item.icon] && (
                       <span
-                        className={`text-xl transition-all duration-300 group-hover:scale-110 ${
+                        className={`text-lg transition-all duration-300 group-hover:scale-110 ${
                           isParentActive ? "text-brand-gold drop-shadow-md" : "text-gray-500 group-hover:text-brand-gold/80"
                         }`}
                       >
@@ -157,13 +158,13 @@ const Header = ({ closeSidebar }) => {
                       </span>
                     )}
                     {item.title === "Notification" ? unreadCount > 0 && (
-                      <span className="flex items-center font-medium">
+                      <span className="flex items-center text-sm font-medium">
                         <span>{item.title}</span>
                         <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500/20 text-red-400 rounded-full border border-red-500/30 animate-pulse">
                           {unreadCount > 10 ? "10+" : unreadCount}
                         </span>
                       </span>
-                    ) : <span className="font-medium tracking-wide">{item.title}</span>
+                    ) : <span className="text-sm font-medium tracking-wide whitespace-nowrap">{item.title}</span>
                     }
                   </span>
 
@@ -205,7 +206,7 @@ const Header = ({ closeSidebar }) => {
                           {React.createElement(iconMap[subItem.icon])}
                         </span>
                       )}
-                      <span className="font-medium">{subItem.title}</span>
+                      <span className="font-medium whitespace-nowrap">{subItem.title}</span>
                     </NavLink>
                   ))}
                 </div>
@@ -233,4 +234,4 @@ const Header = ({ closeSidebar }) => {
 };
 
 export default Header;
-
+

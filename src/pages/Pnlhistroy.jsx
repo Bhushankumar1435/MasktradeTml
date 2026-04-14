@@ -28,7 +28,7 @@ const PnlHistory = () => {
       } else {
         toast.error("Failed to fetch data");
       }
-    } catch { toast.error("Server error"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Server error`); }
     finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
@@ -62,7 +62,7 @@ const PnlHistory = () => {
   ];
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <ToastContainer />
       <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-purple-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 

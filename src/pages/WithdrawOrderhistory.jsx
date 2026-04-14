@@ -24,9 +24,7 @@ const WithdrawOrders = () => {
       const res = await getWithdrawOrdersApi(page, limit, status, search);
       setData(res?.data?.data?.data || []);
       setTotal(res?.data?.data?.count || 0);
-    } catch {
-      toast.error("Failed to fetch withdraw orders");
-    } finally {
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch withdraw orders`); } finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
     }
@@ -43,7 +41,7 @@ const WithdrawOrders = () => {
       await manageWithdrawApi({ id, status: "APPROVED", remarks: "Approved" });
       toast.success("Approved");
       fetchWithdraws();
-    } catch { toast.error("Error"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Error`); }
   };
 
   const openRejectModal = (id) => { setSelectedId(id); setRemark(""); setShowModal(true); };
@@ -55,7 +53,7 @@ const WithdrawOrders = () => {
       toast.success("Rejected");
       setShowModal(false);
       fetchWithdraws();
-    } catch { toast.error("Error"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Error`); }
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -76,7 +74,7 @@ const WithdrawOrders = () => {
   const copyText = async (text) => {
     if (!text) return toast.error("Nothing to copy");
     try { await navigator.clipboard.writeText(text); toast.success("Copied!"); }
-    catch { toast.error("Failed to copy"); }
+    catch (err) { toast.error(err?.response?.data?.message || `Failed to copy`); }
   };
 
   const truncateAddress = (address) => {
@@ -93,7 +91,7 @@ const WithdrawOrders = () => {
   ];
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 left-1/3 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* Header */}

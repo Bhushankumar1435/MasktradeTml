@@ -162,7 +162,7 @@ const User = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* Header */}
@@ -399,19 +399,19 @@ const User = () => {
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-brand-gold hover:-translate-y-1 transition-transform cursor-default group overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-brand-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <p className="text-gray-400 text-sm font-semibold tracking-wide uppercase">Total Users</p>
-          <h2 className="text-3xl font-bold text-white mt-1 drop-shadow-md">{stats.totalUsers}</h2>
+          <h2 className="text-xl font-bold text-white mt-1 drop-shadow-md">{stats.totalUsers}</h2>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-transform cursor-default group overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <p className="text-gray-400 text-sm font-semibold tracking-wide uppercase">Active Users</p>
-          <h2 className="text-3xl font-bold text-emerald-400 mt-1 drop-shadow-md">{stats.activeUsers}</h2>
+          <h2 className="text-xl font-bold text-emerald-400 mt-1 drop-shadow-md">{stats.activeUsers}</h2>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-red-500 hover:-translate-y-1 transition-transform cursor-default group overflow-hidden">
            <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <p className="text-gray-400 text-sm font-semibold tracking-wide uppercase">Inactive Users</p>
-          <h2 className="text-3xl font-bold text-red-500 mt-1 drop-shadow-md">{stats.inactiveUsers}</h2>
+          <h2 className="text-xl font-bold text-red-500 mt-1 drop-shadow-md">{stats.inactiveUsers}</h2>
         </div>
 
       </div>

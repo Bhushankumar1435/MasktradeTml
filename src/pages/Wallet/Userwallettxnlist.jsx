@@ -57,7 +57,7 @@ const Userwallettxnlist = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-blue-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}

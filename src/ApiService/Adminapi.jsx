@@ -281,3 +281,7 @@ export const broadcastNotificationApi = (data) => {
         data
     );
 };
+
+export const getDepositHistory = (page = 1, limit = 10) => {
+  return api.get(`/admin/getAdminDepositHistory?page=${page}&limit=${limit}`);
+};

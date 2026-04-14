@@ -43,7 +43,7 @@ const Addincome = () => {
   };
 
   return (
-    <div className="w-full flex justify-center font-outfit relative py-4">
+    <div className="w-full flex justify-center font-poppins relative py-4">
       <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-emerald-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
       <div className="w-full max-w-lg relative z-10">

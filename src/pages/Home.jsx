@@ -110,7 +110,7 @@ const Home = () => {
             </div>
             <div className="flex items-end justify-between relative z-10">
               <div>
-                <p className="text-gray-400 font-medium text-sm mb-1 uppercase tracking-wider">Transactions</p>
+                <p className="text-gray-400 font-medium text-sm mb-1 uppercase tracking-wider">Total Transactions</p>
                 <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">{stats.transactions}</h2>
               </div>
             </div>

@@ -24,9 +24,7 @@ const Notifications = () => {
       const res = await getAllNotificationsApi(page, limit);
       setData(res?.data?.data || []);
       setTotal(res?.data?.total || 0);
-    } catch (err) {
-      toast.error("Failed to fetch notifications");
-    } finally {
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to fetch notifications`); } finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
     }
@@ -38,7 +36,7 @@ const Notifications = () => {
       await markNotificationReadApi(item._id);
       setData(prev => prev.map(n => n._id === item._id ? { ...n, isRead: true } : n));
       toast.success("Marked as read");
-    } catch { toast.error("Failed to mark as read"); }
+    } catch (err) { toast.error(err?.response?.data?.message || `Failed to mark as read`); }
   };
 
   useEffect(() => {
@@ -62,7 +60,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-blue-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* HEADER */}
@@ -200,7 +198,7 @@ const Notifications = () => {
                   await sendNotificationApi({ receiverId: replyOpenId, title: replyData.title, message: replyData.message });
                   toast.success("Reply sent!");
                   setReplyOpenId(null);
-                } catch { toast.error("Failed to send"); }
+                } catch (err) { toast.error(err?.response?.data?.message || `Failed to send`); }
               }}
                 className="px-4 py-2 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold rounded-xl text-sm font-semibold transition">
                 Send
@@ -232,7 +230,7 @@ const Notifications = () => {
                   await broadcastNotificationApi({ title: broadcastData.title, message: broadcastData.message });
                   toast.success("Sent to all users!");
                   setBroadcastOpen(false);
-                } catch { toast.error("Failed"); }
+                } catch (err) { toast.error(err?.response?.data?.message || `Failed`); }
               }}
                 className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition">
                 Broadcast

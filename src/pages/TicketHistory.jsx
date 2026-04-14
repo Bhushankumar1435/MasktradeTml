@@ -78,7 +78,7 @@ const TicketHistory = () => {
   const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <ToastContainer />
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 

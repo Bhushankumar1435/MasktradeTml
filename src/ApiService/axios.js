@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-//  401 handle
+//  401 handle and Global Error JSON Parsing
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -25,6 +25,21 @@ api.interceptors.response.use(
       localStorage.removeItem("admin_token");
       window.location.href = "/login";
     }
+
+    // Attempt to globally parse stringified JSON error messages (e.g. Binance errors)
+    if (err.response && err.response.data && typeof err.response.data.message === "string") {
+      try {
+        const parsed = JSON.parse(err.response.data.message);
+        if (parsed.msg) {
+          err.response.data.message = parsed.msg;
+        } else if (parsed.message) {
+          err.response.data.message = parsed.message;
+        }
+      } catch (e) {
+        // Not a JSON string, leave it unaltered
+      }
+    }
+
     return Promise.reject(err);
   }
 );

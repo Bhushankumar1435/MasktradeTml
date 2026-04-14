@@ -35,6 +35,7 @@ import PlacebatchTrade from "./pages/Binance/PlacebatchTrade";
 import AllBatches from "./pages/Binance/AllBatcheshistory";
 import BatchDetails from "./pages/Binance/BatchDetails";
 import NotificationHistory from "./pages/Notifications/NotificationHistory";
+import DepositHistory from "./pages/deposithistory";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
             <Route path="/user-dashboard/:userId" element={<UserDashboard />} />
             <Route path="/level-referrals/:userId/:level" element={<LevelReferrals />} />
             <Route path="/withdrawhistory" element={<WithdrawOrders />} />
+            <Route path="/depositHistory" element={<DepositHistory />} />
             <Route path="/ticketHistory" element={<TicketHistory />} />
             <Route path="/incometxnlist" element={<Income />} />
             <Route path="/addincome" element={<Addincome />} />

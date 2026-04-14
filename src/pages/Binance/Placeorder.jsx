@@ -58,16 +58,24 @@ const PlaceTrade = () => {
         autoClose: formData.autoClose,
       };
       if (formData.autoClose) payload.expiryMinutes = Number(formData.expiryMinutes);
-      await placeTradeApi(payload);
-      setResult("success");
+      const res = await placeTradeApi(payload);
+      setResult({ type: "success", message: res?.data?.message || "Trade placed successfully!" });
       setFormData({ userId: "", pair: "SOLUSDT", amount: "", leverage: 1, mode: "LONG", confirm: false, autoClose: false, expiryMinutes: 10 });
       setUserName("");
-    } catch { setResult("error"); }
+    } catch (err) { 
+      let errMsg = err.response?.data?.message || err.message || "Failed to place trade";
+      try {
+        const parsed = JSON.parse(errMsg);
+        if (parsed.msg) errMsg = parsed.msg;
+      } catch (e) {}
+      setResult({ type: "error", message: errMsg }); 
+    }
     finally { setLoading(false); }
   };
+  console.log(result)
 
   return (
-    <div className="w-full flex justify-center font-outfit relative py-4">
+    <div className="w-full flex justify-center font-poppins relative py-4">
       <div className="absolute top-1/3 left-1/4 w-72 h-72 bg-brand-gold/5 blur-[100px] pointer-events-none rounded-full"></div>
 
       <div className="w-full max-w-3xl relative z-10">
@@ -85,14 +93,14 @@ const PlaceTrade = () => {
         </div>
 
         {/* Result Banner */}
-        {result === "success" && (
-          <div className="mb-5 px-5 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 font-semibold text-sm flex items-center gap-2">
-            ✅ Trade placed successfully!
+        {result?.type === "success" && (
+          <div className="mb-5 px-5 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 font-semibold text-sm flex items-center gap-2 max-h-32 overflow-y-auto">
+            ✅ {result.message}
           </div>
         )}
-        {result === "error" && (
-          <div className="mb-5 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-semibold text-sm flex items-center gap-2">
-            ❌ Unable to place trade. Please try again.
+        {result?.type === "error" && (
+          <div className="mb-5 px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 font-semibold text-sm flex items-center gap-2 max-h-32 overflow-y-auto">
+            ❌ {result.message}
           </div>
         )}
 

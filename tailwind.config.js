@@ -8,17 +8,18 @@ module.exports = {
       fontFamily: {
         inter: ["Inter", "sans-serif"],
         outfit: ["Outfit", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
       },
       colors: {
         leat_dark: "#181818",
         light_dark:"#1E1E1E",
         light_white:"#F0F0F0",
         brand: {
-          dark: "#0B1121",     // Deep space background
-          darker: "#060A14",   // Deeper elements
-          gold: "#d6a210",     // The accent color
-          goldLight: "#f5c536", // Hover gold
-          card: "rgba(30, 41, 59, 0.4)", // Translucent card bg
+          dark: "#0B1121",     
+          darker: "#060A14",   
+          gold: "#d6a210",     
+          goldLight: "#f5c536", 
+          card: "rgba(30, 41, 59, 0.4)", 
           cardHover: "rgba(30, 41, 59, 0.7)", 
         }
       },

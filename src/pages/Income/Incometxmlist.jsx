@@ -20,9 +20,7 @@ const Income = () => {
       const res = await getAllIncomeApi(page, limit, search);
       setData(res?.data?.data || []);
       setTotal(res?.data?.total || 0);
-    } catch (error) {
-      toast.error("Failed to fetch income");
-    } finally {
+    } catch (error) { toast.error(error?.response?.data?.message || `Failed to fetch income`); } finally {
       setLoading(false);
       setTimeout(() => setShowNoData(true), 300);
     }
@@ -55,7 +53,7 @@ const Income = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-screen flex flex-col font-outfit relative overflow-hidden">
+    <div className="w-full h-full min-h-screen flex flex-col font-poppins relative overflow-hidden">
       <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-emerald-900/10 blur-[100px] pointer-events-none rounded-full"></div>
 
       {/* Header */}
