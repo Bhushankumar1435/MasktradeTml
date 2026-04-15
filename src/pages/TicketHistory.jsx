@@ -122,7 +122,7 @@ const TicketHistory = () => {
                     </td>
                     <td className="text-center">
                       {t.doc ? (
-                        <a href={t.doc} target="_blank" rel="noreferrer"
+                        <a href={`https://api.robofict.mail-go.site/uploads/${t.doc}`} target="_blank" rel="noreferrer"
                           className="text-blue-400 hover:text-blue-300 text-sm font-medium underline transition">View File</a>
                       ) : <span className="text-gray-600">N/A</span>}
                     </td>

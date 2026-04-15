@@ -145,8 +145,11 @@ const BannerList = () => {
             />
 
             <div className="w-full h-36 bg-white/5 border border-white/10 rounded-xl mb-5 overflow-hidden flex items-center justify-center">
-              <img src={editData.imageFile ? editData.preview : getImageUrl(editData)}
-                alt="" className="max-h-full object-contain" />
+              {editData.imageFile ? (
+                <img src={editData.preview} alt="" className="max-h-full object-contain" />
+              ) : (
+                <span className="text-gray-500 text-sm">No new image selected</span>
+              )}
             </div>
 
             <div className="flex gap-3">

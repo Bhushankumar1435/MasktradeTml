@@ -133,21 +133,24 @@ const Header = ({ closeSidebar }) => {
               >
                 <NavLink
                   to={item.path || "#"}
-                  className={`relative px-4 py-3 rounded-xl flex justify-between items-center transition-all duration-300 group overflow-hidden border border-transparent
+                  className={`relative px-4 py-3 rounded-xl flex justify-between items-center transition-colors duration-300 group overflow-hidden border border-transparent
                ${isParentActive
                       ? "bg-brand-gold/10 border-brand-gold/30 shadow-[inset_0_0_20px_rgba(214,162,16,0.15)] text-white"
-                      : "hover:bg-white/5 hover:border-white/10 text-gray-400 hover:text-gray-100"
+                      : "text-gray-400 hover:text-white border-transparent"
                     }`}
                 >
                   {/* Active left-bar indicator */}
                   {isParentActive && (
-                    <div className="absolute left-0 top-0 w-1 h-full bg-brand-gold shadow-glow-gold rounded-r-md block animate-scale-in"></div>
+                    <div className="absolute left-0 top-0 w-1 h-full bg-brand-gold shadow-glow-gold rounded-r-md block animate-scale-in z-20"></div>
                   )}
 
-                  {/* Hover shimmer sweep */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/3 to-transparent pointer-events-none"></div>
+                  {/* Premium left-to-right Glassmorphism fill */}
+                  <div className={`absolute inset-0 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none ${isParentActive ? 'bg-gradient-to-r from-brand-gold/20 via-brand-gold/5 to-transparent' : 'bg-gradient-to-r from-white/10 via-white/5 to-transparent'}`}></div>
 
-                  <span className="flex items-center gap-2">
+                  {/* Glowing sweep line on bottom */}
+                  <div className={`absolute left-0 bottom-0 h-[1px] w-full origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-20 pointer-events-none ${isParentActive ? 'bg-gradient-to-r from-brand-gold/50 to-transparent' : 'bg-gradient-to-r from-white/30 to-transparent'}`}></div>
+
+                  <span className="flex items-center gap-3 relative z-10 transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
                     {item.icon && iconMap[item.icon] && (
                       <span
                         className={`text-lg transition-all duration-300 group-hover:scale-110 ${
@@ -169,7 +172,7 @@ const Header = ({ closeSidebar }) => {
                   </span>
 
                   {item.children && (
-                    <span className={`text-xs transition-all duration-300 text-gray-500 group-hover:text-gray-300 ${openMenu === index ? "rotate-180" : "rotate-0"}`}>
+                    <span className={`text-xs transition-all duration-300 relative z-10 text-gray-500 group-hover:text-gray-300 ${openMenu === index ? "rotate-180" : "rotate-0"}`}>
                       <FaChevronDown />
                     </span>
                   )}
@@ -186,27 +189,27 @@ const Header = ({ closeSidebar }) => {
                       onClick={() => closeSidebar?.()}
                       style={{ animationDelay: `${subIndex * 0.04}s`, animationFillMode: 'both' }}
                       className={({ isActive }) =>
-                        `relative px-4 py-2.5 text-sm rounded-lg flex items-center gap-3 transition-all duration-300 group animate-fade-in-up
+                        `relative px-4 py-2.5 text-sm rounded-lg flex items-center gap-3 transition-colors duration-300 group animate-fade-in-up overflow-hidden
                         ${isActive
-                          ? "bg-white/5 text-white border-l-2 border-brand-gold"
-                          : "text-gray-400 hover:bg-white/5 hover:text-gray-200 border-l-2 border-transparent hover:border-brand-gold/30"
+                          ? "bg-white/5 text-white border-l-2 border-brand-gold shadow-[inset_0_0_10px_rgba(255,215,0,0.05)]"
+                          : "text-gray-400 hover:text-white border-l-2 border-transparent"
                         }`
                       }
                     >
-                      {/* Sub-item shimmer */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-transparent via-white/3 to-transparent pointer-events-none rounded-lg"></div>
+                      {/* Premium Sub-item hover left-to-right fill */}
+                      <div className="absolute inset-0 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] bg-gradient-to-r from-white/10 to-transparent pointer-events-none rounded-lg"></div>
 
                       {subItem.icon && iconMap[subItem.icon] && (
                         <span
-                          className={`text-[15px] transition-all duration-300 group-hover:scale-110 ${location.pathname === subItem.path
+                          className={`text-[15px] transition-all duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] relative z-10 group-hover:scale-110 group-hover:translate-x-1 ${location.pathname === subItem.path
                             ? "text-brand-gold"
-                            : "text-gray-500 group-hover:text-brand-gold/70"
+                            : "text-gray-500 group-hover:text-brand-gold/80"
                             }`}
                         >
                           {React.createElement(iconMap[subItem.icon])}
                         </span>
                       )}
-                      <span className="font-medium whitespace-nowrap">{subItem.title}</span>
+                      <span className="font-medium whitespace-nowrap relative z-10 transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">{subItem.title}</span>
                     </NavLink>
                   ))}
                 </div>

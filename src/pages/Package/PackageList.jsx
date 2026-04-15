@@ -83,7 +83,7 @@ const PackageList = () => {
                   <div className="space-y-2 mb-5">
                     <div className="flex justify-between items-center py-2 border-b border-white/5">
                       <span className="text-gray-400 text-sm">Price</span>
-                      <span className="text-emerald-400 font-bold">₹{item.price}</span>
+                      <span className="text-emerald-400 font-bold">{item.price}</span>
                     </div>
                     <div className="flex justify-between items-center py-2">
                       <span className="text-gray-400 text-sm">Validity</span>
@@ -118,7 +118,7 @@ const PackageList = () => {
               className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
               placeholder="Package Name" />
 
-            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Price (₹)</label>
+            <label className="block text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Price</label>
             <input type="number" value={editData.price} onChange={(e) => setEditData({ ...editData, price: e.target.value })}
               className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
               placeholder="Price" />

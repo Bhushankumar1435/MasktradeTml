@@ -103,28 +103,28 @@ const Notifications = () => {
                 data.map((item, index) => (
                   <tr key={item._id}
                     onClick={() => handleMarkRead(item)}
-                    className={`cursor-pointer ${!item.isRead ? "border-l-2 border-blue-500" : "opacity-70"}`}>
-                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
-                    <td className="text-white font-medium">{item.receiverId}</td>
-                    <td className="font-medium text-gray-200">{item.title}</td>
+                    className={`cursor-pointer transition-all duration-300 ${!item.isRead ? "bg-white/5 hover:bg-white/10 border-l-4 border-brand-gold shadow-[inset_0_0_20px_rgba(255,215,0,0.05)]" : "hover:bg-white/5 opacity-60 border-l-4 border-transparent hover:opacity-100"}`}>
+                    <td><span className={!item.isRead ? "text-gray-400 font-semibold" : "text-gray-500"}>{(page - 1) * limit + index + 1}</span></td>
+                    <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.receiverId}</td>
+                    <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.title}</td>
                     <td className="max-w-[200px]">
-                      <p className="truncate text-gray-400" title={item.message}>{item.message}</p>
+                      <p className={`truncate ${!item.isRead ? "text-gray-300" : "text-gray-500"}`} title={item.message}>{item.message}</p>
                     </td>
-                    <td className="text-gray-400">{item.type}</td>
+                    <td className={!item.isRead ? "text-gray-300" : "text-gray-500"}>{item.type}</td>
                     <td className="text-center">
                       {item.isRead ? (
-                        <span className="glass-badge bg-gray-500/10 text-gray-400 border-gray-500/20">Read</span>
+                        <span className="px-3 py-1 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded-lg text-xs font-medium">Read</span>
                       ) : (
-                        <span className="glass-badge bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse">New</span>
+                        <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold border border-brand-gold/30 rounded-lg text-xs font-semibold shadow-[0_0_10px_rgba(255,215,0,0.2)] animate-pulse">New</span>
                       )}
                     </td>
                     <td className="text-center">
                       <button onClick={(e) => { e.stopPropagation(); setReplyOpenId(item._id); setReplyData({ title: `Re: ${item.title}`, message: "" }); }}
-                        className="px-3 py-1 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold text-xs rounded-lg font-semibold transition">
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${!item.isRead ? "bg-brand-gold/20 hover:bg-brand-gold/30 border border-brand-gold/40 text-brand-gold" : "bg-gray-500/10 hover:bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:text-white"}`}>
                         Reply
                       </button>
                     </td>
-                    <td className="text-gray-500 text-xs">{new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</td>
+                    <td className={`text-xs ${!item.isRead ? "text-brand-gold/80 font-medium" : "text-gray-500"}`}>{new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</td>
                   </tr>
                 ))
               ) : (

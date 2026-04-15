@@ -104,7 +104,6 @@ const DepositHistory = () => {
                                 <th>Amount</th>
                                 <th>From</th>
                                 <th>To</th>
-                                <th>Contract</th>
                                 <th>Hash / TXN ID</th>
                                 <th>Created</th>
                             </tr>
@@ -116,9 +115,9 @@ const DepositHistory = () => {
                                         <td>
                                             <span className="text-gray-500">{(page - 1) * limit + index + 1}</span>
                                         </td>
-                                        <td className="font-medium text-white">{item.toUserId || item.user || "—"}</td>
+                                        <td className="font-medium text-white">{item.userId || item.toUserId || item.user || "—"}</td>
                                         <td className="font-semibold text-brand-gold">
-                                            {item.amount ? (Number(item.amount) / 1e18) : "0"}
+                                            {item.amount || "0"}
                                         </td>
                                         <td className="max-w-[200px]">
                                             <div className="flex items-center gap-2">
@@ -144,26 +143,14 @@ const DepositHistory = () => {
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="max-w-[200px]">
-                                            <div className="flex items-center gap-2">
-                                                <p className="truncate text-gray-400 max-w-[140px]" title={item.contract || "—"}>
-                                                    {truncateText(item.contract)}
-                                                </p>
-                                                {(item.contract) && (
-                                                    <button onClick={() => copyText(item.contract)}>
-                                                        <FaCopy className="text-gray-400 hover:text-blue-400 transition cursor-pointer" />
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </td>
 
                                         <td className="max-w-[200px]">
                                             <div className="flex items-center gap-2">
-                                                <p className="truncate text-gray-400 max-w-[140px]" title={item.txHash || "—"}>
-                                                    {truncateText(item.txHash)}
+                                                <p className="truncate text-gray-400 max-w-[140px]" title={item.hash || "—"}>
+                                                    {truncateText(item.hash)}
                                                 </p>
-                                                {(item.hash || item.txHash) && (
-                                                    <button onClick={() => copyText(item.hash || item.txHash)}>
+                                                {(item.hash) && (
+                                                    <button onClick={() => copyText(item.hash)}>
                                                         <FaCopy className="text-gray-400 hover:text-blue-400 transition cursor-pointer" />
                                                     </button>
                                                 )}
@@ -178,13 +165,13 @@ const DepositHistory = () => {
                             ) : (
                                 loading || !showNoData ? (
                                     <tr>
-                                        <td colSpan="6" className="text-center py-12">
+                                        <td colSpan="7" className="text-center py-12">
                                             <span className="opacity-0">Loading...</span>
                                         </td>
                                     </tr>
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="text-center py-12 text-gray-500 font-medium">
+                                        <td colSpan="7" className="text-center py-12 text-gray-500 font-medium">
                                             No Data Found
                                         </td>
                                     </tr>
