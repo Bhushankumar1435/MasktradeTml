@@ -5,11 +5,13 @@ import Loader from "../../components/ui/Loader";
 import { FaCopy, FaLayerGroup } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
+import PaginationLimit from "../../components/ui/PaginationLimit";
+
 const AllBatches = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [showNoData, setShowNoData] = useState(false);
@@ -32,7 +34,7 @@ const AllBatches = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchBatches(), 200);
     return () => clearTimeout(delay);
-  }, [page, search]);
+  }, [page, search, limit]);
 
   const handleCloseBatch = async (batchId) => {
     if (!window.confirm("Close all trades for this batch?")) return;
@@ -89,6 +91,13 @@ const AllBatches = () => {
       </div>
 
       {/* MAIN TABLE */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[800px] glass-table whitespace-nowrap">

@@ -4,16 +4,18 @@ import Loader from "../../components/ui/Loader";
 import { getBatchHistoryApi } from "../../ApiService/Adminapi";
 import { FaArrowLeft, FaLayerGroup } from "react-icons/fa";
 
+import PaginationLimit from "../../components/ui/PaginationLimit";
+
 const BatchDetails = () => {
   const { batchId } = useParams();
   const navigate = useNavigate();
 
   const [showNoData, setShowNoData] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [batchDetails, setBatchDetails] = useState(null);
   const [trades, setTrades] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [prices, setPrices] = useState({});
   const totalPages = Math.ceil(total / limit);
@@ -86,7 +88,7 @@ const BatchDetails = () => {
   useEffect(() => {
     const delay = setTimeout(() => { if (batchId) fetchBatch(); }, 200);
     return () => clearTimeout(delay);
-  }, [batchId, page]);
+  }, [batchId, page, limit]);
 
   const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
@@ -146,6 +148,13 @@ const BatchDetails = () => {
       )}
 
       {/* TABLE */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[1000px] glass-table whitespace-nowrap">

@@ -1,14 +1,16 @@
 import React, { useEffect } from "react";
 
 const Loader = () => {
-    useEffect(() => {
-        // load script once
+   useEffect(() => {
+    const timer = setTimeout(() => {
         const script = document.createElement("script");
-        script.src =
-            "https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js";
+        script.src = "https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js";
         script.type = "module";
         document.body.appendChild(script);
     }, 1000);
+
+    return () => clearTimeout(timer); // cleanup
+}, []);
 
     return (
         <div style={styles.container}>

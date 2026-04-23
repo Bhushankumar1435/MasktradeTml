@@ -5,22 +5,23 @@ import "react-toastify/dist/ReactToastify.css";
 import Loader from "../../components/ui/Loader";
 import { FaChartLine } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../../components/ui/PaginationLimit";
 
 const Opentrades = () => {
   const [trades, setTrades] = useState([]);
   const [prices, setPrices] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [userId, setUserId] = useState("");
   const [showNoData, setShowNoData] = useState(false);
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const fetchTrades = async () => {
     setLoading(true);
     try {
-      const res = await getTradeHistoryApi(page, PAGE_SIZE, userId.trim(), "OPEN");
+      const res = await getTradeHistoryApi(page, limit, userId.trim(), "OPEN");
       if (res?.data?.success) {
         setTrades(res?.data?.data?.trades || []);
         setTotal(res?.data?.data?.pagination?.total || 0);
@@ -74,7 +75,7 @@ const Opentrades = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchTrades(), 200);
     return () => clearTimeout(delay);
-  }, [page, userId]);
+  }, [page, userId, limit]);
 
   useEffect(() => {
     let interval;
@@ -119,7 +120,13 @@ const Opentrades = () => {
           className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition w-full md:w-56"
         />
       </div>
-
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[900px] glass-table whitespace-nowrap">
@@ -147,7 +154,7 @@ const Opentrades = () => {
                   const pnl = calculatePnL(t);
                   return (
                     <tr key={t._id}>
-                      <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + i + 1}</span></td>
+                      <td><span className="text-gray-500">{(page - 1) * limit + i + 1}</span></td>
                       <td className="text-white font-medium">{t.userId}</td>
                       <td className="font-mono text-gray-300">{t.pair}</td>
                       <td className="text-gray-300">{t.amount}%</td>

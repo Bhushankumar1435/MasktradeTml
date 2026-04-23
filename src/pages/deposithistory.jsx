@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { getDepositHistory } from "../ApiService/Adminapi";
 import { toast } from "react-toastify";
-import { FaCopy, FaArrowDown } from "react-icons/fa";
+import { FaCopy, FaArrowDown, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import Loader from "../components/ui/Loader";
+
+import PaginationLimit from "../components/ui/PaginationLimit";
 
 const DepositHistory = () => {
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [limit] = useState(10);
+    const [limit, setLimit] = useState(10);
     const [total, setTotal] = useState(0);
     const [showNoData, setShowNoData] = useState(false);
 
@@ -35,7 +37,7 @@ const DepositHistory = () => {
     useEffect(() => {
         const delay = setTimeout(() => fetchDeposits(), 200);
         return () => clearTimeout(delay);
-    }, [page]);
+    }, [page, limit]);
 
     const totalPages = Math.ceil(total / limit) || 1;
     const getPageNumbers = () => {
@@ -94,7 +96,14 @@ const DepositHistory = () => {
             </div>
 
             {/* Main */}
-            <div className="glass-table-container flex flex-col z-10">
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
+      <div className="glass-table-container flex flex-col z-10">
                 <div className="w-full overflow-x-auto relative">
                     <table className="min-w-[1000px] glass-table whitespace-nowrap">
                         <thead>
@@ -105,6 +114,9 @@ const DepositHistory = () => {
                                 <th>From</th>
                                 <th>To</th>
                                 <th>Hash / TXN ID</th>
+                                <th>Admin Status</th>
+                                <th>Gas Status</th>
+                                <th>MLM Distributed</th>
                                 <th>Created</th>
                             </tr>
                         </thead>
@@ -156,6 +168,34 @@ const DepositHistory = () => {
                                                 )}
                                             </div>
                                         </td>
+                                        
+                                        <td className="text-center align-middle">
+                                            {item.adminDepositStatus === true ? (
+                                                <FaCheckCircle className="text-green-500 text-lg inline-block" title="True" />
+                                            ) : item.adminDepositStatus === false ? (
+                                                <FaTimesCircle className="text-red-500 text-lg inline-block" title="False" />
+                                            ) : (
+                                                "—"
+                                            )}
+                                        </td>
+                                        <td className="text-center align-middle">
+                                            {item.gasDepositStatus === true ? (
+                                                <FaCheckCircle className="text-green-500 text-lg inline-block" title="True" />
+                                            ) : item.gasDepositStatus === false ? (
+                                                <FaTimesCircle className="text-red-500 text-lg inline-block" title="False" />
+                                            ) : (
+                                                "—"
+                                            )}
+                                        </td>
+                                        <td className="text-center align-middle">
+                                            {item.mlmDistributed === true ? (
+                                                <FaCheckCircle className="text-green-500 text-lg inline-block" title="True" />
+                                            ) : item.mlmDistributed === false ? (
+                                                <FaTimesCircle className="text-red-500 text-lg inline-block" title="False" />
+                                            ) : (
+                                                "—"
+                                            )}
+                                        </td>
 
                                         <td className="text-gray-500 text-xs">
                                             {item.createdAt ? new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "N/A"}
@@ -165,13 +205,13 @@ const DepositHistory = () => {
                             ) : (
                                 loading || !showNoData ? (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-12">
+                                        <td colSpan="10" className="text-center py-12">
                                             <span className="opacity-0">Loading...</span>
                                         </td>
                                     </tr>
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-12 text-gray-500 font-medium">
+                                        <td colSpan="10" className="text-center py-12 text-gray-500 font-medium">
                                             No Data Found
                                         </td>
                                     </tr>

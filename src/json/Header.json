@@ -73,6 +73,17 @@
     ]
   },
   {
+    "title": "Level Manage",
+    "icon": "FaLayerGroup",
+    "children": [
+      {
+        "title": "Level View",
+        "path": "/levelview",
+        "icon": "FaUsers"
+      }
+    ]
+  },
+  {
     "title": "Wallet Manage",
     "icon": "FaWallet",
     "children": [

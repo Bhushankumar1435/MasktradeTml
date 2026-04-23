@@ -4,11 +4,13 @@ import Loader from "../../components/ui/Loader";
 import { toast } from "react-toastify";
 import { FaBell, FaBroadcastTower } from "react-icons/fa";
 
+import PaginationLimit from "../../components/ui/PaginationLimit";
+
 const Notifications = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [showNoData, setShowNoData] = useState(false);
   const [replyOpenId, setReplyOpenId] = useState(null);
@@ -40,9 +42,8 @@ const Notifications = () => {
   };
 
   useEffect(() => {
-    const delay = setTimeout(() => fetchNotifications(), 200);
-    return () => clearTimeout(delay);
-  }, [page]);
+    fetchNotifications();
+  }, [page, limit]);
 
   const handlePageChange = (p) => { if (p < 1 || p > totalPages) return; setPage(p); };
 
@@ -83,163 +84,176 @@ const Notifications = () => {
       </div>
 
       {/* TABLE */}
-      <div className="glass-table-container flex flex-col z-10">
-        <div className="w-full overflow-x-auto relative">
-          <table className="min-w-[800px] glass-table whitespace-nowrap">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>User</th>
-                <th>Title</th>
-                <th>Message</th>
-                <th>Type</th>
-                <th className="text-center">Status</th>
-                <th className="text-center">Reply</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length > 0 ? (
-                data.map((item, index) => (
-                  <tr key={item._id}
-                    onClick={() => handleMarkRead(item)}
-                    className={`cursor-pointer transition-all duration-300 ${!item.isRead ? "bg-white/5 hover:bg-white/10 border-l-4 border-brand-gold shadow-[inset_0_0_20px_rgba(255,215,0,0.05)]" : "hover:bg-white/5 opacity-60 border-l-4 border-transparent hover:opacity-100"}`}>
-                    <td><span className={!item.isRead ? "text-gray-400 font-semibold" : "text-gray-500"}>{(page - 1) * limit + index + 1}</span></td>
-                    <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.receiverId}</td>
-                    <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.title}</td>
-                    <td className="max-w-[200px]">
-                      <p className={`truncate ${!item.isRead ? "text-gray-300" : "text-gray-500"}`} title={item.message}>{item.message}</p>
-                    </td>
-                    <td className={!item.isRead ? "text-gray-300" : "text-gray-500"}>{item.type}</td>
-                    <td className="text-center">
-                      {item.isRead ? (
-                        <span className="px-3 py-1 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded-lg text-xs font-medium">Read</span>
-                      ) : (
-                        <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold border border-brand-gold/30 rounded-lg text-xs font-semibold shadow-[0_0_10px_rgba(255,215,0,0.2)] animate-pulse">New</span>
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <button onClick={(e) => { e.stopPropagation(); setReplyOpenId(item._id); setReplyData({ title: `Re: ${item.title}`, message: "" }); }}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${!item.isRead ? "bg-brand-gold/20 hover:bg-brand-gold/30 border border-brand-gold/40 text-brand-gold" : "bg-gray-500/10 hover:bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:text-white"}`}>
-                        Reply
-                      </button>
-                    </td>
-                    <td className={`text-xs ${!item.isRead ? "text-brand-gold/80 font-medium" : "text-gray-500"}`}>{new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</td>
-                  </tr>
-                ))
-              ) : (
-                loading || !showNoData ? (
-                  <tr><td colSpan="8" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
-                ) : (
-                  <tr><td colSpan="8" className="text-center py-12 text-gray-500 font-medium">No Notifications Found</td></tr>
-                )
-              )}
-            </tbody>
-          </table>
-
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
-              <Loader />
-            </div>
-          )}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
-          <span className="text-gray-400 font-medium">
-            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
-          </span>
-          <div className="flex items-center gap-1 flex-wrap">
-            <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
-              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
-            {getPageNumbers().map((num, index) =>
-              num === "..." ? (
-                <span key={index} className="px-0.5 text-gray-500">
-                  ...
-                </span>
-              ) : (
-                <button
-                  key={index}
-                  onClick={() => handlePageChange(num)}
-                  className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
-                    ? "text-brand-gold "
-                    : "text-gray-400  hover:brand-gold  "
-                    }`}
-                >
-                  {num}
-                </button>
-              )
-            )}
-            <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
-              className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
-          </div>
-        </div>
+      {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+        <PaginationLimit
+          value={limit}
+          onChange={(val) => { setLimit(val); setPage(1); }}
+        />
       </div>
+    
+  <div className="glass-table-container flex flex-col z-10">
+    <div className="w-full overflow-x-auto relative">
+      <table className="min-w-[800px] glass-table whitespace-nowrap">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Title</th>
+            <th>Message</th>
+            <th>Type</th>
+            <th className="text-center">Status</th>
+            <th className="text-center">Reply</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.length > 0 ? (
+            data.map((item, index) => (
+              <tr key={item._id}
+                onClick={() => handleMarkRead(item)}
+                className={`cursor-pointer transition-all duration-300 ${!item.isRead ? "bg-white/5 hover:bg-white/10 border-l-4 border-brand-gold shadow-[inset_0_0_20px_rgba(255,215,0,0.05)]" : "hover:bg-white/5 opacity-60 border-l-4 border-transparent hover:opacity-100"}`}>
+                <td><span className={!item.isRead ? "text-gray-400 font-semibold" : "text-gray-500"}>{(page - 1) * limit + index + 1}</span></td>
+                <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.receiverId}</td>
+                <td className={`font-medium ${!item.isRead ? "text-white" : "text-gray-400"}`}>{item.title}</td>
+                <td className="max-w-[200px]">
+                  <p className={`truncate ${!item.isRead ? "text-gray-300" : "text-gray-500"}`} title={item.message}>{item.message}</p>
+                </td>
+                <td className={!item.isRead ? "text-gray-300" : "text-gray-500"}>{item.type}</td>
+                <td className="text-center">
+                  {item.isRead ? (
+                    <span className="px-3 py-1 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded-lg text-xs font-medium">Read</span>
+                  ) : (
+                    <span className="px-3 py-1 bg-brand-gold/10 text-brand-gold border border-brand-gold/30 rounded-lg text-xs font-semibold shadow-[0_0_10px_rgba(255,215,0,0.2)] animate-pulse">New</span>
+                  )}
+                </td>
+                <td className="text-center">
+                  <button onClick={(e) => { e.stopPropagation(); setReplyOpenId(item._id); setReplyData({ title: `Re: ${item.title}`, message: "" }); }}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition ${!item.isRead ? "bg-brand-gold/20 hover:bg-brand-gold/30 border border-brand-gold/40 text-brand-gold" : "bg-gray-500/10 hover:bg-gray-500/20 border border-gray-500/30 text-gray-400 hover:text-white"}`}>
+                    Reply
+                  </button>
+                </td>
+                <td className={`text-xs ${!item.isRead ? "text-brand-gold/80 font-medium" : "text-gray-500"}`}>{new Date(item.createdAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}</td>
+              </tr>
+            ))
+          ) : (
+            loading || !showNoData ? (
+              <tr><td colSpan="8" className="text-center py-12"><span className="opacity-0">Loading...</span></td></tr>
+            ) : (
+              <tr><td colSpan="8" className="text-center py-12 text-gray-500 font-medium">No Notifications Found</td></tr>
+            )
+          )}
+        </tbody>
+      </table>
 
-      {/* REPLY MODAL */}
-      {replyOpenId && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-brand-gold font-semibold text-lg">Reply Notification</h3>
-              <button onClick={() => setReplyOpenId(null)} className="text-gray-400 hover:text-white transition text-xl">✕</button>
-            </div>
-            <input value={replyData.title} onChange={(e) => setReplyData({ ...replyData, title: e.target.value })}
-              className="w-full mb-3 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
-              placeholder="Title" />
-            <textarea value={replyData.message} onChange={(e) => setReplyData({ ...replyData, message: e.target.value })}
-              className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 resize-none"
-              rows={4} placeholder="Message" />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setReplyOpenId(null)}
-                className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
-              <button onClick={async () => {
-                try {
-                  await sendNotificationApi({ receiverId: replyOpenId, title: replyData.title, message: replyData.message });
-                  toast.success("Reply sent!");
-                  setReplyOpenId(null);
-                } catch (err) { toast.error(err?.response?.data?.message || `Failed to send`); }
-              }}
-                className="px-4 py-2 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold rounded-xl text-sm font-semibold transition">
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* BROADCAST MODAL */}
-      {broadcastOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-emerald-400 font-semibold text-lg flex items-center gap-2"><FaBroadcastTower /> Broadcast to All</h3>
-              <button onClick={() => setBroadcastOpen(false)} className="text-gray-400 hover:text-white transition text-xl">✕</button>
-            </div>
-            <input value={broadcastData.title} onChange={(e) => setBroadcastData({ ...broadcastData, title: e.target.value })}
-              className="w-full mb-3 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500/50"
-              placeholder="Title" />
-            <textarea value={broadcastData.message} onChange={(e) => setBroadcastData({ ...broadcastData, message: e.target.value })}
-              className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 resize-none"
-              rows={4} placeholder="Message for all users..." />
-            <div className="flex justify-end gap-3">
-              <button onClick={() => setBroadcastOpen(false)}
-                className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
-              <button onClick={async () => {
-                try {
-                  await broadcastNotificationApi({ title: broadcastData.title, message: broadcastData.message });
-                  toast.success("Sent to all users!");
-                  setBroadcastOpen(false);
-                } catch (err) { toast.error(err?.response?.data?.message || `Failed`); }
-              }}
-                className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition">
-                Broadcast
-              </button>
-            </div>
-          </div>
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/40 backdrop-blur-md z-20">
+          <Loader />
         </div>
       )}
     </div>
+
+    {/* Pagination */}
+    <div className="flex flex-col md:flex-row items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
+      <span className="text-gray-400 font-medium">
+        Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+      </span>
+      <div className="flex items-center gap-1 flex-wrap">
+        <button onClick={() => handlePageChange(page - 1)} disabled={page === 1}
+          className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Prev</button>
+        {getPageNumbers().map((num, index) =>
+          num === "..." ? (
+            <span key={index} className="px-0.5 text-gray-500">
+              ...
+            </span>
+          ) : (
+            <button
+              key={index}
+              onClick={() => handlePageChange(num)}
+              className={`px-0.5 py-0.5  font-semibold transition-all ${page === num
+                ? "text-brand-gold "
+                : "text-gray-400  hover:brand-gold  "
+                }`}
+            >
+              {num}
+            </button>
+          )
+        )}
+        <button onClick={() => handlePageChange(page + 1)} disabled={page === totalPages}
+          className="px-3 py-1.5 border border-white/10 rounded-lg text-white font-semibold hover:bg-white/10 transition disabled:opacity-40">Next</button>
+      </div>
+    </div>
+  </div>
+
+{/* REPLY MODAL */ }
+{
+  replyOpenId && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-brand-gold font-semibold text-lg">Reply Notification</h3>
+          <button onClick={() => setReplyOpenId(null)} className="text-gray-400 hover:text-white transition text-xl">✕</button>
+        </div>
+        <input value={replyData.title} onChange={(e) => setReplyData({ ...replyData, title: e.target.value })}
+          className="w-full mb-3 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50"
+          placeholder="Title" />
+        <textarea value={replyData.message} onChange={(e) => setReplyData({ ...replyData, message: e.target.value })}
+          className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 resize-none"
+          rows={4} placeholder="Message" />
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setReplyOpenId(null)}
+            className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
+          <button onClick={async () => {
+            try {
+              await sendNotificationApi({ receiverId: replyOpenId, title: replyData.title, message: replyData.message });
+              toast.success("Reply sent!");
+              setReplyOpenId(null);
+            } catch (err) { toast.error(err?.response?.data?.message || `Failed to send`); }
+          }}
+            className="px-4 py-2 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 text-brand-gold rounded-xl text-sm font-semibold transition">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+{/* BROADCAST MODAL */ }
+{
+  broadcastOpen && (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="glass-panel w-full max-w-md rounded-2xl p-6 border border-white/10">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-emerald-400 font-semibold text-lg flex items-center gap-2"><FaBroadcastTower /> Broadcast to All</h3>
+          <button onClick={() => setBroadcastOpen(false)} className="text-gray-400 hover:text-white transition text-xl">✕</button>
+        </div>
+        <input value={broadcastData.title} onChange={(e) => setBroadcastData({ ...broadcastData, title: e.target.value })}
+          className="w-full mb-3 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500/50"
+          placeholder="Title" />
+        <textarea value={broadcastData.message} onChange={(e) => setBroadcastData({ ...broadcastData, message: e.target.value })}
+          className="w-full mb-4 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 resize-none"
+          rows={4} placeholder="Message for all users..." />
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setBroadcastOpen(false)}
+            className="px-4 py-2 border border-white/10 rounded-xl text-sm font-medium hover:bg-white/5 transition">Cancel</button>
+          <button onClick={async () => {
+            try {
+              await broadcastNotificationApi({ title: broadcastData.title, message: broadcastData.message });
+              toast.success("Sent to all users!");
+              setBroadcastOpen(false);
+            } catch (err) { toast.error(err?.response?.data?.message || `Failed`); }
+          }}
+            className="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm font-semibold transition">
+            Broadcast
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+    </div >
   );
 };
 

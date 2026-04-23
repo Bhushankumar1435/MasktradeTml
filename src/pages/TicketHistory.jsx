@@ -5,24 +5,25 @@ import "react-toastify/dist/ReactToastify.css";
 import Loader from "../components/ui/Loader";
 import { FaTicketAlt } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../components/ui/PaginationLimit";
 
 const TicketHistory = () => {
   const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [message, setMessage] = useState("");
   const [showNoData, setShowNoData] = useState(false);
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const fetchTickets = async () => {
     setLoading(true);
     setShowNoData(false);
     try {
-      const res = await GetAdminTicketHistoryApi(page, PAGE_SIZE);
+      const res = await GetAdminTicketHistoryApi(page, limit);
       if (res?.data?.success) {
         const ticketsData = res?.data?.data?.tickets || [];
         setTickets(Array.isArray(ticketsData) ? ticketsData : []);
@@ -41,7 +42,7 @@ const TicketHistory = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchTickets(), 200);
     return () => clearTimeout(delay);
-  }, [page]);
+  }, [page, limit]);
 
   const openPopup = (index) => { setSelectedIndex(index); setMessage(""); setShowPopup(true); };
 
@@ -96,6 +97,13 @@ const TicketHistory = () => {
       </div>
 
       {/* Main Container */}
+      {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[700px] glass-table whitespace-nowrap">
@@ -114,7 +122,7 @@ const TicketHistory = () => {
               {tickets.length > 0 ? (
                 tickets.map((t, i) => (
                   <tr key={t._id}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + i + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + i + 1}</span></td>
                     <td><span className="bg-white/5 border border-white/10 px-2 py-1 rounded font-mono text-xs">{t.userId}</span></td>
                     <td className="font-medium text-white">{t.user?.name}</td>
                     <td className="max-w-[200px]">

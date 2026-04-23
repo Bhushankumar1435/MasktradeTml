@@ -1,0 +1,109 @@
+/* LevelView.css - Clean Org Chart Tree */
+
+.org-tree {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.org-tree ul {
+  display: flex;
+  position: relative;
+  padding-top: 20px;
+  transition: all 0.5s;
+  margin: 0;
+  padding-left: 0;
+  gap: 20px; /* Space between sibling nodes */
+}
+
+.org-tree li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  list-style-type: none;
+  position: relative;
+  padding: 20px 0px 0 0px;
+  transition: all 0.5s;
+}
+
+/* Connector lines - Top horizontal line for siblings */
+.org-tree li::before, 
+.org-tree li::after {
+  content: '';
+  position: absolute; 
+  top: 0; 
+  right: 50%;
+  border-top: 2px solid white; /* Solid white line */
+  width: 50%; 
+  height: 20px;
+  z-index: 0;
+}
+
+.org-tree li::after {
+  right: auto; 
+  left: 50%;
+  border-left: 2px solid white;
+}
+
+/* Remove left/right connectors from only children */
+.org-tree li:only-child::after, 
+.org-tree li:only-child::before {
+  display: none;
+}
+
+/* Remove top padding if it's the only child (no horizontal bar above it) */
+.org-tree li:only-child { 
+  padding-top: 0;
+}
+
+/* First and last children don't need full horizontal bars */
+.org-tree li:first-child::before, 
+.org-tree li:last-child::after {
+  border: 0 none;
+}
+
+/* Add vertical line connecting the horizontal bar down to the node */
+.org-tree li:last-child::before {
+  border-right: 2px solid white;
+  border-radius: 0; /* Square corners like image */
+}
+
+.org-tree li:first-child::after {
+  border-radius: 0; /* Square corners */
+}
+
+/* Line extending downwards from parent to children's horizontal bar */
+.org-tree ul ul::before {
+  content: '';
+  position: absolute; 
+  top: 0; 
+  left: 50%;
+  border-left: 2px solid white;
+  width: 0; 
+  height: 20px;
+  transform: translateX(-50%); /* perfectly center the vertical line */
+  z-index: 0;
+}
+
+/* Custom Animation for nodes */
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tree-node-animate {
+  animation: slideDownFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Ensure the node content sits on top of the lines */
+.node-content {
+  position: relative;
+  z-index: 10;
+}

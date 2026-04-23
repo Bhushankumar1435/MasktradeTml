@@ -4,15 +4,15 @@ import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import Loader from "../../components/ui/Loader";
-
-const PAGE_SIZE = 10;
+import PaginationLimit from "../../components/ui/PaginationLimit";
 
 const User = () => {
   const [userData, setUserData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [showNoData, setShowNoData] = useState(false);
@@ -24,13 +24,13 @@ const User = () => {
     inactiveUsers: 0,
   });
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const getUsers = async () => {
     try {
       setLoading(true);
       setShowNoData(false);
-      const res = await getUsersApi(page, PAGE_SIZE, search, formatDate(fromDate), formatDate(toDate));
+      const res = await getUsersApi(page, limit, search, formatDate(fromDate), formatDate(toDate));
 
       if (res.data?.success) {
         const data = res.data.data;
@@ -62,7 +62,7 @@ const User = () => {
       clearTimeout(delay);
       clearTimeout(timer);
     };
-  }, [page, search, fromDate, toDate]);
+  }, [page, search, fromDate, toDate, limit]);
 
 
   const getPageNumbers = () => {
@@ -238,6 +238,13 @@ const User = () => {
       </div>
 
       {/* Main Container */}
+      {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="flex-1 min-h-[400px] glass-table-container flex flex-col z-10">
 
         {/* TABLE */}
@@ -268,7 +275,7 @@ const User = () => {
                   <tr key={user._id || index}>
 
                     <td>
-                      <span className="text-gray-500">{(page - 1) * PAGE_SIZE + index + 1}</span>
+                      <span className="text-gray-500">{(page - 1) * limit + index + 1}</span>
                     </td>
                     <td className="font-medium text-gray-200">
                       {user.name || "N/A"}

@@ -5,15 +5,16 @@ import { toast } from "react-toastify";
 import Loader from "../components/ui/Loader";
 import { FaArrowLeft, FaUser } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../components/ui/PaginationLimit";
 
 const BinanceOrders = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [userName, setUserName] = useState("");
@@ -24,7 +25,7 @@ const BinanceOrders = () => {
     try {
       setLoading(true);
       setShowNoData(false);
-      const res = await getAllBinanceOrdersapi(page, PAGE_SIZE, userId);
+      const res = await getAllBinanceOrdersapi(page, limit, userId);
       if (res?.data?.success) {
         setOrders(res?.data?.data || []);
         setTotal(res?.data?.total || 0);
@@ -42,7 +43,7 @@ const BinanceOrders = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchOrders(), 200);
     return () => clearTimeout(delay);
-  }, [page, userId]);
+  }, [page, userId, limit]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -103,6 +104,13 @@ const BinanceOrders = () => {
       </div>
 
       {/* TABLE */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[900px] glass-table whitespace-nowrap">
@@ -127,7 +135,7 @@ const BinanceOrders = () => {
               {orders.length > 0 ? (
                 orders.map((o, i) => (
                   <tr key={i}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + i + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + i + 1}</span></td>
                     <td className="font-mono text-xs text-gray-400">{o.orderId}</td>
                     <td className="font-mono font-medium text-white">{o.pair}</td>
                     <td className={o.side === "BUY" ? "text-green-400 font-semibold" : "text-red-400 font-semibold"}>{o.entryPrice}</td>

@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import headerjson from "../../json/Header.json";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { adminLogoutApi, getAllNotificationsApi } from "../../ApiService/Adminapi";
+import { adminLogoutApi } from "../../ApiService/Adminapi";
 import {
   FaHome,
   FaUsers,
@@ -32,7 +32,6 @@ import {
 
 const Header = ({ closeSidebar }) => {
   const [openMenu, setOpenMenu] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -43,17 +42,7 @@ const Header = ({ closeSidebar }) => {
     FaChartPie, FaLayerGroup, FaExchangeAlt, FaRandom, FaBell,FaArrowDown
   };
 
-  const fetchNotifications = async () => {
-    try {
-      const res = await getAllNotificationsApi(1, 20);
-      const unread = res?.data?.data?.filter(n => !n.isRead)?.length || 0;
-      setUnreadCount(unread);
-    } catch (err) {
-      console.error("Notification fetch error", err);
-    }
-  };
 
-  useEffect(() => { fetchNotifications(); }, []);
 
   const handleToggle = (index) => {
     setOpenMenu(openMenu === index ? null : index);
@@ -97,7 +86,7 @@ const Header = ({ closeSidebar }) => {
             <img className="w-8 h-6 md:w-9 md:h-7 object-contain" src={"/Images/favicon.png"} alt="logo" />
           </Link>
           <h2 className="text-xl md:text-2xl font-bold tracking-wide text-brand-gold text-glow">
-            Masktrades
+            Robofict
           </h2>
         </div>
       </div>
@@ -160,15 +149,7 @@ const Header = ({ closeSidebar }) => {
                         {React.createElement(iconMap[item.icon])}
                       </span>
                     )}
-                    {item.title === "Notification" ? unreadCount > 0 && (
-                      <span className="flex items-center text-sm font-medium">
-                        <span>{item.title}</span>
-                        <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500/20 text-red-400 rounded-full border border-red-500/30 animate-pulse">
-                          {unreadCount > 10 ? "10+" : unreadCount}
-                        </span>
-                      </span>
-                    ) : <span className="text-sm font-medium tracking-wide whitespace-nowrap">{item.title}</span>
-                    }
+                    <span className="text-sm font-medium tracking-wide whitespace-nowrap">{item.title}</span>
                   </span>
 
                   {item.children && (
@@ -195,7 +176,7 @@ const Header = ({ closeSidebar }) => {
                           : "text-gray-400 hover:text-white border-l-2 border-transparent"
                         }`
                       }
-                    >
+                    > 
                       {/* Premium Sub-item hover left-to-right fill */}
                       <div className="absolute inset-0 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] bg-gradient-to-r from-white/10 to-transparent pointer-events-none rounded-lg"></div>
 
@@ -225,7 +206,7 @@ const Header = ({ closeSidebar }) => {
       <div className="p-4 mt-auto border-t border-white/5 animate-fade-in" style={{ animationDelay: '0.5s', animationFillMode: 'both' }}>
         <button
           onClick={handleLogout}
-          className="w-full bg-red-500/10 hover:bg-red-500/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:-translate-y-0.5 active:translate-y-0 border border-red-500/30 text-red-400 hover:text-red-300 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
+          className="w-full bg-red-500/20 hover:bg-red-500/50 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)] hover:-translate-y-0.5 active:translate-y-0 border border-red-500/30 text-red-400 hover:text-red-300 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 group"
         >
           <FaSignOutAlt className="transition-transform duration-300 group-hover:-translate-x-1" />
           Log Out

@@ -3,23 +3,24 @@ import { getWalletListApi } from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
 import { FaWallet } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../../components/ui/PaginationLimit";
 
 const Userwallettxnlist = () => {
   const [wallets, setWallets] = useState([]);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showNoData, setShowNoData] = useState(false);
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const getWallets = async () => {
     try {
       setLoading(true);
       setShowNoData(false);
-      const res = await getWalletListApi(page, PAGE_SIZE, search);
+      const res = await getWalletListApi(page, limit, search);
       if (res.data?.success) {
         setWallets(res.data.wallets || []);
         setTotal(res.data.pagination?.totalRecords || 0);
@@ -35,7 +36,7 @@ const Userwallettxnlist = () => {
   useEffect(() => {
     const delay = setTimeout(() => getWallets(), 200);
     return () => clearTimeout(delay);
-  }, [page, search]);
+  }, [page, search, limit]);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -83,6 +84,13 @@ const Userwallettxnlist = () => {
       </div>
 
       {/* MAIN */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[700px] glass-table whitespace-nowrap">
@@ -100,7 +108,7 @@ const Userwallettxnlist = () => {
               {wallets.length > 0 ? (
                 wallets.map((item, index) => (
                   <tr key={item._id}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + index + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
                     <td className="font-medium text-white">{item.userId}</td>
                     <td>
                       <span className={`glass-badge ${item.amount >= 0 ? "glass-badge-success" : "glass-badge-danger"}`}>

@@ -1,8 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getUserDashboardApi, getUserLevelViewApi } from "../../ApiService/Adminapi";
+import {
+  getUserDashboardApi,
+  getUserLevelViewApi,
+  updateUserCredentialsApi,
+} from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
-import { FaUser, FaArrowLeft, FaWallet, FaUsers, FaChartLine } from "react-icons/fa";
+import {
+  FaUser,
+  FaArrowLeft,
+  FaWallet,
+  FaUsers,
+  FaChartLine,
+  FaKey,
+  FaEye,
+  FaEyeSlash,
+  FaTimes,
+  FaCheckCircle,
+  FaExclamationTriangle,
+} from "react-icons/fa";
 
 const statFields = [
   { title: "Wallet Balance", key: "walletBalance", color: "text-brand-gold" },
@@ -17,13 +33,209 @@ const statFields = [
   { title: "Exchange Balance", key: "exchangeBalance", color: "text-teal-400" },
 ];
 
+/* ─── Credentials Modal ─────────────────────────────────────────────────── */
+const CredentialsModal = ({ userId, currentEmail, currentName, currentPhone, onClose }) => {
+  const [email, setEmail] = useState(currentEmail || "");
+  const [newPassword, setNewPassword] = useState("");
+  const [newname, setNewname] = useState(currentName || "");
+  const [newphoneNumber, setNewphoneNumber] = useState(currentPhone || "");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email.trim()) return showToast("error", "Email cannot be empty.");
+    setLoading(true);
+    try {
+      const payload = { email: email.trim() };
+      if (newPassword.trim()) payload.newPassword = newPassword.trim();
+      if (newname.trim()) payload.name = newname.trim();
+      if (newphoneNumber.trim()) payload.phoneNumber = newphoneNumber.trim();
+      const res = await updateUserCredentialsApi(userId, payload);
+      if (res.data?.success) {
+        showToast("success", "Credentials updated successfully!");
+        setTimeout(() => onClose(), 1800);
+      } else {
+        showToast("error", res.data?.message || "Update failed.");
+      }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message || "Something went wrong. Try again.";
+      showToast("error", msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4"
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(6px)" }}>
+      <div
+        className="relative w-full max-w-md rounded-2xl border border-white/10 p-6 shadow-2xl"
+        style={{ background: "linear-gradient(135deg,rgba(18,18,28,0.98),rgba(30,25,50,0.98))" }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-brand-gold/10 border border-brand-gold/30">
+              <FaKey className="text-brand-gold text-lg" />
+            </div>
+            <div>
+              <h2 className="text-white font-bold text-lg">Change Credentials</h2>
+              <p className="text-gray-400 text-xs font-mono mt-0.5">{userId}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all">
+            <FaTimes />
+          </button>
+        </div>
+
+        {/* Toast */}
+        {toast && (
+          <div
+            className={`mb-4 flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium border animate-pulse
+              ${toast.type === "success"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                : "bg-red-500/10 border-red-500/30 text-red-400"}`}>
+            {toast.type === "success"
+              ? <FaCheckCircle className="shrink-0" />
+              : <FaExclamationTriangle className="shrink-0" />}
+            {toast.message}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+              Email Address
+            </label>
+            <input
+              id="cred-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="user@example.com"
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600
+                focus:outline-none focus:border-brand-gold/50 focus:bg-white/8 transition-all"
+            />
+          </div>
+
+          {/* New Password */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+              New Password
+              <span className="ml-1 normal-case text-gray-600 font-normal">(leave blank to keep current)</span>
+            </label>
+            <div className="relative">
+              <input
+                id="cred-password"
+                type={showPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 pr-11 text-sm text-white placeholder-gray-600
+                  focus:outline-none focus:border-brand-gold/50 focus:bg-white/8 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+          </div>
+
+          {/* Name */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+              Full Name
+              <span className="ml-1 normal-case text-gray-600 font-normal">(leave blank to keep current)</span>
+            </label>
+            <input
+              id="cred-name"
+              type="text"
+              value={newname}
+              onChange={(e) => setNewname(e.target.value)}
+              placeholder="Enter new name..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600
+                focus:outline-none focus:border-brand-gold/50 focus:bg-white/8 transition-all"
+            />
+          </div>
+
+          {/* Phone Number */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-400 uppercase tracking-wider font-semibold">
+              Phone Number
+              <span className="ml-1 normal-case text-gray-600 font-normal">(leave blank to keep current)</span>
+            </label>
+            <input
+              id="cred-phone"
+              type="tel"
+              value={newphoneNumber}
+              onChange={(e) => setNewphoneNumber(e.target.value)}
+              placeholder="Enter new phone number..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600
+                focus:outline-none focus:border-brand-gold/50 focus:bg-white/8 transition-all"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-sm font-semibold text-gray-300 hover:text-white transition-all">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-brand-gold to-yellow-400 text-black text-sm font-bold
+                hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Updating…
+                </>
+              ) : (
+                <>
+                  <FaKey className="text-xs" /> Update
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Main Component ─────────────────────────────────────────────────────── */
 const UserDashboard = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
   const [levelData, setLevelData] = useState([]);
   const [levelLoading, setLevelLoading] = useState(false);
+  const [levelPage, setLevelPage] = useState(1);
+  const [levelTotalPages, setLevelTotalPages] = useState(1);
+  const LEVEL_LIMIT = 10;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showCredModal, setShowCredModal] = useState(false);
 
   const getDashboard = async () => {
     try {
@@ -34,23 +246,32 @@ const UserDashboard = () => {
     finally { setLoading(false); }
   };
 
-  const getLevelData = async () => {
+  const getLevelData = async (page = 1) => {
     try {
       setLevelLoading(true);
-      const res = await getUserLevelViewApi(userId);
-      if (res.data?.success) setLevelData(res.data.data || []);
+      const res = await getUserLevelViewApi(userId, page, LEVEL_LIMIT);
+      if (res.data?.success) {
+        setLevelData(res.data.data || []);
+        const total = res.data.pagination?.totalPages || res.data.totalPages || 1;
+        setLevelTotalPages(total);
+      }
     } catch (err) { console.log(err); }
     finally { setLevelLoading(false); }
   };
 
-  useEffect(() => { getDashboard(); getLevelData(); }, [userId]);
+  useEffect(() => { getDashboard(); getLevelData(1); setLevelPage(1); }, [userId]);
+
+  const handleLevelPageChange = (page) => {
+    setLevelPage(page);
+    getLevelData(page);
+  };
 
   const user = data?.user;
   const income = data?.income;
   const team = data?.team;
   const pkg = data?.package;
 
-  const filteredLevels = levelData.filter(item => Number(item.level) > 0 && Number(item.totalTeam) > 0);
+  const filteredLevels = levelData.filter(item => Number(item.level) > 0);
 
   const stats = {
     walletBalance: user?.balance,
@@ -101,9 +322,20 @@ const UserDashboard = () => {
 
           {/* USER INFO */}
           <div className="glass-panel p-6 rounded-2xl border border-white/10">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-brand-gold mb-5 flex items-center gap-2">
-              <FaUser className="text-brand-gold" /> User Information
-            </h3>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
+                <FaUser className="text-brand-gold" /> User Information
+              </h3>
+              {/* ── Change Credentials Button ── */}
+              <button
+                id="btn-change-credentials"
+                onClick={() => setShowCredModal(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-brand-gold/40 bg-brand-gold/10
+                  hover:bg-brand-gold/20 text-brand-gold hover:text-yellow-300 text-xs font-semibold transition-all
+                  hover:shadow-[0_0_12px_rgba(212,175,55,0.25)]">
+                <FaKey className="text-xs" /> Change Credentials
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               {[
                 { label: "Name", value: user.name },
@@ -180,7 +412,7 @@ const UserDashboard = () => {
                     <tbody>
                       {filteredLevels.map((item, index) => (
                         <tr key={index}>
-                          <td><span className="text-gray-500">{index + 1}</span></td>
+                          <td><span className="text-gray-500">{(levelPage - 1) * LEVEL_LIMIT + index + 1}</span></td>
                           <td><span className="text-blue-400 font-semibold">Level {item.level}</span></td>
                           <td className="text-white font-medium">{item.totalTeam}</td>
                           <td className="text-center text-emerald-400 font-semibold">{item.activeTeam}</td>
@@ -198,6 +430,59 @@ const UserDashboard = () => {
                   </table>
                 </div>
               </div>
+
+              {/* PAGINATION */}
+              {levelTotalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 px-1">
+                  <p className="text-xs text-gray-500">
+                    Page <span className="text-white font-semibold">{levelPage}</span> of{" "}
+                    <span className="text-white font-semibold">{levelTotalPages}</span>
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleLevelPageChange(levelPage - 1)}
+                      disabled={levelPage <= 1 || levelLoading}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 bg-white/5
+                        hover:bg-white/10 text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                      ← Prev
+                    </button>
+
+                    {/* Page number pills */}
+                    {Array.from({ length: levelTotalPages }, (_, i) => i + 1)
+                      .filter(p => p === 1 || p === levelTotalPages || Math.abs(p - levelPage) <= 1)
+                      .reduce((acc, p, idx, arr) => {
+                        if (idx > 0 && p - arr[idx - 1] > 1) acc.push("...");
+                        acc.push(p);
+                        return acc;
+                      }, [])
+                      .map((p, i) =>
+                        p === "..." ? (
+                          <span key={`ellipsis-${i}`} className="text-gray-600 text-xs px-1">…</span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => handleLevelPageChange(p)}
+                            disabled={levelLoading}
+                            className={`w-8 h-8 rounded-lg text-xs font-bold border transition-all
+                              ${ p === levelPage
+                                ? "bg-brand-gold text-black border-brand-gold shadow-[0_0_10px_rgba(212,175,55,0.4)]"
+                                : "bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+                              } disabled:opacity-30`}>
+                            {p}
+                          </button>
+                        )
+                      )}
+
+                    <button
+                      onClick={() => handleLevelPageChange(levelPage + 1)}
+                      disabled={levelPage >= levelTotalPages || levelLoading}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/10 bg-white/5
+                        hover:bg-white/10 text-gray-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all">
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -208,6 +493,17 @@ const UserDashboard = () => {
         <div className="glass-panel rounded-2xl p-12 text-center text-gray-500 font-medium relative z-10">
           No data found for this user.
         </div>
+      )}
+
+      {/* CREDENTIALS MODAL */}
+      {showCredModal && (
+        <CredentialsModal
+          userId={userId}
+          currentEmail={user?.email || ""}
+          currentName={user?.name || ""}
+          currentPhone={user?.phoneNumber || ""}
+          onClose={() => setShowCredModal(false)}
+        />
       )}
     </div>
   );

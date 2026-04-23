@@ -4,16 +4,17 @@ import { getReferralByLevelApi } from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
 import { FaArrowLeft, FaUsers } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../../components/ui/PaginationLimit";
 
 const LevelReferrals = () => {
   const { userId, level } = useParams();
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [showNoData, setShowNoData] = useState(false);
 
@@ -21,7 +22,7 @@ const LevelReferrals = () => {
     try {
       setLoading(true);
       setShowNoData(false);
-      const res = await getReferralByLevelApi(userId, level, page, PAGE_SIZE);
+      const res = await getReferralByLevelApi(userId, level, page, limit);
       if (res.data?.success) {
         setData(res.data.data || []);
         setTotal(res.data.total || 0);
@@ -37,10 +38,10 @@ const LevelReferrals = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchReferrals(), 200);
     return () => clearTimeout(delay);
-  }, [userId, level, page]);
+  }, [userId, level, page, limit]);
 
   useEffect(() => { setPage(1); }, [level]);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page]);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "smooth" }); }, [page, limit]);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -81,6 +82,13 @@ const LevelReferrals = () => {
       </div>
 
       {/* TABLE */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[800px] glass-table whitespace-nowrap">
@@ -99,7 +107,7 @@ const LevelReferrals = () => {
               {data.length > 0 ? (
                 data.map((item, index) => (
                   <tr key={item._id || index}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + index + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
                     <td><span className="bg-white/5 border border-white/10 px-2 py-1 rounded font-mono text-xs">{item.userId}</span></td>
                     <td className="font-medium text-white">{item.name}</td>
                     <td className="text-gray-400">{item.sponsorId}</td>

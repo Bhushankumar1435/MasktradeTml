@@ -3,22 +3,23 @@ import { getadminWalletListApi } from "../../ApiService/Adminapi";
 import Loader from "../../components/ui/Loader";
 import { FaWallet } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../../components/ui/PaginationLimit";
 
 const Adminwallettxnlist = () => {
   const [transactions, setTransactions] = useState([]);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showNoData, setShowNoData] = useState(false);
 
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const getWallets = async () => {
     try {
       setLoading(true);
       setShowNoData(false);
-      const res = await getadminWalletListApi(page, PAGE_SIZE);
+      const res = await getadminWalletListApi(page, limit);
       if (res.data?.success) {
         setTransactions(res.data.transactions || []);
         setTotal(res.data.pagination?.totalRecords || 0);
@@ -34,7 +35,7 @@ const Adminwallettxnlist = () => {
   useEffect(() => {
     const delay = setTimeout(() => getWallets(), 200);
     return () => clearTimeout(delay);
-  }, [page]);
+  }, [page, limit]);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -75,6 +76,13 @@ const Adminwallettxnlist = () => {
       </div>
 
       {/* MAIN */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[1000px] glass-table whitespace-nowrap">
@@ -95,7 +103,7 @@ const Adminwallettxnlist = () => {
               {transactions.length > 0 ? (
                 transactions.map((item, index) => (
                   <tr key={item._id}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + index + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + index + 1}</span></td>
                     <td><span className="bg-white/5 border border-white/10 px-2 py-1 rounded font-mono text-xs">{item.userId}</span></td>
                     <td className="font-medium text-white">{item.user?.name || "—"}</td>
                     <td className="max-w-[200px] truncate text-gray-400">{item.user?.email || "—"}</td>

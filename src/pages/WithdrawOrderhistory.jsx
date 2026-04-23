@@ -4,11 +4,13 @@ import { toast } from "react-toastify";
 import { FaCopy, FaArrowUp } from "react-icons/fa";
 import Loader from "../components/ui/Loader";
 
+import PaginationLimit from "../components/ui/PaginationLimit";
+
 const WithdrawOrders = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [status, setStatus] = useState("");
   const [search, setSearch] = useState("");
@@ -33,7 +35,7 @@ const WithdrawOrders = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchWithdraws(), 200);
     return () => clearTimeout(delay);
-  }, [page, status, search]);
+  }, [page, status, search, limit]);
 
   const handleApprove = async (id) => {
     if (!window.confirm("Are you sure you want to approve this request?")) return;
@@ -125,6 +127,13 @@ const WithdrawOrders = () => {
       </div>
 
       {/* Main */}
+            {/* Top Controls: Rows per page */}
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[1000px] glass-table whitespace-nowrap">

@@ -36,6 +36,7 @@ import AllBatches from "./pages/Binance/AllBatcheshistory";
 import BatchDetails from "./pages/Binance/BatchDetails";
 import NotificationHistory from "./pages/Notifications/NotificationHistory";
 import DepositHistory from "./pages/deposithistory";
+import LevelView from "./pages/LevelView";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
             <Route path="/paidUsers" element={<PaidUsers />} />
             <Route path="/user-dashboard/:userId" element={<UserDashboard />} />
             <Route path="/level-referrals/:userId/:level" element={<LevelReferrals />} />
+            <Route path="/levelview" element={<LevelView />} />
             <Route path="/withdrawhistory" element={<WithdrawOrders />} />
             <Route path="/depositHistory" element={<DepositHistory />} />
             <Route path="/ticketHistory" element={<TicketHistory />} />

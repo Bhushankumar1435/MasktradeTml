@@ -150,9 +150,9 @@ export const addIncomeApi = (data) => {
 
 /////////////// TEAM LEVEL ///////////////////
 
-export const getUserLevelViewApi = (userId) => {
+export const getUserLevelViewApi = (userId, page = 1, limit = 10) => {
   return api.get(`/admin/levelViewAdmin`, {
-    params: { userId }
+    params: { userId, page, limit }
   });
 };
 
@@ -285,3 +285,15 @@ export const broadcastNotificationApi = (data) => {
 export const getDepositHistory = (page = 1, limit = 10) => {
   return api.get(`/admin/getAdminDepositHistory?page=${page}&limit=${limit}`);
 };
+
+///////////// USER CREDENTIALS /////////////////
+
+export const updateUserCredentialsApi = (userId, data) => {
+  return api.put(`/admin/updateUserCredentials?userId=${userId}`, data);
+};
+
+///////////// TREE VIEW /////////////////
+
+export const getTreeChildrenApi = (userId) => {
+  return api.get(`/admin/getTreeChildren?userId=${userId}`);
+};

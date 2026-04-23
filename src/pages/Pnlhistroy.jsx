@@ -5,23 +5,24 @@ import "react-toastify/dist/ReactToastify.css";
 import Loader from "../components/ui/Loader";
 import { FaChartPie } from "react-icons/fa";
 
-const PAGE_SIZE = 10;
+import PaginationLimit from "../components/ui/PaginationLimit";
 
 const PnlHistory = () => {
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
   const [type, setType] = useState("");
   const [showNoData, setShowNoData] = useState(false);
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalPages = Math.ceil(total / limit);
 
   const fetchData = async () => {
     setLoading(true);
     setShowNoData(false);
     try {
-      const res = await getMyProfitHistoryApi(page, PAGE_SIZE, search, type);
+      const res = await getMyProfitHistoryApi(page, limit, search, type);
       if (res?.data?.success) {
         setData(Array.isArray(res.data.data) ? res.data.data : []);
         setTotal(res.data.total || 0);
@@ -38,7 +39,7 @@ const PnlHistory = () => {
   useEffect(() => {
     const delay = setTimeout(() => fetchData(), 200);
     return () => clearTimeout(delay);
-  }, [page, search, type]);
+  }, [page, search, type, limit]);
 
   const getPageNumbers = () => {
     const pages = [];
@@ -68,6 +69,7 @@ const PnlHistory = () => {
 
       {/* HEADER */}
       <div className="mb-6 flex flex-col md:flex-row justify-between gap-4 relative z-10 glass-panel p-5 rounded-2xl">
+
         <div className="flex items-center gap-4">
           <div className="p-2 border border-brand-gold/30 rounded-xl shadow-glow-gold/20 bg-brand-gold/10">
             <FaChartPie className="text-brand-gold text-xl" />
@@ -79,21 +81,66 @@ const PnlHistory = () => {
             <p className="text-gray-400 text-sm mt-1">Total: {total} records</p>
           </div>
         </div>
+
         <div className="flex flex-wrap gap-3 items-center">
-          <input type="text" placeholder="Search User ID..."
-            value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search User ID..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-gold/50 transition"
           />
+
+          {/* Filters */}
           {typeFilters.map((f) => (
-            <button key={f.value} onClick={() => { setType(f.value); setPage(1); }}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${f.cls} ${type === f.value ? "ring-1 ring-white/20" : ""}`}>
+            <button
+              key={f.value}
+              onClick={() => {
+                setType(f.value);
+                setPage(1);
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${f.cls} ${type === f.value ? "ring-1 ring-white/20" : ""
+                }`}
+            >
               {f.label}
             </button>
           ))}
+
+          {/* Limit Dropdown (only once) */}
+          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm px-2 py-1">
+            <select
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPage(1);
+              }}
+              className="bg-[#020817] border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-brand-gold cursor-pointer"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+
         </div>
       </div>
 
       {/* MAIN */}
+      {/* Top Controls: Rows per page */}
+
+
+      <div className="flex justify-end mb-4 relative z-10 px-2">
+          <PaginationLimit 
+              value={limit} 
+              onChange={(val) => { setLimit(val); setPage(1); }} 
+          />
+      </div>
       <div className="glass-table-container flex flex-col z-10">
         <div className="w-full overflow-x-auto relative">
           <table className="min-w-[900px] glass-table whitespace-nowrap">
@@ -115,7 +162,7 @@ const PnlHistory = () => {
               {data.length > 0 ? (
                 data.map((item, i) => (
                   <tr key={i}>
-                    <td><span className="text-gray-500">{(page - 1) * PAGE_SIZE + i + 1}</span></td>
+                    <td><span className="text-gray-500">{(page - 1) * limit + i + 1}</span></td>
                     <td className="font-medium text-white">{item.userId}</td>
                     <td className="font-mono text-gray-300">{item.pair}</td>
                     <td className="text-center">
