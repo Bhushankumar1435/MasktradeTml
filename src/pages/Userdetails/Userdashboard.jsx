@@ -50,13 +50,23 @@ const CredentialsModal = ({ userId, currentEmail, currentName, currentPhone, onC
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return showToast("error", "Email cannot be empty.");
+    const trimmedEmail = email.trim();
+    const trimmedPass = newPassword.trim();
+    const trimmedName = newname.trim();
+    const trimmedPhone = newphoneNumber.trim();
+
+    if (!trimmedEmail && !trimmedPass && !trimmedName && !trimmedPhone) {
+      return showToast("error", "Please provide at least one field to update.");
+    }
+
     setLoading(true);
     try {
-      const payload = { email: email.trim() };
-      if (newPassword.trim()) payload.newPassword = newPassword.trim();
-      if (newname.trim()) payload.name = newname.trim();
-      if (newphoneNumber.trim()) payload.phoneNumber = newphoneNumber.trim();
+      const payload = {};
+      if (trimmedEmail) payload.email = trimmedEmail;
+      if (trimmedPass) payload.newPassword = trimmedPass;
+      if (trimmedName) payload.name = trimmedName;
+      if (trimmedPhone) payload.phoneNumber = trimmedPhone;
+      
       const res = await updateUserCredentialsApi(userId, payload);
       if (res.data?.success) {
         showToast("success", "Credentials updated successfully!");
@@ -125,7 +135,6 @@ const CredentialsModal = ({ userId, currentEmail, currentName, currentPhone, onC
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
-              required
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-600
                 focus:outline-none focus:border-brand-gold/50 focus:bg-white/8 transition-all"
             />
