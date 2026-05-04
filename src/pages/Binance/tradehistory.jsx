@@ -47,9 +47,13 @@ const TradeHistory = () => {
 
   const fetchPrice = async (pair) => {
     try {
+      // Try futures first, fallback to spot (covers non-futures pairs)
       const res = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`);
       const data = await res.json();
-      return parseFloat(data.markPrice);
+      if (data.markPrice) return parseFloat(data.markPrice);
+      const spot = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`);
+      const sd = await spot.json();
+      return sd.price ? parseFloat(sd.price) : null;
     } catch { return null; }
   };
 
@@ -72,11 +76,11 @@ const TradeHistory = () => {
     if (trade.status === "CLOSED") return trade.pnl || 0;
     const current = prices[trade.pair];
     if (!current) return 0;
-    const pnl = trade.mode === "LONG"
-      ? (current - trade.entryPrice) * trade.quantity
-      : (trade.entryPrice - current) * trade.quantity;
-    const fee = trade.usedUSDT * 0.0004 * trade.leverage;
-    return pnl - fee;
+    // ✅ Same formula everywhere — quantity fallback if not stored in DB
+    const qty = trade.quantity || (trade.usedUSDT * trade.leverage) / trade.entryPrice;
+    return trade.mode === "LONG"
+      ? (current - trade.entryPrice) * qty
+      : (trade.entryPrice - current) * qty;
   };
 
   useEffect(() => {
@@ -84,14 +88,56 @@ const TradeHistory = () => {
     return () => clearTimeout(delay);
   }, [page, userId, limit]);
 
+  // ✅ WebSocket real-time mark price (1s updates) — no lag
   useEffect(() => {
-    let interval;
-    const hasActiveTrades = trades.some(t => t.status !== "CLOSED");
-    if (hasActiveTrades) {
-      updatePrices();
-      interval = setInterval(updatePrices, 2000);
+    const hasActive = trades.some(t => t.status !== "CLOSED");
+    if (!hasActive) return;
+
+    const pairs = new Set(trades.map(t => t.pair));
+    let ws, pollId;
+
+    const startPolling = () => {
+      // Fallback: REST polling every 2s
+      const poll = async () => {
+        const updated = {};
+        await Promise.all([...pairs].map(async p => {
+          const price = await fetchPrice(p);
+          if (price) updated[p] = price;
+        }));
+        if (Object.keys(updated).length) setPrices(prev => ({ ...prev, ...updated }));
+      };
+      poll();
+      pollId = window.setInterval(poll, 2000);
+    };
+
+    try {
+      ws = new WebSocket("wss://fstream.binance.com/ws/!markPrice@arr@1s");
+
+      ws.onopen = () => {
+        // Initial REST fetch for non-futures pairs (spot fallback)
+        updatePrices();
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const arr = JSON.parse(e.data);
+          if (!Array.isArray(arr)) return;
+          const updated = {};
+          arr.forEach(d => { if (pairs.has(d.s)) updated[d.s] = parseFloat(d.p); });
+          if (Object.keys(updated).length) setPrices(prev => ({ ...prev, ...updated }));
+        } catch {}
+      };
+
+      ws.onerror = () => { ws = null; startPolling(); };
+      ws.onclose = () => { if (ws) startPolling(); };
+    } catch {
+      startPolling();
     }
-    return () => clearInterval(interval);
+
+    return () => {
+      if (ws) ws.close();
+      if (pollId) window.clearInterval(pollId);
+    };
   }, [trades]);
 
   const getPageNumbers = () => {

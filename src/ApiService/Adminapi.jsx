@@ -243,6 +243,13 @@ export const getMyProfitHistoryApi = (page = 1,limit = 10,search = "",type = "")
   );
 };
 
+// For chart: fetch all PnL records (large limit, no search filter, for graph)
+export const getMyProfitHistoryAllApi = (limit = 1000, search = "", type = "") => {
+  return api.get(
+    `/admin/getMyProfitHistory?page=1&limit=${limit}&search=${search}&type=${type}`
+  );
+};
+
 
 
 

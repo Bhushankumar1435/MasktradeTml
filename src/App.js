@@ -37,6 +37,8 @@ import BatchDetails from "./pages/Binance/BatchDetails";
 import NotificationHistory from "./pages/Notifications/NotificationHistory";
 import DepositHistory from "./pages/deposithistory";
 import LevelView from "./pages/LevelView";
+import TradeAnalytics from "./pages/Binance/TradeAnalytics";
+import TokenChart from "./pages/Binance/TokenChart";
 
 function App() {
   return (
@@ -86,6 +88,8 @@ function App() {
             <Route path="/closeTrades" element={<CloseTrades />} />
             <Route path="/binance-orders/:userId" element={<BinanceOrders />} />
             <Route path="/pnlhistory" element={<PnlHistory />} />
+            <Route path="/trade-analytics" element={<TradeAnalytics />} />
+            <Route path="/token-chart" element={<TokenChart />} />
             <Route path="/notificationhistory" element={<NotificationHistory />} />
 
           </Route>

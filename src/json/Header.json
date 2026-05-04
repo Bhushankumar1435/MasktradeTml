@@ -69,6 +69,16 @@
         "title": "Profit & Loss",
         "path": "/pnlhistory",
         "icon": "FaChartLine"
+      },
+      {
+        "title": "Trade Analytics",
+        "path": "/trade-analytics",
+        "icon": "FaChartBar"
+      },
+      {
+        "title": "Token Chart",
+        "path": "/token-chart",
+        "icon": "FaChartLine"
       }
     ]
   },

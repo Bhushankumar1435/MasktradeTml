@@ -110,24 +110,6 @@ const PnlHistory = () => {
               {f.label}
             </button>
           ))}
-
-          {/* Limit Dropdown (only once) */}
-          <div className="flex items-center bg-white/5 border border-white/10 rounded-xl backdrop-blur-sm px-2 py-1">
-            <select
-              value={limit}
-              onChange={(e) => {
-                setLimit(Number(e.target.value));
-                setPage(1);
-              }}
-              className="bg-[#020817] border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm focus:outline-none focus:border-brand-gold cursor-pointer"
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
-
         </div>
       </div>
 

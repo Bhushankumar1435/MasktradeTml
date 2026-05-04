@@ -45,11 +45,17 @@ const Opentrades = () => {
     finally { setLoading(false); }
   };
 
+  // ✅ Futures mark price first (matches Binance platform), spot fallback for non-futures pairs
   const fetchPrice = async (pair) => {
+    try {
+      const res = await fetch(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${pair}`);
+      const data = await res.json();
+      if (data.markPrice) return parseFloat(data.markPrice);
+    } catch {}
     try {
       const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`);
       const data = await res.json();
-      return parseFloat(data.price);
+      return data.price ? parseFloat(data.price) : null;
     } catch { return null; }
   };
 
@@ -64,12 +70,15 @@ const Opentrades = () => {
     setPrices(updated);
   };
 
+  // ✅ Same formula everywhere: (markPrice - entryPrice) × qty
   const calculatePnL = (trade) => {
     const current = prices[trade.pair];
     if (!current) return 0;
+    // quantity fallback: if not stored, derive from usedUSDT×leverage÷entryPrice
+    const qty = trade.quantity || (trade.usedUSDT * trade.leverage) / trade.entryPrice;
     return trade.mode === "LONG"
-      ? (current - trade.entryPrice) * trade.quantity
-      : (trade.entryPrice - current) * trade.quantity;
+      ? (current - trade.entryPrice) * qty
+      : (trade.entryPrice - current) * qty;
   };
 
   useEffect(() => {
@@ -77,10 +86,39 @@ const Opentrades = () => {
     return () => clearTimeout(delay);
   }, [page, userId, limit]);
 
+  // ✅ WebSocket real-time mark price — matches Binance platform exactly
   useEffect(() => {
-    let interval;
-    if (trades.length) { updatePrices(); interval = setInterval(updatePrices, 2000); }
-    return () => clearInterval(interval);
+    if (!trades.length) return;
+    const pairs = new Set(trades.map(t => t.pair));
+    let ws, pollId;
+
+    const startPolling = () => {
+      updatePrices();
+      pollId = window.setInterval(updatePrices, 2000);
+    };
+
+    try {
+      ws = new WebSocket("wss://fstream.binance.com/ws/!markPrice@arr@1s");
+      ws.onopen = () => updatePrices(); // initial fetch for spot-only pairs
+      ws.onmessage = (e) => {
+        try {
+          const arr = JSON.parse(e.data);
+          if (!Array.isArray(arr)) return;
+          const updated = {};
+          arr.forEach(d => { if (pairs.has(d.s)) updated[d.s] = parseFloat(d.p); });
+          if (Object.keys(updated).length) setPrices(prev => ({ ...prev, ...updated }));
+        } catch {}
+      };
+      ws.onerror = () => { ws = null; startPolling(); };
+      ws.onclose = () => { if (ws) startPolling(); };
+    } catch {
+      startPolling();
+    }
+
+    return () => {
+      if (ws) ws.close();
+      if (pollId) window.clearInterval(pollId);
+    };
   }, [trades]);
 
   const getPageNumbers = () => {
