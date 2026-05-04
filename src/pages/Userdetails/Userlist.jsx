@@ -240,10 +240,10 @@ const User = () => {
       {/* Main Container */}
       {/* Top Controls: Rows per page */}
       <div className="flex justify-end mb-4 relative z-10 px-2">
-          <PaginationLimit 
-              value={limit} 
-              onChange={(val) => { setLimit(val); setPage(1); }} 
-          />
+        <PaginationLimit
+          value={limit}
+          onChange={(val) => { setLimit(val); setPage(1); }}
+        />
       </div>
       <div className="flex-1 min-h-[400px] glass-table-container flex flex-col z-10">
 
@@ -355,7 +355,7 @@ const User = () => {
         {/* Pagination */}
         <div className="flex flex-col md:flex-row md:items-center justify-between px-6 py-4 border-t border-white/10 bg-white/5 backdrop-blur-md text-sm gap-3">
           <span className="text-gray-400 font-medium">
-             Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
+            Page <span className="text-white">{page}</span> of <span className="text-white">{totalPages}</span>
           </span>
 
           <div className="flex items-center gap-1 w-full md:w-auto overflow-x-auto">
@@ -416,7 +416,7 @@ const User = () => {
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-red-500 hover:-translate-y-1 transition-transform cursor-default group overflow-hidden">
-           <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
           <p className="text-gray-400 text-sm font-semibold tracking-wide uppercase">Inactive Users</p>
           <h2 className="text-xl font-bold text-red-500 mt-1 drop-shadow-md">{stats.inactiveUsers}</h2>
         </div>

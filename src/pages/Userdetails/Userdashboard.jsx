@@ -21,7 +21,8 @@ import {
 } from "react-icons/fa";
 
 const statFields = [
-  { title: "Wallet Balance", key: "walletBalance", color: "text-brand-gold" },
+  // { title: "Wallet Balance", key: "walletBalance", color: "text-brand-gold" },
+  { title: "Fuel Balance", key: "fuelBalance", color: "text-orange-400" },
   { title: "Total Income", key: "totalIncome", color: "text-emerald-400" },
   { title: "Total Withdraw", key: "totalWithdraw", color: "text-red-400" },
   { title: "Package Amount", key: "packageAmount", color: "text-blue-400" },
@@ -29,7 +30,6 @@ const statFields = [
   { title: "Team Business", key: "teamBusiness", color: "text-yellow-400" },
   { title: "Total Team", key: "totalTeam", color: "text-cyan-400" },
   { title: "Direct Users", key: "directUsers", color: "text-pink-400" },
-  { title: "Fuel Balance", key: "fuelBalance", color: "text-orange-400" },
   { title: "Exchange Balance", key: "exchangeBalance", color: "text-teal-400" },
 ];
 
@@ -283,7 +283,8 @@ const UserDashboard = () => {
   const filteredLevels = levelData.filter(item => Number(item.level) > 0);
 
   const stats = {
-    walletBalance: user?.balance,
+    // walletBalance: user?.balance,
+    fuelBalance: data?.fuelbalance?.balance,
     totalIncome: income?.totalIncome,
     totalWithdraw: income?.totalWithdraw,
     packageAmount: pkg?.amount,
@@ -291,7 +292,6 @@ const UserDashboard = () => {
     teamBusiness: team?.teamBusiness,
     totalTeam: team?.totalTeam,
     directUsers: team?.directUsers,
-    fuelBalance: data?.fuelbalance?.balance,
     exchangeBalance: data?.exchange?.data?.available,
   };
 
